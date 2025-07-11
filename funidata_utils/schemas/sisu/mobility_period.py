@@ -1,3 +1,7 @@
+#  Copyright (c) 2025 Funidata Oy.
+#  All rights reserved.
+# ------------------------------------------------------------------------------
+
 from typing import Literal
 
 from pydantic import BaseModel, constr

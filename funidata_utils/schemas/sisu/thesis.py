@@ -1,3 +1,7 @@
+#  Copyright (c) 2025 Funidata Oy.
+#  All rights reserved.
+# ------------------------------------------------------------------------------
+
 import datetime
 from typing import Literal
 
