@@ -1,8 +1,7 @@
 import asyncio
 import logging
-import time
 import typing
-from typing import Tuple, Any, Callable, Literal, Coroutine
+from typing import Tuple, Any, Callable, Literal
 
 import httpx
 
