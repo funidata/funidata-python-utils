@@ -3,9 +3,9 @@ from typing import Literal
 
 from pydantic import BaseModel, field_serializer, Field, constr, field_validator, conset
 
-from schemas.sisu import LocalizedString
-from schemas.sisu.attainment import PersonWithAttainmentAcceptorType, OrganisationRoleShareBase
-from src.utils import group_by
+from ...schemas.sisu import LocalizedString
+from ...schemas.sisu.attainment import PersonWithAttainmentAcceptorType, OrganisationRoleShareBase
+from ...utils import group_by
 
 
 class Thesis(BaseModel):
