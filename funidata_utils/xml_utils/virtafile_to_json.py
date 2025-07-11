@@ -138,7 +138,7 @@ def parse_virtafile_to_dict(
                 raise Exception("Wtf yhyy", node)
             continue
         except Exception as e:
-            print(f"Exception {e} at", node)
+            logger.exception(f"Exception {e} at", node)
     end = time()
     logger.info(f"Finished load and processing of {input_file} in {end - start} seconds")
 
