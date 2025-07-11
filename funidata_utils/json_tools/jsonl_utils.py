@@ -1,4 +1,8 @@
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def read_jsonl(jsonl_file_path: str) -> list[dict]:
@@ -9,7 +13,6 @@ def read_jsonl(jsonl_file_path: str) -> list[dict]:
                 json_data = json.loads(line)
                 list_of_dicts.append(json_data)
     except FileNotFoundError as e:
-        print(f"File {jsonl_file_path} not found.")
+        logger.exception(f"File {jsonl_file_path} not found.")
         raise e
     return list_of_dicts
-
