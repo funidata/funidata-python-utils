@@ -1,7 +1,6 @@
 import datetime
 from typing import Optional, Literal
 
-from dateutil.parser import isoparse
 from pydantic import model_validator, BaseModel, field_validator, field_serializer, Field, conint, constr, PastDate
 
 from ...schemas.sisu.common import SIS_MAX_LONG_STRING_LENGTH, OTM_ID_REGEX_PATTERN, SIS_MAX_TERSE_STRING_LENGTH
@@ -113,7 +112,7 @@ def _get_start_and_end_date_from_range(date_range: LocalDateRange | None):
 class StudyRight(BaseModel):
     id: str
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
-    snapshotDateTime: str | None
+    snapshotDateTime: datetime.datetime | None
     studentId: str = Field(description='PrivatePersonId')
     educationId: str
     organisationId: str
@@ -164,12 +163,11 @@ class StudyRight(BaseModel):
     schoolEducationLanguageUrn: Optional[str] = None
 
     @field_serializer('snapshotDateTime')
-    def serialize_ssdt(self, ssdt: str | None, _info):
+    def serialize_ssdt(self, ssdt: datetime.datetime | None, _info):
         if ssdt is None:
             return None
 
-        ssdt_as_date = isoparse(ssdt)
-        return ssdt_as_date.strftime("%Y-%m-%dT%H:%M:%S")
+        return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
 
     @model_validator(mode='after')
     def check_classification_urn_when_graduated(self):

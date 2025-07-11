@@ -1,13 +1,9 @@
-from enum import Enum
-from tempfile import NamedTemporaryFile
-from typing import TextIO, overload, IO, Literal, Union
+from typing import TextIO, overload, IO, Literal
 
 import simplejson
-from pydantic import BaseModel
 
 from ..auth.sis_credentials import SisuSettings
 from ..request_utils.httpx_requests import send_get_httpx
-from ..schemas.sisu import StudyRight
 
 
 _EXPORT_LITERAL_RESOURCES = Literal[

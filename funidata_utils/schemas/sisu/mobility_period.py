@@ -1,9 +1,8 @@
-import datetime
-from typing import Optional, Literal
+from typing import Literal
 
-from pydantic import model_validator, BaseModel, field_validator, field_serializer, Field, conint, constr, PastDate
+from pydantic import BaseModel, constr
 
-from schemas.sisu.study_right import LocalDateRange
+from .study_right import LocalDateRange
 
 
 class MobilityPeriod(BaseModel):
