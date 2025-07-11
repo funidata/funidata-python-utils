@@ -1,3 +1,7 @@
+#  Copyright (c) 2025 Funidata Oy.
+#  All rights reserved.
+# ------------------------------------------------------------------------------
+
 import json
 from sqlalchemy import create_engine, text
 

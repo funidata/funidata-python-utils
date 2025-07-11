@@ -1,3 +1,7 @@
+#  Copyright (c) 2025 Funidata Oy.
+#  All rights reserved.
+# ------------------------------------------------------------------------------
+
 from collections import defaultdict
 from functools import reduce
 from statistics import mean, stdev
