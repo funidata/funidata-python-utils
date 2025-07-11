@@ -1,3 +1,7 @@
+#  Copyright (c) 2025 Funidata Oy.
+#  All rights reserved.
+# ------------------------------------------------------------------------------
+
 from pathlib import Path
 
 from .sis_credentials import SisuSettings
