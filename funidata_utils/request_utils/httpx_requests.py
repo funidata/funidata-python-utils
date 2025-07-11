@@ -1,8 +1,7 @@
 from typing import Tuple, Any, Callable, Literal
 
 import httpx
-
-from src.utils import flatten, group_by
+from ..utils import flatten, group_by
 
 
 ACCEPTED_RESPONSE_CODES = {200, 201, 202, 204}
