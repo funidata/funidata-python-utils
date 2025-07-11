@@ -1,9 +1,9 @@
-import simplejson
+import json
 from sqlalchemy import create_engine, text
 
 
 def json_encoder_ascii_false(d):
-    return simplejson.dumps(d, ensure_ascii=False)
+    return json.dumps(d, ensure_ascii=False)
 
 
 def get_engine(

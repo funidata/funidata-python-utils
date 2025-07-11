@@ -4,7 +4,7 @@ from typing import Optional, Literal
 from dateutil.parser import isoparse
 from pydantic import model_validator, BaseModel, field_validator, field_serializer, Field, conint, constr, PastDate
 
-from src.schemas.sisu.common import SIS_MAX_LONG_STRING_LENGTH, OTM_ID_REGEX_PATTERN, SIS_MAX_TERSE_STRING_LENGTH
+from ...schemas.sisu.common import SIS_MAX_LONG_STRING_LENGTH, OTM_ID_REGEX_PATTERN, SIS_MAX_TERSE_STRING_LENGTH
 
 
 class LocalDateRange(BaseModel):

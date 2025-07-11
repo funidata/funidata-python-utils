@@ -6,7 +6,6 @@ import simplejson
 from pydantic import BaseModel
 
 from ..auth.sis_credentials import SisuSettings
-from ..json_tools.jsonl_utils import read_jsonl, write_jsonl
 from ..request_utils.httpx_requests import send_get_httpx
 from ..schemas.sisu import StudyRight
 
