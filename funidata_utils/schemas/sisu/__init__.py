@@ -3,7 +3,11 @@
 # ------------------------------------------------------------------------------
 
 from .study_right import (
-    StudyRight
+    StudyRight,
+    StudyRightExtension,
+    StudyRightCancellation,
+    StudyRightCourseUnitSelection,
+    StudyRightMinorSelection,
 )
 from .common import LocalizedString
 from .attainment import (
@@ -12,3 +16,5 @@ from .attainment import (
     CustomModuleAttainment,
     DegreeProgrammeAttainment,
 )
+from .mobility_period import MobilityPeriod
+from .thesis import Thesis
