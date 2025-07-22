@@ -1,7 +1,7 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from .resources.schemas import SisExport, SisImport
 
@@ -14,6 +14,7 @@ class SisImportable(Protocol):
     imports: SisImport
 
 
+@runtime_checkable
 class SisLegacyImportable(Protocol):
     legacy_imports: SisImport
 
@@ -22,5 +23,6 @@ class SisPatchable(Protocol):
     patches: SisImport
 
 
+@runtime_checkable
 class SisLegacyPatchable(Protocol):
     legacy_patches: SisImport
