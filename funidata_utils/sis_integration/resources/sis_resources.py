@@ -23,6 +23,7 @@ __all__ = [
     'Modules',
     'KoriPersons',
     'StudyYearTemplates',
+    'CodeBooks',
 ]
 
 
@@ -242,5 +243,12 @@ class StudyYearTemplates(BaseResource):
     )
     exports = SisExport(
         endpoint='/kori/api/study-year-templates/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class CodeBooks(BaseResource):
+    exports = SisExport(
+        endpoint='/kori/api/codebooks/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )

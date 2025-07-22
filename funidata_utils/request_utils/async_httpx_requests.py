@@ -57,7 +57,7 @@ async def send_get_httpx(
     proxy_mounts = {
         "http://": httpx.AsyncHTTPTransport(proxy=proxies.get('http')),
         "https://": httpx.AsyncHTTPTransport(proxy=proxies.get('https')),
-    }
+    } if proxies else None
     client = httpx.AsyncClient(mounts=proxy_mounts, auth=auth)
     response = await client.get(
         path,
