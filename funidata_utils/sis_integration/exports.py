@@ -57,10 +57,10 @@ def _export_from_endpoint(
 
     while True:
         sis_response = send_get_httpx(
-            path=f"{sis_settings.sis_host}{endpoint}",
+            path=f"{sis_settings.host}{endpoint}",
             auth=sis_settings.get_export_auth(),
             params={'since': greatest_ordinal, 'limit': export_limit},
-            proxies=sis_settings.socks_proxies,
+            proxies=sis_settings.proxies,
         )
         if sis_response.status_code == 200:
             response_json = sis_response.json()
