@@ -93,7 +93,7 @@ async def import_to_sisu(
 
     # Maximum theoretical import payload size
     if not batch_size or batch_size == UNSET_BATCH_SIZE:
-        if isinstance(resource, SisLegacyImportable):
+        if use_legacy_import:
             batch_size = resource.legacy_imports.default_import_limit
         else:
             batch_size = resource.imports.default_import_limit
@@ -134,7 +134,7 @@ async def patch_to_sisu(
 
     # Maximum theoretical import payload size
     if not batch_size or batch_size == UNSET_BATCH_SIZE:
-        if isinstance(resource, SisLegacyPatchable):
+        if use_legacy_import:
             batch_size = resource.legacy_patches.default_import_limit
         else:
             batch_size = resource.patches.default_import_limit
