@@ -2,6 +2,7 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 from .schemas import SisImport, SisExport
+from re import sub
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -25,7 +26,21 @@ __all__ = [
 ]
 
 
-class OriPersons:
+class BaseMeta(type):
+    @staticmethod
+    def _snake_case_ify(input: str):
+        input_with_spaces = sub('([a-z])([A-Z])', r'\1 \2', input)
+        return input_with_spaces.lower().replace(' ', '_')
+
+    def __repr__(self):
+        return f'{self._snake_case_ify(self.__name__)}'
+
+
+class BaseResource(metaclass=BaseMeta):
+    pass
+
+
+class OriPersons(BaseResource):
     imports = SisImport(
         endpoint='/ori/api/persons/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -40,7 +55,7 @@ class OriPersons:
     )
 
 
-class AccessRolePersonAssignments:
+class AccessRolePersonAssignments(BaseResource):
     imports = SisImport(
         endpoint='/ori/api/access-roles-person-assignments/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -51,9 +66,21 @@ class AccessRolePersonAssignments:
     )
 
 
-class Attainments:
+class Attainments(BaseResource):
     imports = SisImport(
         endpoint='/ori/api/attainments/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_imports = SisImport(
+        endpoint='/ori/api/attainments/v1/import/legacy',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    patches = SisImport(
+        endpoint='/ori/api/attainments/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_patches = SisImport(
+        endpoint='/ori/api/attainments/v1/import/legacy',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
@@ -62,8 +89,12 @@ class Attainments:
     )
 
 
-class StudyRights:
+class StudyRights(BaseResource):
     imports = SisImport(
+        endpoint='/ori/api/study-rights/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    patches = SisImport(
         endpoint='/ori/api/study-rights/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
@@ -73,8 +104,12 @@ class StudyRights:
     )
 
 
-class TermRegistrations:
+class TermRegistrations(BaseResource):
     imports = SisImport(
+        endpoint='/ori/api/term-registrations/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    patches = SisImport(
         endpoint='/ori/api/term-registrations/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
@@ -84,7 +119,7 @@ class TermRegistrations:
     )
 
 
-class Thesis:
+class Thesis(BaseResource):
     imports = SisImport(
         endpoint='/ori/api/thesis/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -95,7 +130,7 @@ class Thesis:
     )
 
 
-class MobilityPeriods:
+class MobilityPeriods(BaseResource):
     imports = SisImport(
         endpoint='/ori/api/mobility-periods/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -106,7 +141,7 @@ class MobilityPeriods:
     )
 
 
-class StudyRightPrimalities:
+class StudyRightPrimalities(BaseResource):
     imports = SisImport(
         endpoint='/ori/api/study-right-primalities/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -117,7 +152,7 @@ class StudyRightPrimalities:
     )
 
 
-class Organisations:
+class Organisations(BaseResource):
     imports = SisImport(
         endpoint='/kori/api/organisations/v2/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -128,9 +163,21 @@ class Organisations:
     )
 
 
-class CourseUnits:
+class CourseUnits(BaseResource):
     imports = SisImport(
         endpoint='/kori/api/course-units/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_imports = SisImport(
+        endpoint='/ori/api/course-units/v1/import/legacy',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    patches = SisImport(
+        endpoint='/kori/api/course-units/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_patches = SisImport(
+        endpoint='/ori/api/course-units/v1/import/legacy',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
@@ -139,9 +186,13 @@ class CourseUnits:
     )
 
 
-class Educations:
+class Educations(BaseResource):
     imports = SisImport(
         endpoint='/kori/api/educations/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_imports = SisImport(
+        endpoint='/kori/api/educations/v1/import/legacy',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
@@ -150,9 +201,21 @@ class Educations:
     )
 
 
-class Modules:
+class Modules(BaseResource):
     imports = SisImport(
         endpoint='/kori/api/modules/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_imports = SisImport(
+        endpoint='/kori/api/modules/v1/import/legacy',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    patches = SisImport(
+        endpoint='/kori/api/modules/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_patches = SisImport(
+        endpoint='/kori/api/modules/v1/import/legacy',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
@@ -161,7 +224,7 @@ class Modules:
     )
 
 
-class KoriPersons:
+class KoriPersons(BaseResource):
     imports = SisImport(
         endpoint='/kori/api/persons/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -172,7 +235,7 @@ class KoriPersons:
     )
 
 
-class StudyYearTemplates:
+class StudyYearTemplates(BaseResource):
     imports = SisImport(
         endpoint='/kori/api/study-year-templates/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
