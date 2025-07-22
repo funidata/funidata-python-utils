@@ -7,7 +7,7 @@ from typing import IO, Literal, overload
 
 import httpx
 
-from ..auth.sis_credentials import SisuSettings
+from ..auth.sis_auth import SisuConfig
 from ..request_utils.async_httpx_requests import send_post_with_binary_err_search_httpx
 
 
@@ -31,7 +31,7 @@ _EXPORT_LITERAL_RESOURCES = Literal[
 
 @overload
 async def import_to_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: _EXPORT_LITERAL_RESOURCES,
     fp: IO,
     batch_size: int,
@@ -45,7 +45,7 @@ async def import_to_sisu(
 
 @overload
 async def import_to_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: _EXPORT_LITERAL_RESOURCES,
     data: list[dict],
     batch_size: int,
@@ -58,7 +58,7 @@ async def import_to_sisu(
 
 
 async def import_to_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: _EXPORT_LITERAL_RESOURCES,
     fp: IO | None = None,
     data: list[dict] | None = None,
@@ -115,10 +115,10 @@ async def import_to_sisu(
     _batch_size = min(batch_size, 10000)
 
     responses = await send_post_with_binary_err_search_httpx(
-        path=f"{sisu_settings.sis_host}{resource_maps[resource]['endpoint']}",
+        path=f"{sisu_config.sis_host}{resource_maps[resource]['endpoint']}",
         payload=data,
-        auth=sisu_settings.get_integration_auth(),
-        proxies=sisu_settings.socks_proxies,
+        auth=sisu_config.get_integration_auth(),
+        proxies=sisu_config.socks_proxies,
         batch_size=_batch_size,
         binary_search_max_depth=binary_search_max_depth,
         binary_err_search_sublists=binary_err_search_sublists,
@@ -131,7 +131,7 @@ async def import_to_sisu(
 
 
 async def patch_to_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: Literal[
         'modules',
         'private-persons',
@@ -168,10 +168,10 @@ async def patch_to_sisu(
     _batch_size = min(batch_size, 10000)
 
     responses = await send_post_with_binary_err_search_httpx(
-        path=f"{sisu_settings.sis_host}{resource_maps[resource]['endpoint']}",
+        path=f"{sisu_config.sis_host}{resource_maps[resource]['endpoint']}",
         payload=data,
-        auth=sisu_settings.get_integration_auth(),
-        proxies=sisu_settings.socks_proxies,
+        auth=sisu_config.get_integration_auth(),
+        proxies=sisu_config.socks_proxies,
         batch_size=_batch_size,
         binary_search_max_depth=binary_search_max_depth,
         binary_err_search_sublists=binary_err_search_sublists,

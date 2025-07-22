@@ -1,12 +1,10 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-
+import json
 from typing import TextIO, overload, IO, Literal
 
-import simplejson
-
-from ..auth.sis_credentials import SisuSettings
+from ..auth.sis_auth import SisuConfig
 from ..request_utils.httpx_requests import send_get_httpx
 
 
@@ -26,7 +24,7 @@ _EXPORT_LITERAL_RESOURCES = Literal[
 
 @overload
 def _export_from_endpoint(
-    sis_settings: SisuSettings,
+    sis_settings: SisuConfig,
     endpoint: str,
     fp: None,
     since_ordinal: int = 0,
@@ -37,7 +35,7 @@ def _export_from_endpoint(
 
 @overload
 def _export_from_endpoint(
-    sis_settings: SisuSettings,
+    sis_settings: SisuConfig,
     endpoint: str,
     fp: IO,
     since_ordinal: int = 0,
@@ -47,7 +45,7 @@ def _export_from_endpoint(
 
 
 def _export_from_endpoint(
-    sis_settings: SisuSettings,
+    sis_settings: SisuConfig,
     endpoint: str,
     fp: IO | None,
     since_ordinal: int = 0,
@@ -72,7 +70,7 @@ def _export_from_endpoint(
                 exported_entities += entities
             else:
                 for json_entity in entities:
-                    fp.write(simplejson.dumps(json_entity))
+                    fp.write(json.dumps(json_entity))
                     fp.write('\n')
 
             if len(entities) == 0 or len(entities) < export_limit:
@@ -90,7 +88,7 @@ def _export_from_endpoint(
 
 @overload
 def export_from_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: _EXPORT_LITERAL_RESOURCES,
     fp: None = None,
     since_ordinal: int = 0,
@@ -100,7 +98,7 @@ def export_from_sisu(
 
 @overload
 def export_from_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: _EXPORT_LITERAL_RESOURCES,
     fp: IO,
     since_ordinal: int = 0,
@@ -109,7 +107,7 @@ def export_from_sisu(
 
 
 def export_from_sisu(
-    sisu_settings: SisuSettings,
+    sisu_config: SisuConfig,
     resource: _EXPORT_LITERAL_RESOURCES,
     fp: IO | None = None,
     since_ordinal: int = 0,
@@ -165,7 +163,7 @@ def export_from_sisu(
         return _export_from_endpoint(
             endpoint=resource_maps[resource]['endpoint'],
             export_limit=resource_maps[resource]['export_limit'],
-            sis_settings=sisu_settings,
+            sis_settings=sisu_config,
             since_ordinal=since_ordinal,
             fp=fp
         )
@@ -173,7 +171,7 @@ def export_from_sisu(
     return _export_from_endpoint(
         endpoint=resource_maps[resource]['endpoint'],
         export_limit=resource_maps[resource]['export_limit'],
-        sis_settings=sisu_settings,
+        sis_settings=sisu_config,
         since_ordinal=since_ordinal,
         fp=None
     )
