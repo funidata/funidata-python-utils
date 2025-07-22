@@ -3,38 +3,26 @@
 # ------------------------------------------------------------------------------
 
 import logging
-from typing import IO, Literal, overload
+from typing import IO, overload, Literal
 
 import httpx
 
+from .protocols import SisImportable, SisPatchable, SisLegacyImportable, SisLegacyPatchable
 from ..auth.sis_auth import SisuConfig
 from ..request_utils.async_httpx_requests import send_post_with_binary_err_search_httpx
 
 
 logger = logging.getLogger(__name__)
-DEFAULT_BATCH_SIZE = 500
-
-_EXPORT_LITERAL_RESOURCES = Literal[
-    'organisations',
-    'private-persons',
-    'course-units',
-    'educations',
-    'modules',
-    'access-role-person-assignment',
-    'attainments',
-    'studyrights',
-    'term-registrations',
-    'thesis',
-    'mobility-periods',
-]
+UNSET_BATCH_SIZE = -42
 
 
 @overload
 async def import_to_sisu(
     sisu_config: SisuConfig,
-    resource: _EXPORT_LITERAL_RESOURCES,
+    resource: SisImportable,
+    use_legacy_import: False,
     fp: IO,
-    batch_size: int,
+    batch_size: int | None,
     binary_search_max_depth: int | None,
     group_by_key: str | None,
     binary_err_search_sublists: bool,
@@ -46,9 +34,40 @@ async def import_to_sisu(
 @overload
 async def import_to_sisu(
     sisu_config: SisuConfig,
-    resource: _EXPORT_LITERAL_RESOURCES,
+    resource: SisLegacyImportable,
+    use_legacy_import: True,
+    fp: IO,
+    batch_size: int | None,
+    binary_search_max_depth: int | None,
+    group_by_key: str | None,
+    binary_err_search_sublists: bool,
+    max_parallel_requests: int,
+) -> list[httpx.Response]:
+    ...
+
+
+@overload
+async def import_to_sisu(
+    sisu_config: SisuConfig,
+    resource: SisImportable,
+    use_legacy_import: Literal[False],
     data: list[dict],
-    batch_size: int,
+    batch_size: int | None,
+    binary_search_max_depth: int | None,
+    group_by_key: str | None,
+    binary_err_search_sublists: bool,
+    max_parallel_requests: int,
+) -> list[httpx.Response]:
+    ...
+
+
+@overload
+async def import_to_sisu(
+    sisu_config: SisuConfig,
+    resource: SisLegacyImportable,
+    use_legacy_import: Literal[True],
+    data: list[dict],
+    batch_size: int | None,
     binary_search_max_depth: int | None,
     group_by_key: str | None,
     binary_err_search_sublists: bool,
@@ -59,63 +78,31 @@ async def import_to_sisu(
 
 async def import_to_sisu(
     sisu_config: SisuConfig,
-    resource: _EXPORT_LITERAL_RESOURCES,
+    resource: SisImportable | SisLegacyImportable,
+    use_legacy_import: Literal[True, False],
     fp: IO | None = None,
     data: list[dict] | None = None,
-    batch_size: int = DEFAULT_BATCH_SIZE,
+    batch_size: int | None = UNSET_BATCH_SIZE,
     binary_search_max_depth: int | None = 0,
     group_by_key: str | None = None,
     binary_err_search_sublists: bool = False,
     max_parallel_requests: int = 1
 ) -> list[httpx.Response]:
-    ori_resources = {
-        'private-persons': {
-            'endpoint': '/ori/api/persons/v1/import',
-        },
-        'access-role-person-assignment': {
-            'endpoint': '/ori/api/access-roles-person-assignments/v1/import',
-        },
-        'attainments': {
-            'endpoint': '/ori/api/attainments/v1/import/legacy',
-        },
-        'studyrights': {
-            'endpoint': '/ori/api/study-rights/v1/import',
-        },
-        'term-registrations': {
-            'endpoint': '/ori/api/term-registrations/v1/import',
-        },
-        'thesis': {
-            'endpoint': '/ori/api/thesis/v1/import',
-        },
-        'mobility-periods': {
-            'endpoint': '/ori/api/mobility-periods/v1/import',
-        },
-    }
-
-    kori_resources = {
-        'organisations': {
-            'endpoint': '/kori/api/organisations/v2/import',
-        },
-        'course-units': {
-            'endpoint': '/kori/api/course-units/v1/import',
-        },
-        'educations': {
-            'endpoint': '/kori/api/educations/v1/import',
-        },
-        'modules': {
-            'endpoint': '/kori/api/modules/v1/import',
-        },
-    }
-    resource_maps = ori_resources | kori_resources
-
     if fp:
         raise NotImplementedError("Not yet implemented")
 
     # Maximum theoretical import payload size
+    if not batch_size or batch_size == UNSET_BATCH_SIZE:
+        if isinstance(resource, SisLegacyImportable):
+            batch_size = resource.legacy_imports.default_import_limit
+        else:
+            batch_size = resource.imports.default_import_limit
+
     _batch_size = min(batch_size, 10000)
 
+    _path_postfix = resource.legacy_imports.endpoint if use_legacy_import else resource.imports.endpoint
     responses = await send_post_with_binary_err_search_httpx(
-        path=f"{sisu_config.host}{resource_maps[resource]['endpoint']}",
+        path=f"{sisu_config.host}{_path_postfix}",
         payload=data,
         auth=sisu_config.get_integration_auth(),
         proxies=sisu_config.proxies,
@@ -132,43 +119,31 @@ async def import_to_sisu(
 
 async def patch_to_sisu(
     sisu_config: SisuConfig,
-    resource: Literal[
-        'modules',
-        'private-persons',
-        'attainments',
-    ],
+    resource: SisPatchable | SisLegacyPatchable,
+    use_legacy_import: Literal[True, False],
     fp: IO | None = None,
     data: list[dict] | None = None,
-    batch_size: int = DEFAULT_BATCH_SIZE,
+    batch_size: int | None = UNSET_BATCH_SIZE,
     binary_search_max_depth: int | None = 0,
     group_by_key: str | None = None,
     binary_err_search_sublists: bool = False,
     max_parallel_requests: int = 1
 ) -> list[httpx.Response]:
-    ori_resources = {
-        'private-persons': {
-            'endpoint': '/ori/api/persons/v1/import',
-        },
-        'attainments': {
-            'endpoint': '/ori/api/attainments/v1/import/legacy',
-        },
-    }
-
-    kori_resources = {
-        'modules': {
-            'endpoint': '/kori/api/modules/v1/import',
-        },
-    }
-    resource_maps = ori_resources | kori_resources
-
     if fp:
         raise NotImplementedError("Not yet implemented")
 
     # Maximum theoretical import payload size
+    if not batch_size or batch_size == UNSET_BATCH_SIZE:
+        if isinstance(resource, SisLegacyPatchable):
+            batch_size = resource.legacy_patches.default_import_limit
+        else:
+            batch_size = resource.patches.default_import_limit
+
     _batch_size = min(batch_size, 10000)
 
+    _path_postfix = resource.legacy_patches.endpoint if use_legacy_import else resource.patches.endpoint
     responses = await send_post_with_binary_err_search_httpx(
-        path=f"{sisu_config.host}{resource_maps[resource]['endpoint']}",
+        path=f"{sisu_config.host}{_path_postfix}",
         payload=data,
         auth=sisu_config.get_integration_auth(),
         proxies=sisu_config.proxies,
