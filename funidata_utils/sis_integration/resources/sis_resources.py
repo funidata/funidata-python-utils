@@ -1,34 +1,42 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-from pydantic import BaseModel, conint
+from .schemas import SisImport, SisExport
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
+_DEFAULT_IMPORT_LIMIT = 1500
 
-
-class SisExport(BaseModel):
-    endpoint: str
-    default_export_limit: conint(ge=1, le=5000)
-
-
-class SisImport(BaseModel):
-    endpoint: str
-    default_import_limit: conint(ge=1, le=5000) = 1500
+__all__ = [
+    'OriPersons',
+    'AccessRolePersonAssignments',
+    'Attainments',
+    'StudyRights',
+    'TermRegistrations',
+    'Thesis',
+    'MobilityPeriods',
+    'StudyRightPrimalities',
+    'Organisations',
+    'CourseUnits',
+    'Educations',
+    'Modules',
+    'KoriPersons',
+    'StudyYearTemplates',
+]
 
 
 class OriPersons:
     imports = SisImport(
         endpoint='/ori/api/persons/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     legacy_imports = SisImport(
         endpoint='/ori/api/persons/v1/import/legacy',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     patches = SisImport(
         endpoint='/ori/api/persons/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/persons/v1/export',
@@ -39,7 +47,7 @@ class OriPersons:
 class AccessRolePersonAssignments:
     imports = SisImport(
         endpoint='/ori/api/access-roles-person-assignments/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/access-roles-person-assignments/v1/export',
@@ -50,7 +58,7 @@ class AccessRolePersonAssignments:
 class Attainments:
     imports = SisImport(
         endpoint='/ori/api/attainments/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/attainments/v1/export',
@@ -61,7 +69,7 @@ class Attainments:
 class StudyRights:
     imports = SisImport(
         endpoint='/ori/api/study-rights/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/study-rights/v1/export',
@@ -72,7 +80,7 @@ class StudyRights:
 class TermRegistrations:
     imports = SisImport(
         endpoint='/ori/api/term-registrations/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/term-registrations/v1/export',
@@ -83,7 +91,7 @@ class TermRegistrations:
 class Thesis:
     imports = SisImport(
         endpoint='/ori/api/thesis/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/thesis/v1/export',
@@ -94,7 +102,7 @@ class Thesis:
 class MobilityPeriods:
     imports = SisImport(
         endpoint='/ori/api/mobility-periods/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/mobility-periods/v1/export',
@@ -105,7 +113,7 @@ class MobilityPeriods:
 class StudyRightPrimalities:
     imports = SisImport(
         endpoint='/ori/api/study-right-primalities/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/ori/api/study-right-primalities/v1/export',
@@ -116,7 +124,7 @@ class StudyRightPrimalities:
 class Organisations:
     imports = SisImport(
         endpoint='/kori/api/organisations/v2/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/kori/api/organisations/v2/export',
@@ -127,7 +135,7 @@ class Organisations:
 class CourseUnits:
     imports = SisImport(
         endpoint='/kori/api/course-units/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/kori/api/course-units/v1/export',
@@ -138,7 +146,7 @@ class CourseUnits:
 class Educations:
     imports = SisImport(
         endpoint='/kori/api/educations/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/kori/api/educations/v1/export',
@@ -149,7 +157,7 @@ class Educations:
 class Modules:
     imports = SisImport(
         endpoint='/kori/api/modules/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/kori/api/modules/v1/export',
@@ -160,7 +168,7 @@ class Modules:
 class KoriPersons:
     imports = SisImport(
         endpoint='/kori/api/persons/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/kori/api/persons/v1/export',
@@ -171,7 +179,7 @@ class KoriPersons:
 class StudyYearTemplates:
     imports = SisImport(
         endpoint='/kori/api/study-year-templates/v1/import',
-        default_import_limit=_DEFAULT_EXPORT_LIMIT,
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(
         endpoint='/kori/api/study-year-templates/v1/export',

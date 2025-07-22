@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 from typing import Protocol
 
-from .sis_resources import SisExport, SisImport
+from .resources.schemas import SisExport, SisImport
 
 
 class SisExportable(Protocol):
