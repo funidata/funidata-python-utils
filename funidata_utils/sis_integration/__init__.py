@@ -3,6 +3,6 @@
 # ------------------------------------------------------------------------------
 
 from .exports import export_from_sisu
-from .imports import (
+from .async_imports import (
     import_to_sisu, patch_to_sisu,
 )
