@@ -115,10 +115,10 @@ async def import_to_sisu(
     _batch_size = min(batch_size, 10000)
 
     responses = await send_post_with_binary_err_search_httpx(
-        path=f"{sisu_config.sis_host}{resource_maps[resource]['endpoint']}",
+        path=f"{sisu_config.host}{resource_maps[resource]['endpoint']}",
         payload=data,
         auth=sisu_config.get_integration_auth(),
-        proxies=sisu_config.socks_proxies,
+        proxies=sisu_config.proxies,
         batch_size=_batch_size,
         binary_search_max_depth=binary_search_max_depth,
         binary_err_search_sublists=binary_err_search_sublists,
@@ -168,10 +168,10 @@ async def patch_to_sisu(
     _batch_size = min(batch_size, 10000)
 
     responses = await send_post_with_binary_err_search_httpx(
-        path=f"{sisu_config.sis_host}{resource_maps[resource]['endpoint']}",
+        path=f"{sisu_config.host}{resource_maps[resource]['endpoint']}",
         payload=data,
         auth=sisu_config.get_integration_auth(),
-        proxies=sisu_config.socks_proxies,
+        proxies=sisu_config.proxies,
         batch_size=_batch_size,
         binary_search_max_depth=binary_search_max_depth,
         binary_err_search_sublists=binary_err_search_sublists,
