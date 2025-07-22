@@ -1,19 +1,14 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
+import datetime
 
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, field_serializer
 
 
 class HashableBaseModel(BaseModel):
     def __hash__(self):
         return hash((type(self),) + tuple(self.__dict__.values()))
-
-
-class LocalizedString(HashableBaseModel):
-    fi: str | None = None
-    en: str | None = None
-    sv: str | None = None
 
 
 SIS_MAX_VERY_LONG_STRING_LENGTH = 65000
@@ -31,3 +26,20 @@ SIS_MAX_SMALL_SET_SIZE = 20
 
 OTM_ID_REGEX_PATTERN = '([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}'
 OTM_ID_REGEX_VALIDATED_STR = constr(pattern=OTM_ID_REGEX_PATTERN)
+
+
+class LocalDateRange(BaseModel):
+    startDate: datetime.date | None = None
+    endDate: datetime.date | None = None
+
+    @field_serializer('startDate', 'endDate')
+    def serialize_dt(self, dt: datetime.date | None, _info):
+        if dt is None:
+            return dt
+        return dt.isoformat()
+
+
+class LocalizedString(HashableBaseModel):
+    fi: str | None = None
+    en: str | None = None
+    sv: str | None = None

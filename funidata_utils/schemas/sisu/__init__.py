@@ -18,3 +18,9 @@ from .attainment import (
 )
 from .mobility_period import MobilityPeriod
 from .thesis import Thesis
+from .private_person import PrivatePerson
+from .study_year_template import (
+    StudyYearTemplate,
+    StudyPeriodTemplate,
+    StudyTermTemplate,
+)

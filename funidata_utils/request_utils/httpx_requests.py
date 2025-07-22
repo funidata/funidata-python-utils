@@ -51,7 +51,7 @@ def send_get_httpx(
     proxy_mounts = {
         "http://": httpx.HTTPTransport(proxy=proxies.get('http')),
         "https://": httpx.HTTPTransport(proxy=proxies.get('https')),
-    }
+    } if proxies else None
     client = httpx.Client(mounts=proxy_mounts, auth=auth)
     response = client.get(
         path,

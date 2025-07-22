@@ -5,20 +5,23 @@
 import datetime
 from typing import Optional, Literal
 
-from pydantic import model_validator, BaseModel, field_validator, field_serializer, Field, conint, constr, PastDate
+from pydantic import (
+    model_validator,
+    BaseModel,
+    field_validator,
+    field_serializer,
+    Field,
+    conint,
+    constr,
+    PastDate,
+)
 
-from ...schemas.sisu.common import SIS_MAX_LONG_STRING_LENGTH, OTM_ID_REGEX_PATTERN, SIS_MAX_TERSE_STRING_LENGTH
-
-
-class LocalDateRange(BaseModel):
-    startDate: datetime.date | None = None
-    endDate: datetime.date | None = None
-
-    @field_serializer('startDate', 'endDate')
-    def serialize_dt(self, dt: datetime.date | None, _info):
-        if dt is None:
-            return dt
-        return dt.isoformat()
+from .common import (
+    SIS_MAX_LONG_STRING_LENGTH,
+    OTM_ID_REGEX_PATTERN,
+    SIS_MAX_TERSE_STRING_LENGTH,
+    LocalDateRange,
+)
 
 
 class StudyRightCourseUnitSelection(BaseModel):
