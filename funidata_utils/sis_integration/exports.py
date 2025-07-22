@@ -2,24 +2,11 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 import json
-from typing import TextIO, overload, IO, Literal
+from typing import TextIO, overload, IO
 
+from .protocols import SisExportable
 from ..auth.sis_auth import SisuConfig
 from ..request_utils.httpx_requests import send_get_httpx
-
-
-_EXPORT_LITERAL_RESOURCES = Literal[
-    'organisations',
-    'private-persons',
-    'course-units',
-    'educations',
-    'modules',
-    'attainments',
-    'public-persons',
-    'study-rights',
-    'study-right-primalities',
-    'study-year-templates',
-]
 
 
 @overload
@@ -89,7 +76,7 @@ def _export_from_endpoint(
 @overload
 def export_from_sisu(
     sisu_config: SisuConfig,
-    resource: _EXPORT_LITERAL_RESOURCES,
+    resource: SisExportable,
     fp: None = None,
     since_ordinal: int = 0,
 ) -> list[dict]:
@@ -99,7 +86,7 @@ def export_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SisuConfig,
-    resource: _EXPORT_LITERAL_RESOURCES,
+    resource: SisExportable,
     fp: IO,
     since_ordinal: int = 0,
 ) -> IO:
@@ -108,69 +95,22 @@ def export_from_sisu(
 
 def export_from_sisu(
     sisu_config: SisuConfig,
-    resource: _EXPORT_LITERAL_RESOURCES,
+    resource: SisExportable,
     fp: IO | None = None,
     since_ordinal: int = 0,
 ) -> list[dict] | IO:
-    ori_resources = {
-        'private-persons': {
-            'endpoint': '/ori/api/persons/v1/export',
-            'export_limit': 1500,
-        },
-        'attainments': {
-            'endpoint': '/ori/api/attainments/v1/export',
-            'export_limit': 2500,
-        },
-        'study-rights': {
-            'endpoint': '/ori/api/study-rights/v1/export',
-            'export_limit': 1000,
-        },
-        'study-right-primalities': {
-            'endpoint': '/ori/api/study-right-primalities/v1/export',
-            'export_limit': 1000,
-        }
-    }
-
-    kori_resources = {
-        'organisations': {
-            'endpoint': '/kori/api/organisations/v2/export',
-            'export_limit': 1500
-        },
-        'course-units': {
-            'endpoint': '/kori/api/course-units/v1/export',
-            'export_limit': 1500
-        },
-        'educations': {
-            'endpoint': '/kori/api/educations/v1/export',
-            'export_limit': 1000
-        },
-        'modules': {
-            'endpoint': '/kori/api/modules/v1/export',
-            'export_limit': 1000
-        },
-        'public-persons': {
-            'endpoint': '/kori/api/persons/v1/export',
-            'export_limit': 1500
-        },
-        'study-year-templates': {
-            'endpoint': '/kori/api/study-year-templates/v1/export',
-            'export_limit': 1000
-        },
-    }
-    resource_maps = ori_resources | kori_resources
-
     if fp:
         return _export_from_endpoint(
-            endpoint=resource_maps[resource]['endpoint'],
-            export_limit=resource_maps[resource]['export_limit'],
+            endpoint=resource.exports.endpoint,
+            export_limit=resource.exports.default_export_limit,
             sis_settings=sisu_config,
             since_ordinal=since_ordinal,
             fp=fp
         )
 
     return _export_from_endpoint(
-        endpoint=resource_maps[resource]['endpoint'],
-        export_limit=resource_maps[resource]['export_limit'],
+        endpoint=resource.exports.endpoint,
+        export_limit=resource.exports.default_export_limit,
         sis_settings=sisu_config,
         since_ordinal=since_ordinal,
         fp=None
