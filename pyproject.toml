@@ -40,16 +40,9 @@ sql = [
     "psycopg2-binary>=2.9.10, <3.0.0",
 ]
 
-xml = [
-    "lxml>=5.3.1, <6.0.0",
-    "xmltodict>=0.14.2, <1.0.0",
-]
-
 all = [
     "SQLAlchemy>=2.0.38, <3.0.0",
     "psycopg2-binary>=2.9.10, <3.0.0",
-    "lxml>=5.3.1, <6.0.0",
-    "xmltodict>=0.14.2, <1.0.0",
 ]
 
 [tool.pdm]
