@@ -6,25 +6,11 @@ import datetime
 from typing import Literal
 from pydantic import BaseModel, field_serializer, constr, conset
 
+from funidata_utils.schemas.sisu.common import FinnishAddress, GenericAddress
+
 
 CountryUrnStr = constr(pattern='(urn:code:country)(:[A-z_0-9]+)*')
 SchoolEducationLangUrnStr = constr(pattern='(urn:code:school-education-language)(:[A-z_0-9]+)*')
-
-
-class FinnishAddress(BaseModel):
-    countryUrn: CountryUrnStr
-    isUserEditable: bool
-    type: str = 'FinnishAddress'
-    streetAddress: str | None = None
-    postalCode: str | None = None
-    city: str | None = None
-
-
-class GenericAddress(BaseModel):
-    countryUrn: CountryUrnStr
-    isUserEditable: bool
-    type: str = 'GenericAddress'
-    address: str | None = None
 
 
 class ClassifiedPersonInfo(BaseModel):

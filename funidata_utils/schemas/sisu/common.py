@@ -6,6 +6,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, constr, field_serializer, Field
 
+from funidata_utils.schemas.sisu.private_person import CountryUrnStr
+
 
 class HashableBaseModel(BaseModel):
     def __hash__(self):
@@ -64,3 +66,19 @@ class OrganisationRoleShareBase(HashableBaseModel):
 
 class OrganisationRoleShare(OrganisationRoleShareBase):
     validityPeriod: LocalDateRange
+
+
+class FinnishAddress(BaseModel):
+    countryUrn: CountryUrnStr
+    isUserEditable: bool
+    type: str = 'FinnishAddress'
+    streetAddress: str | None = None
+    postalCode: str | None = None
+    city: str | None = None
+
+
+class GenericAddress(BaseModel):
+    countryUrn: CountryUrnStr
+    isUserEditable: bool
+    type: str = 'GenericAddress'
+    address: str | None = None
