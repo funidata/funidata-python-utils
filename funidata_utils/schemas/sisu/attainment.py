@@ -8,7 +8,7 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, conlist, constr, Field, model_validator, field_validator, conset, field_serializer, AfterValidator
 
-from .common import LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, HashableBaseModel
+from .common import LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, HashableBaseModel, OrganisationRoleShareBase
 from ...utils import group_by
 
 
@@ -29,13 +29,6 @@ class AttainmentGroupNode(AttainmentNode):
 class AttainmentReferenceNode(AttainmentNode):
     type: Literal['AttainmentReferenceNode'] = 'AttainmentReferenceNode'
     attainmentId: str
-
-
-class OrganisationRoleShareBase(HashableBaseModel):
-    organisationId: str
-    educationalInstitutionUrn: constr(pattern='(urn:code:educational-institution)(:[A-z_0-9]+)*') | None = None
-    roleUrn: constr(pattern='(urn:code:organisation-role)(:[A-z_0-9]+)*')
-    share: Annotated[float, Field(strict=False, ge=0, le=1)]
 
 
 class PersonWithAttainmentAcceptorType(HashableBaseModel):

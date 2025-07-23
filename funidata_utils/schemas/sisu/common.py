@@ -2,8 +2,9 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, constr, field_serializer
+from pydantic import BaseModel, constr, field_serializer, Field
 
 
 class HashableBaseModel(BaseModel):
@@ -28,6 +29,10 @@ OTM_ID_REGEX_PATTERN = '([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}'
 OTM_ID_REGEX_VALIDATED_STR = constr(pattern=OTM_ID_REGEX_PATTERN)
 
 
+def sis_code_urn_pattern(codebook: str):
+    return f'(urn:code:{codebook})(:[A-z_0-9]+)*'
+
+
 class LocalDateRange(BaseModel):
     startDate: datetime.date | None = None
     endDate: datetime.date | None = None
@@ -39,7 +44,23 @@ class LocalDateRange(BaseModel):
         return dt.isoformat()
 
 
+class CreditRange(BaseModel):
+    min: float
+    max: float | None = None
+
+
 class LocalizedString(HashableBaseModel):
     fi: str | None = None
     en: str | None = None
     sv: str | None = None
+
+
+class OrganisationRoleShareBase(HashableBaseModel):
+    organisationId: str
+    educationalInstitutionUrn: Annotated[str, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
+    roleUrn: Annotated[str, Field(pattern=sis_code_urn_pattern('organisation-role'))]
+    share: Annotated[float, Field(strict=False, ge=0, le=1)]
+
+
+class OrganisationRoleShare(OrganisationRoleShareBase):
+    validityPeriod: LocalDateRange

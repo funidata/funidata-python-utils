@@ -7,8 +7,8 @@ from typing import Literal
 
 from pydantic import BaseModel, field_serializer, Field, constr, field_validator, conset
 
-from .common import LocalizedString
-from .attainment import PersonWithAttainmentAcceptorType, OrganisationRoleShareBase
+from .common import LocalizedString, OrganisationRoleShareBase
+from .attainment import PersonWithAttainmentAcceptorType
 from ...utils import group_by
 
 
