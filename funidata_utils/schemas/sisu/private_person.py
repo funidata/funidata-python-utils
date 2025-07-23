@@ -3,14 +3,14 @@
 # ------------------------------------------------------------------------------
 
 import datetime
-from typing import Literal
-from pydantic import BaseModel, field_serializer, constr, conset
+from typing import Literal, Annotated
+from pydantic import BaseModel, field_serializer, conset, Field
 
-from funidata_utils.schemas.sisu.common import FinnishAddress, GenericAddress
+from .common import FinnishAddress, GenericAddress, STRIPPED_STR, sis_code_urn_pattern
 
 
-CountryUrnStr = constr(pattern='(urn:code:country)(:[A-z_0-9]+)*')
-SchoolEducationLangUrnStr = constr(pattern='(urn:code:school-education-language)(:[A-z_0-9]+)*')
+CountryUrnStr = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
+SchoolEducationLangUrnStr = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('school-education-language'))]
 
 
 class ClassifiedPersonInfo(BaseModel):
@@ -48,12 +48,12 @@ class PrivatePerson(BaseModel):
     secondaryEmail: str | None = None
     primaryAddress: FinnishAddress | None = None
     secondaryAddress: FinnishAddress | GenericAddress | None = None
-    genderUrn: constr(pattern='(urn:code:gender)(:[A-z_0-9]+)*')
+    genderUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('gender'))]
     citizenshipUrns: conset(CountryUrnStr, min_length=1) | None = None
-    motherTongueUrn: constr(pattern='(urn:code:language)(:[A-z_0-9]+)*') | None = None
-    preferredLanguageUrn: constr(pattern='(urn:code:preferred-language)(:[A-z_0-9]+)*') | None = None
+    motherTongueUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))] | None = None
+    preferredLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('preferred-language'))] | None = None
     schoolEducationLanguageUrns: conset(SchoolEducationLangUrnStr, min_length=1) | None = None
-    municipalityUrn: constr(pattern='(urn:code:municipality)(:[A-z_0-9]+)*') | None = None
+    municipalityUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('municipality'))] | None = None
     oppijanumero: str | None = None
     oids: list[str] = []
     dead: bool = False

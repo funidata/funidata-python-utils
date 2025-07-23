@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 import datetime
-from typing import Optional, Literal
+from typing import Optional, Literal, Annotated
 
 from pydantic import (
     model_validator,
@@ -11,8 +11,6 @@ from pydantic import (
     field_validator,
     field_serializer,
     Field,
-    conint,
-    constr,
     PastDate,
 )
 
@@ -20,7 +18,7 @@ from .common import (
     SIS_MAX_LONG_STRING_LENGTH,
     OTM_ID_REGEX_PATTERN,
     SIS_MAX_TERSE_STRING_LENGTH,
-    LocalDateRange,
+    LocalDateRange, STRIPPED_STR, sis_code_urn_pattern,
 )
 
 
@@ -67,14 +65,14 @@ class StudyRightMinorSelection(BaseModel):
 class StudyRightExtension(BaseModel):
     localId: str
     state: Literal['ACTIVE', 'DELETED']
-    extensionCount: conint(ge=1, le=4)
+    extensionCount: Annotated[int, Field(ge=1, le=4)]
     extensionStartDate: datetime.date
     grantDate: datetime.date
     workflowId: str | None = None
-    grantReason: constr(min_length=1, max_length=SIS_MAX_LONG_STRING_LENGTH) | None
+    grantReason: Annotated[str, Field(min_length=1, max_length=SIS_MAX_LONG_STRING_LENGTH)] | None
     grantedBy: str = Field(description='<MAGIC>PersonId', pattern=OTM_ID_REGEX_PATTERN)
     deleteDate: datetime.date | None = None
-    deleteReason: constr(min_length=1, max_length=SIS_MAX_TERSE_STRING_LENGTH) | None
+    deleteReason: Annotated[str, Field(min_length=1, max_length=SIS_MAX_TERSE_STRING_LENGTH)] | None
     deletedBy: str | None = Field(default=None, description='<MAGIC>PersonId', pattern=OTM_ID_REGEX_PATTERN)
 
     @model_validator(mode='after')
@@ -93,7 +91,7 @@ class StudyRightExtension(BaseModel):
 
 class StudyRightCancellation(BaseModel):
     cancellationDate: PastDate
-    cancellationReason: constr(min_length=1, max_length=SIS_MAX_TERSE_STRING_LENGTH)
+    cancellationReason: Annotated[str, Field(min_length=1, max_length=SIS_MAX_TERSE_STRING_LENGTH)]
     cancellationType: Literal[
         'RESCINDED',
         'CANCELLED_BY_ADMINISTRATION',
@@ -116,7 +114,7 @@ def _get_start_and_end_date_from_range(date_range: LocalDateRange | None):
     return start, end
 
 
-CodeUrnsStr = constr(pattern='(urn:code)(:[A-z_0-9]+)*')
+CodeUrnsStr = Annotated[STRIPPED_STR, Field(pattern='(urn:code)(:[A-z_0-9]+)*')]
 
 
 class StudyRight(BaseModel):
@@ -164,7 +162,7 @@ class StudyRight(BaseModel):
     phase2EducationLocationUrn: Optional[str] = None
     phase1InternationalContractualDegree: Optional[dict] = None
     phase2InternationalContractualDegree: Optional[dict] = None
-    admissionTypeUrn: constr(pattern='(urn:code:admission-type)(:[A-z_0-9]+)*') | None = None
+    admissionTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('admission-type'))] | None = None
     codeUrns: list[CodeUrnsStr]
     additionalInformation: Optional[dict] = None
     # basedOnEnrolmentRights: bool < Apparently removed from sisu model at some point in time

@@ -4,9 +4,7 @@
 import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, constr, field_serializer, Field
-
-from funidata_utils.schemas.sisu.private_person import CountryUrnStr
+from pydantic import BaseModel, field_serializer, Field, BeforeValidator
 
 
 class HashableBaseModel(BaseModel):
@@ -28,7 +26,9 @@ SIS_MAX_MEDIUM_SET_SIZE = 200
 SIS_MAX_SMALL_SET_SIZE = 20
 
 OTM_ID_REGEX_PATTERN = '([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}'
-OTM_ID_REGEX_VALIDATED_STR = constr(pattern=OTM_ID_REGEX_PATTERN)
+OTM_ID_REGEX_VALIDATED_STR = Annotated[str, Field(pattern=OTM_ID_REGEX_PATTERN)]
+
+STRIPPED_STR = Annotated[str, BeforeValidator(lambda x: str.strip(x))]
 
 
 def sis_code_urn_pattern(codebook: str):
@@ -59,8 +59,8 @@ class LocalizedString(HashableBaseModel):
 
 class OrganisationRoleShareBase(HashableBaseModel):
     organisationId: str
-    educationalInstitutionUrn: Annotated[str, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
-    roleUrn: Annotated[str, Field(pattern=sis_code_urn_pattern('organisation-role'))]
+    educationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
+    roleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('organisation-role'))]
     share: Annotated[float, Field(strict=False, ge=0, le=1)]
 
 
@@ -69,7 +69,7 @@ class OrganisationRoleShare(OrganisationRoleShareBase):
 
 
 class FinnishAddress(BaseModel):
-    countryUrn: CountryUrnStr
+    countryUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
     isUserEditable: bool
     type: str = 'FinnishAddress'
     streetAddress: str | None = None
@@ -78,7 +78,7 @@ class FinnishAddress(BaseModel):
 
 
 class GenericAddress(BaseModel):
-    countryUrn: CountryUrnStr
+    countryUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
     isUserEditable: bool
     type: str = 'GenericAddress'
     address: str | None = None

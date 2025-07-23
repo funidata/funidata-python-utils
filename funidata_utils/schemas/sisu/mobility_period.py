@@ -2,11 +2,11 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 
-from typing import Literal
+from typing import Literal, Annotated
 
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, Field
 
-from .common import LocalDateRange
+from .common import LocalDateRange, sis_code_urn_pattern, STRIPPED_STR
 
 
 class MobilityPeriod(BaseModel):
@@ -17,12 +17,12 @@ class MobilityPeriod(BaseModel):
     mobilityDirection: Literal['INBOUND', 'OUTBOUND']
     activityPeriod: LocalDateRange
     phase: Literal['PHASE1', 'PHASE2']
-    mobilityProgramUrn: constr(pattern='(urn:code:mobility-program)(:[A-z_0-9]+)*', strip_whitespace=True)
+    mobilityProgramUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('mobility-program'))]
     mobilityProgramDescription: str | None = None
-    mobilityTypeUrn: constr(pattern='(urn:code:mobility-type)(:[A-z_0-9]+)*', strip_whitespace=True)
-    countryUrn: constr(pattern='(urn:code:country)(:[A-z_0-9]+)*', strip_whitespace=True)
-    internationalInstitutionUrn: constr(pattern='(urn:code:international-institution)(:[A-z_0-9]+)*', strip_whitespace=True) | None = None
+    mobilityTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('mobility-type'))]
+    countryUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
+    internationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('international-institution'))] | None = None
     organisation: str | None = None
-    mobilityStudyRightTypeUrn: constr(pattern='(urn:code:mobility-study-right-type)(:[A-z_0-9]+)*', strip_whitespace=True) | None = None
+    mobilityStudyRightTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('mobility-study-right-type'))] | None = None
     virtualMobilityType: Literal["None", "RemoteAttendance", "BlendedAttendance"] | None = None
     isCancelled: bool
