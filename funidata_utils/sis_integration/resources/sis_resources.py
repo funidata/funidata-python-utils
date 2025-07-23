@@ -24,6 +24,11 @@ __all__ = [
     'KoriPersons',
     'StudyYearTemplates',
     'CodeBooks',
+    'CurriculumPeriods',
+    'AssessmentItems',
+    'Buildings',
+    'Qualifications',
+    'GradeScales',
 ]
 
 
@@ -250,5 +255,60 @@ class StudyYearTemplates(BaseResource):
 class CodeBooks(BaseResource):
     exports = SisExport(
         endpoint='/kori/api/codebooks/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class CurriculumPeriods(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/curriculum-periods/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/curriculum-periods/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class AssessmentItems(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/assessment-items/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/assessment-items/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class Buildings(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/buildings/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/buildings/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class Qualifications(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/qualifications/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/qualifications/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class GradeScales(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/grade-scales/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/grade-scales/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
