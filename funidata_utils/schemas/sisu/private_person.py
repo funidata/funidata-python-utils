@@ -4,7 +4,7 @@
 
 import datetime
 from typing import Literal
-from pydantic import BaseModel, field_serializer, Field, constr, conset
+from pydantic import BaseModel, field_serializer, constr, conset
 
 
 CountryUrnStr = constr(pattern='(urn:code:country)(:[A-z_0-9]+)*')

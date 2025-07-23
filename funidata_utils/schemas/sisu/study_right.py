@@ -116,6 +116,9 @@ def _get_start_and_end_date_from_range(date_range: LocalDateRange | None):
     return start, end
 
 
+CodeUrnsStr = constr(pattern='(urn:code)(:[A-z_0-9]+)*')
+
+
 class StudyRight(BaseModel):
     id: str
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
@@ -162,7 +165,7 @@ class StudyRight(BaseModel):
     phase1InternationalContractualDegree: Optional[dict] = None
     phase2InternationalContractualDegree: Optional[dict] = None
     admissionTypeUrn: constr(pattern='(urn:code:admission-type)(:[A-z_0-9]+)*') | None = None
-    codeUrns: list[constr(pattern='(urn:code)(:[A-z_0-9]+)*')]
+    codeUrns: list[CodeUrnsStr]
     additionalInformation: Optional[dict] = None
     # basedOnEnrolmentRights: bool < Apparently removed from sisu model at some point in time
     cooperationNetworkRights: Optional[str] = None

@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, constr
 
-from .study_right import LocalDateRange
+from .common import LocalDateRange
 
 
 class MobilityPeriod(BaseModel):
