@@ -1,7 +1,9 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-from pydantic import BaseModel, conlist, conint, field_validator
+from typing import Annotated
+
+from pydantic import BaseModel, conlist, field_validator, Field
 
 from .common import LocalDateRange, LocalizedString, SIS_MAX_SMALL_SET_SIZE
 
@@ -10,7 +12,7 @@ class StudyPeriodTemplate(BaseModel):
     defaultValid: LocalDateRange
     overrideValidities: conlist(LocalDateRange, max_length=100) | None = None  # hardcoded in Sisu to 100 at time of writing
     name: LocalizedString
-    size: conint(ge=1, le=100)  # hardcoded values in Sisu at time of writing
+    size: Annotated[int, Field(ge=1, le=100)]  # hardcoded values in Sisu at time of writing
     visibleByDefault: bool = False
     includedInTargetCreditsCalculation: bool = False
 

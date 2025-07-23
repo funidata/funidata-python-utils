@@ -3,12 +3,12 @@
 # ------------------------------------------------------------------------------
 
 import datetime
-from typing import Literal
+from typing import Literal, Annotated
 
-from pydantic import BaseModel, field_serializer, Field, constr, field_validator, conset
+from pydantic import BaseModel, field_serializer, Field, field_validator, conset
 
-from .common import LocalizedString, OrganisationRoleShareBase
 from .attainment import PersonWithAttainmentAcceptorType
+from .common import LocalizedString, OrganisationRoleShareBase, sis_code_urn_pattern, STRIPPED_STR
 from ...utils import group_by
 
 
@@ -19,7 +19,7 @@ class Thesis(BaseModel):
     attainmentId: str | None = None
     title: LocalizedString  # This is technically annotated as optional, but lets not do that
     subject: LocalizedString | None = None
-    thesisTypeUrn: constr(pattern='(urn:code:thesis-type)(:[A-z_0-9]+)*')
+    thesisTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('thesis-type'))]
     responsibilityInfos: conset(PersonWithAttainmentAcceptorType, min_length=1)
     organisations: conset(OrganisationRoleShareBase, min_length=1) | None = None
     courseUnitId: str

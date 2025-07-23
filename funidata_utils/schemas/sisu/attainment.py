@@ -6,9 +6,12 @@ import datetime
 from abc import ABC
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, conlist, constr, Field, model_validator, field_validator, conset, field_serializer, AfterValidator
+from pydantic import BaseModel, conlist, Field, model_validator, field_validator, conset, field_serializer, AfterValidator
 
-from .common import LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, HashableBaseModel, OrganisationRoleShareBase
+from .common import (
+    LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, HashableBaseModel, OrganisationRoleShareBase,
+    sis_code_urn_pattern, STRIPPED_STR,
+)
 from ...utils import group_by
 
 
@@ -34,7 +37,7 @@ class AttainmentReferenceNode(AttainmentNode):
 class PersonWithAttainmentAcceptorType(HashableBaseModel):
     text: LocalizedString | None = None
     personId: str | None = Field(default=None, description='PublicPersonId', pattern=OTM_ID_REGEX_PATTERN)
-    roleUrn: constr(pattern='(urn:code:attainment-acceptor-type)(:[A-z_0-9]+)*')
+    roleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('attainment-acceptor-type'))]
     title: LocalizedString | None = None
 
     @model_validator(mode='after')
@@ -57,8 +60,8 @@ class GradeAverage(BaseModel):
 
 
 class CreditTransferInfo(BaseModel):
-    educationalInstitutionUrn: constr(pattern='(urn:code:educational-institution)(:[A-z_0-9]+)*')
-    internationalInstitutionUrn: constr(pattern='(urn:code:international-institution)(:[A-z_0-9]+)*') | None = None
+    educationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('educational-institution'))]
+    internationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('international-institution'))] | None = None
     organisation: str | None = None
     creditTransferDate: datetime.date
 
@@ -74,7 +77,7 @@ class Attainment(ObjectWithDocumentState):
     studyRightId: str | None = None
     registrationDate: str
     expiryDate: str | None = None
-    attainmentLanguageUrn: constr(pattern='(urn:code:language)(:[A-z_0-9]+)*')
+    attainmentLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))]
     acceptorPersons: conlist(PersonWithAttainmentAcceptorType, min_length=1)
     organisations: conset(OrganisationRoleShareBase, min_length=1)
     state: Literal['ATTAINED', 'INCLUDED', 'SUBSTITUTED', 'FAILED']
@@ -87,8 +90,8 @@ class Attainment(ObjectWithDocumentState):
     gradeId: int
     gradeAverage: GradeAverage | None = None
     additionalInfo: LocalizedString | None = None
-    administrativeNote: constr(min_length=1, max_length=SIS_MAX_MEDIUM_STRING_LENGTH) | None = None
-    studyFieldUrn: constr(pattern='(urn:code:study-field)(:[A-z_0-9]+)*') | None = None
+    administrativeNote: Annotated[STRIPPED_STR, Field(min_length=1, max_length=SIS_MAX_MEDIUM_STRING_LENGTH)] | None = None
+    studyFieldUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('study-field'))] | None = None
     workflowId: str | None = None
     moduleContentApplicationId: str | None = None
     creditTransferInfo: CreditTransferInfo | None = None
@@ -171,8 +174,8 @@ class CourseUnitAttainment(Attainment):
 class CustomCourseUnitAttainment(Attainment):
     type: Literal['CustomCourseUnitAttainment'] = 'CustomCourseUnitAttainment'
     name: LocalizedStringWithRequiredOneValue
-    studyLevelUrn: constr(pattern='(urn:code:study-level)(:[A-z_0-9]+)*')
-    courseUnitTypeUrn: constr(pattern='(urn:code:course-unit-type)(:[A-z_0-9]+)*')
+    studyLevelUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('study-level'))]
+    courseUnitTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('course-unit-type'))]
     code: str
     customStudyDraftId: str | None = None
 
@@ -192,8 +195,8 @@ class DegreeProgrammeAttainment(Attainment):
     embeddedModules: list[dict] | None = None
     acceptorPersons: list[PersonWithAttainmentAcceptorType] = Field(default_factory=lambda x: [])
     acceptorOrganisationIds: conlist(str, min_length=1, max_length=SIS_MAX_MEDIUM_SET_SIZE)
-    educationClassificationUrn: constr(pattern='(urn:code:education-classification)(:[A-z_0-9]+)*')
-    secondaryEducationClassificationUrn: constr(pattern='(urn:code:education-classification)(:[A-z_0-9]+)*') | None = None
-    degreeTitleUrn: constr(pattern='(urn:code:degree-title)(:[A-z_0-9]+)*')
-    honoraryTitleUrn: constr(pattern='(urn:code:honorary-title)(:[A-z_0-9]+)*') | None = None
+    educationClassificationUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('education-classification'))]
+    secondaryEducationClassificationUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('education-classification'))] | None = None
+    degreeTitleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-title'))]
+    honoraryTitleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('honorary-title'))] | None = None
     internationalContractualDegree: dict | None = None
