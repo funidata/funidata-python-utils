@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, field_serializer
 from .common import LocalizedString, sis_code_urn_pattern
 
 
-class Qualifications(BaseModel):
+class Qualification(BaseModel):
     id: str
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     universityOrgId: str
