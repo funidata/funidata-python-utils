@@ -24,3 +24,8 @@ from .study_year_template import (
     StudyPeriodTemplate,
     StudyTermTemplate,
 )
+from .assessment_item import AssessmentItem
+from .buildings import Building
+from .curriculum_period import CurriculumPeriod
+from .grade_scales import (GradeScale, Grade)
+from .qualifications import Qualification
