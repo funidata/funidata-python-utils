@@ -8,7 +8,7 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, conlist, constr, Field, model_validator, field_validator, conset, field_serializer, AfterValidator
 
-from ..sisu.common import LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, HashableBaseModel
+from .common import LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, HashableBaseModel
 from ...utils import group_by
 
 
