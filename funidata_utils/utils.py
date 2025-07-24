@@ -53,7 +53,7 @@ def response_statistics(
         return f'{val:.{resolution_digits}f}s'
 
     _avg = mean([x.elapsed.total_seconds() for x in data])
-    _std = stdev([x.elapsed.total_seconds() for x in data])
+    _std = stdev([x.elapsed.total_seconds() for x in data]) if len(data) >= 2 else None
     _sum = sum(([x.elapsed.total_seconds() for x in data]))
     _max = max([x.elapsed.total_seconds() for x in data])
     _min = min([x.elapsed.total_seconds() for x in data])
