@@ -2,9 +2,10 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 
+import datetime
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString
 
@@ -12,6 +13,7 @@ from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString
 class CooperationNetworkIdentifiers(BaseModel):
     direction: Literal['INBOUND', 'OUTBOUND', 'NONE']
     organisationTkCode: str
+
 
 class Organisation(BaseModel):
     id: str
