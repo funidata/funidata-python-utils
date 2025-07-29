@@ -29,3 +29,5 @@ from .buildings import Building
 from .curriculum_period import CurriculumPeriod
 from .grade_scales import (GradeScale, Grade)
 from .qualifications import Qualification
+
+from .organisation import Organisation
