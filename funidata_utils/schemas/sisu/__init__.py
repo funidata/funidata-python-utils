@@ -25,7 +25,8 @@ from .study_year_template import (
     StudyTermTemplate,
 )
 from .assessment_item import AssessmentItem
-from .buildings import Building
+from .building import Building
 from .curriculum_period import CurriculumPeriod
-from .grade_scales import (GradeScale, Grade)
-from .qualifications import Qualification
+from .grade_scale import (GradeScale, Grade)
+from .qualification import Qualification
+from .organisation import Organisation
