@@ -18,7 +18,7 @@ class CooperationNetworkIdentifiers(BaseModel):
 class Organisation(BaseModel):
     id: str
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
-    snapshotDateTime: datetime.date
+    snapshotDateTime: datetime.datetime
     universityOrgId: str
     parentId: str | None = None
     predecessorIds: list[str]
@@ -30,5 +30,8 @@ class Organisation(BaseModel):
     cooperationNetworkIdentifiers: CooperationNetworkIdentifiers | None = None
 
     @field_serializer('snapshotDateTime')
-    def date_as_isoformat(self, val: datetime.date, _info):
-        return val.isoformat()
+    def serialize_ssdt(self, ssdt: datetime.datetime | None, _info):
+        if ssdt is None:
+            return None
+
+        return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
