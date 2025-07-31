@@ -12,17 +12,17 @@ from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString
 
 class CooperationNetworkIdentifiers(BaseModel):
     direction: Literal['INBOUND', 'OUTBOUND', 'NONE']
-    organisationTkCode: str
+    organisationTkCode: Annotated[str, Field(min_length=1)]
 
 
 class Organisation(BaseModel):
-    id: str
+    id: Annotated[str, Field(min_length=1)]
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     snapshotDateTime: datetime.datetime
-    universityOrgId: str
+    universityOrgId: Annotated[str, Field(min_length=1)]
     parentId: str | None = None
     predecessorIds: list[str]
-    code: str
+    code: Annotated[str, Field(min_length=1)]
     name: LocalizedString
     abbreviation: LocalizedString | None = None
     status: Literal['ACTIVE', 'INACTIVE']
