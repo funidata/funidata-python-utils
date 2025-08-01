@@ -35,3 +35,7 @@ class Organisation(BaseModel):
             return None
 
         return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
+
+    @field_serializer('predecessorIds')
+    def serialize_predecessor_ids(self, set_val: set[str], _info):
+        return list(set_val)
