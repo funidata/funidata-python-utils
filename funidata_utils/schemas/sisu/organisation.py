@@ -7,7 +7,7 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field, field_serializer
 
-from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString
+from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR
 
 
 class CooperationNetworkIdentifiers(BaseModel):
@@ -16,7 +16,7 @@ class CooperationNetworkIdentifiers(BaseModel):
 
 
 class Organisation(BaseModel):
-    id: Annotated[str, Field(min_length=1)]
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     snapshotDateTime: datetime.datetime
     universityOrgId: Annotated[str, Field(min_length=1)]
