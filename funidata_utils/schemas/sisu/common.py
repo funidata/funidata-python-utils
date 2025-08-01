@@ -25,14 +25,14 @@ SIS_MAX_BIG_SET_SIZE = 4000
 SIS_MAX_MEDIUM_SET_SIZE = 200
 SIS_MAX_SMALL_SET_SIZE = 20
 
-OTM_ID_REGEX_PATTERN = '([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}'
+OTM_ID_REGEX_PATTERN = '^([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}$'
 OTM_ID_REGEX_VALIDATED_STR = Annotated[str, Field(pattern=OTM_ID_REGEX_PATTERN)]
 
 STRIPPED_STR = Annotated[str, BeforeValidator(lambda x: str.strip(x))]
 
 
 def sis_code_urn_pattern(codebook: str):
-    return f'(urn:code:{codebook})(:[A-z_0-9]+)*'
+    return f'^(urn:code:{codebook})(:[A-z_0-9]+)*$'
 
 
 class LocalDateRange(BaseModel):
