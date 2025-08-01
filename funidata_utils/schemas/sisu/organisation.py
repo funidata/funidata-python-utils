@@ -5,9 +5,9 @@
 import datetime
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field, field_serializer, conset
 
-from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR
+from .common import sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE
 
 
 class CooperationNetworkIdentifiers(BaseModel):
@@ -19,9 +19,9 @@ class Organisation(BaseModel):
     id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     snapshotDateTime: datetime.datetime
-    universityOrgId: Annotated[str, Field(min_length=1)]
-    parentId: str | None = None
-    predecessorIds: list[str]
+    universityOrgId: OTM_ID_REGEX_VALIDATED_STR
+    parentId: OTM_ID_REGEX_VALIDATED_STR | None = None
+    predecessorIds: conset(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)
     code: Annotated[str, Field(min_length=1)]
     name: LocalizedString
     abbreviation: LocalizedString | None = None
