@@ -30,3 +30,4 @@ from .curriculum_period import CurriculumPeriod
 from .grade_scale import (GradeScale, Grade)
 from .qualification import Qualification
 from .organisation import Organisation
+from .course_unit import CourseUnit
