@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, field_serializer, conset, conlist
 
 from .common import (
     sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE, LocalDateRange,
-    SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE,
+    SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES,
 )
 
 
@@ -31,7 +31,7 @@ class StudyYearRange(BaseModel):
 class CompletionMethodRepeat(BaseModel):
     studyYearRange: StudyYearRange
     yearInterval: Annotated[int, Field(gt=0)] | None = None
-    repeatPossibility: conlist(STRING_WITH_3_SLASHES, minlength=1, maxlength=SIS_MAX_SMALL_SET_SIZE)
+    repeatPossibility: conlist(STRING_WITH_3_SLASHES, min_length=1, max_length=SIS_MAX_SMALL_SET_SIZE)
 
 
 class CompletionMethod(BaseModel):
@@ -84,7 +84,10 @@ class PersonWithModuleResponsibilityInfoType(BaseModel):
     text: LocalizedString | None = None
     personId: OTM_ID_REGEX_VALIDATED_STR | None = None
     roleUrn: Literal[
-        'urn:code:module-responsibility-info-type:responsible-teacher', 'urn:code:module-responsibility-info-type:administrative-person', 'urn:code:module-responsibility-info-type:contact-info']
+        'urn:code:module-responsibility-info-type:responsible-teacher',
+        'urn:code:module-responsibility-info-type:administrative-person',
+        'urn:code:module-responsibility-info-type:contact-info',
+    ]
     validity: LocalDateRange | None = None
     validityPeriod: LocalDateRange | None = None
 
@@ -124,7 +127,11 @@ class CourseUnit(BaseModel):
     universityOrgIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)
     groupId: OTM_ID_REGEX_VALIDATED_STR
     approvalState: Literal[
-                       'urn:code:approval-state-type:not-ready', 'urn:code:approval-state-type:ready-for-approval', 'urn:code:approval-state-type:not-approved', 'urn:code:approval-state-type:approved'] | None = None
+                       'urn:code:approval-state-type:not-ready',
+                       'urn:code:approval-state-type:ready-for-approval',
+                       'urn:code:approval-state-type:not-approved',
+                       'urn:code:approval-state-type:approved',
+                   ] | None = None
     credits: CreditRange
     completionMethods: conlist(CompletionMethod, max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
     assessmentItemOrder: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_BIG_SET_SIZE) | None = None
@@ -152,10 +159,14 @@ class CourseUnit(BaseModel):
     cefrLevel: Annotated[str, Field(pattern=sis_code_urn_pattern('cefr-level'))] | None = None
     responsibilityInfos: conlist(PersonWithModuleResponsibilityInfoType, min_length=1, max_length=SIS_MAX_MEDIUM_SET_SIZE)
     organisations: conlist(OrganisationRoleShare, max_length=SIS_MAX_MEDIUM_SET_SIZE, min_length=1)
-    possibleAttainmentLanguages: conlist(Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))], max_length=SIS_MAX_MEDIUM_SET_SIZE, min_length=1)
+    possibleAttainmentLanguages: conlist(
+        Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))],
+        max_length=SIS_MAX_MEDIUM_SET_SIZE,
+        min_length=1
+    )
     equivalentCoursesInfo: LocalizedString | None = None
     curriculumPeriodIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_MEDIUM_SET_SIZE, min_length=1)
-    customCodeUrns: Annotated[dict[str: list[str]], Field(min_length=1)] | None = None
+    customCodeUrns: Annotated[dict[str, list[str]], Field(min_length=1)] | None = None
     inclusionApplicationInstruction: LocalizedString | None = None
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     s2r2Classification: Annotated[str, Field(pattern=sis_code_urn_pattern('subject'))] | None = None
