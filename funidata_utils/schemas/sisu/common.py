@@ -29,7 +29,16 @@ OTM_ID_REGEX_PATTERN = '^([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}$'
 OTM_ID_REGEX_VALIDATED_STR = Annotated[str, Field(pattern=OTM_ID_REGEX_PATTERN)]
 
 STRIPPED_STR = Annotated[str, BeforeValidator(lambda x: str.strip(x))]
+STRING_WITH_3_SLASHES = Annotated[STRIPPED_STR, BeforeValidator(check_has_3_slashes)]
 
+def check_has_3_slashes(value):
+    # TODO this is used in a case where Sisu expects the contents of a class in a "/" delimited str
+    # we might want to rework this one day to actually validate the contents using a class
+    if value.count('/') != 3:
+        raise ValueError(
+            'String did not contain 3 slashes: %s', value
+        )
+    return value
 
 def sis_code_urn_pattern(codebook: str):
     return f'^(urn:code:{codebook})(:[A-z_0-9]+)*$'

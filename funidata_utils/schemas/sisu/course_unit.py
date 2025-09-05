@@ -31,7 +31,7 @@ class StudyYearRange(BaseModel):
 class CompletionMethodRepeat(BaseModel):
     studyYearRange: StudyYearRange
     yearInterval: Annotated[int, Field(gt=0)] | None = None
-    repeatPossibility: conlist(str, minlength=1, maxlength=SIS_MAX_SMALL_SET_SIZE)
+    repeatPossibility: conlist(STRING_WITH_3_SLASHES, minlength=1, maxlength=SIS_MAX_SMALL_SET_SIZE)
 
 
 class CompletionMethod(BaseModel):
@@ -160,7 +160,3 @@ class CourseUnit(BaseModel):
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     s2r2Classification: Annotated[str, Field(pattern=sis_code_urn_pattern('subject'))] | None = None
     rdiCreditsEnabled: Literal['ENABLED', 'DISABLED']
-
-    def scramble(self, hashed_keys: dict, **kwargs):
-        self.responsibilityInfos = [x.scramble(hashed_keys) for x in self.responsibilityInfos] if self.responsibilityInfos else None
-        return self
