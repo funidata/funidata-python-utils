@@ -4,14 +4,14 @@
 import json
 from typing import TextIO, overload, IO
 
-from .protocols import SisExportable
+from .protocols import SisExportable, SupportsExportAuthentication
 from ..auth.sis_auth import SisuConfig
 from ..request_utils.httpx_requests import send_get_httpx
 
 
 @overload
 def _export_from_endpoint(
-    sis_settings: SisuConfig,
+    sis_settings: SupportsExportAuthentication,
     endpoint: str,
     fp: None,
     since_ordinal: int = 0,
@@ -22,7 +22,7 @@ def _export_from_endpoint(
 
 @overload
 def _export_from_endpoint(
-    sis_settings: SisuConfig,
+    sis_settings: SupportsExportAuthentication,
     endpoint: str,
     fp: IO,
     since_ordinal: int = 0,
@@ -32,7 +32,7 @@ def _export_from_endpoint(
 
 
 def _export_from_endpoint(
-    sis_settings: SisuConfig,
+    sis_settings: SupportsExportAuthentication,
     endpoint: str,
     fp: IO | None,
     since_ordinal: int = 0,
@@ -75,7 +75,7 @@ def _export_from_endpoint(
 
 @overload
 def export_from_sisu(
-    sisu_config: SisuConfig,
+    sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
     fp: None = None,
     since_ordinal: int = 0,
@@ -85,7 +85,7 @@ def export_from_sisu(
 
 @overload
 def export_from_sisu(
-    sisu_config: SisuConfig,
+    sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
     fp: IO,
     since_ordinal: int = 0,
@@ -94,7 +94,7 @@ def export_from_sisu(
 
 
 def export_from_sisu(
-    sisu_config: SisuConfig,
+    sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
     fp: IO | None = None,
     since_ordinal: int = 0,

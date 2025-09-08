@@ -6,6 +6,21 @@ from typing import Protocol, runtime_checkable
 from .resources.schemas import SisExport, SisImport
 
 
+class HasHostAndProxies(Protocol):
+    host: str
+    proxies: dict | None
+    
+
+class SupportsIntegrationAuthentication(HasHostAndProxies, Protocol):
+    def get_integration_auth(self) -> tuple[str, str]:
+        ...
+
+
+class SupportsExportAuthentication(HasHostAndProxies, Protocol):
+    def get_export_auth(self) -> tuple[str, str]:
+        ...
+
+
 class SisExportable(Protocol):
     exports: SisExport
 
