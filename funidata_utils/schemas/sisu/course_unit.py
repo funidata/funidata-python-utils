@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, field_serializer, conlist
 
 from .common import (
     sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE, LocalDateRange,
-    SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES,
+    SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES, OrganisationRoleShare,
 )
 
 
@@ -89,14 +89,6 @@ class PersonWithModuleResponsibilityInfoType(BaseModel):
         'urn:code:module-responsibility-info-type:contact-info',
     ]
     validity: LocalDateRange | None = None
-    validityPeriod: LocalDateRange | None = None
-
-
-class OrganisationRoleShare(BaseModel):
-    organisationId: OTM_ID_REGEX_VALIDATED_STR | None = None
-    educationalInstitutionUrn: Annotated[str, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
-    roleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('organisation-role'))]
-    share: Annotated[float, Field(gt=0, le=1)]
     validityPeriod: LocalDateRange | None = None
 
 

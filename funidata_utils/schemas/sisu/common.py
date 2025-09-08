@@ -71,14 +71,14 @@ class LocalizedString(HashableBaseModel):
 
 
 class OrganisationRoleShareBase(HashableBaseModel):
-    organisationId: str
+    organisationId: OTM_ID_REGEX_VALIDATED_STR | None
     educationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
     roleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('organisation-role'))]
     share: Annotated[float, Field(strict=False, ge=0, le=1)]
 
 
 class OrganisationRoleShare(OrganisationRoleShareBase):
-    validityPeriod: LocalDateRange
+    validityPeriod: LocalDateRange | None
 
 
 class FinnishAddress(BaseModel):
