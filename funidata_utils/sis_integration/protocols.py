@@ -6,6 +6,16 @@ from typing import Protocol, runtime_checkable
 from .resources.schemas import SisExport, SisImport
 
 
+class SupportsIntegrationAuthentication(Protocol):
+    def get_integration_auth(self) -> tuple[str, str]:
+        ...
+
+
+class SupportsExportAuthentication(Protocol):
+    def get_export_auth(self) -> tuple[str, str]:
+        ...
+
+
 class SisExportable(Protocol):
     exports: SisExport
 
