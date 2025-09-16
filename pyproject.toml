@@ -46,7 +46,8 @@ all = [
 ]
 
 [tool.pdm]
-version = { source = "file", path = "funidata_utils/__init__.py" }
+version = { source = "scm", fallback_version = "0.0.0" }
+
 
 [tool.pdm.build]
 source-includes = [
