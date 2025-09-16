@@ -28,7 +28,7 @@ SIS_MAX_SMALL_SET_SIZE = 20
 OTM_ID_REGEX_PATTERN = '^([a-zA-Z]{2,5})-[A-Za-z0-9_\\-]{1,58}$'
 OTM_ID_REGEX_VALIDATED_STR = Annotated[str, Field(pattern=OTM_ID_REGEX_PATTERN)]
 
-STRIPPED_STR = Annotated[str, BeforeValidator(lambda x: str.strip(x))]
+STRIPPED_STR = Annotated[str, BeforeValidator(lambda x: str.strip(x) if x is isinstance(x, str) else None)]
 
 
 def check_has_3_slashes(value):
