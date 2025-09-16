@@ -49,7 +49,7 @@ class PrivatePerson(BaseModel):
     primaryAddress: FinnishAddress | None = None
     secondaryAddress: FinnishAddress | GenericAddress | None = None
     genderUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('gender'))]
-    citizenshipUrns: list[CountryUrnStr] | None = None
+    citizenshipUrns: set[CountryUrnStr] | None = None
     motherTongueUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))] | None = None
     preferredLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('preferred-language'))] | None = None
     schoolEducationLanguageUrns: conset(SchoolEducationLangUrnStr, min_length=1) | None = None
