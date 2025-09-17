@@ -50,10 +50,10 @@ class PrivatePerson(BaseModel):
     secondaryAddress: FinnishAddress | GenericAddress | None = None
     genderUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('gender'))]
     citizenshipUrns: set[CountryUrnStr] | None = None
-    motherTongueUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))] | None = None
-    preferredLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('preferred-language'))] | None = None
+    motherTongueUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('language'))] = None
+    preferredLanguageUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('preferred-language'))] = None
     schoolEducationLanguageUrns: conset(SchoolEducationLangUrnStr, min_length=1) | None = None
-    municipalityUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('municipality'))] | None = None
+    municipalityUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('municipality'))] = None
     oppijanumero: str | None = None
     oids: list[str] = []
     dead: bool = False

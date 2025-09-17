@@ -69,10 +69,10 @@ class StudyRightExtension(BaseModel):
     extensionStartDate: datetime.date
     grantDate: datetime.date
     workflowId: str | None = None
-    grantReason: Annotated[str, Field(min_length=1, max_length=SIS_MAX_LONG_STRING_LENGTH)] | None
+    grantReason: Annotated[str | None, Field(min_length=1, max_length=SIS_MAX_LONG_STRING_LENGTH)]
     grantedBy: str = Field(description='<MAGIC>PersonId', pattern=OTM_ID_REGEX_PATTERN)
     deleteDate: datetime.date | None = None
-    deleteReason: Annotated[str, Field(min_length=1, max_length=SIS_MAX_TERSE_STRING_LENGTH)] | None
+    deleteReason: Annotated[str | None, Field(min_length=1, max_length=SIS_MAX_TERSE_STRING_LENGTH)]
     deletedBy: str | None = Field(default=None, description='<MAGIC>PersonId', pattern=OTM_ID_REGEX_PATTERN)
 
     @model_validator(mode='after')
@@ -162,7 +162,7 @@ class StudyRight(BaseModel):
     phase2EducationLocationUrn: Optional[str] = None
     phase1InternationalContractualDegree: Optional[dict] = None
     phase2InternationalContractualDegree: Optional[dict] = None
-    admissionTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('admission-type'))] | None = None
+    admissionTypeUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('admission-type'))] = None
     codeUrns: list[CodeUrnsStr]
     additionalInformation: Optional[dict] = None
     # basedOnEnrolmentRights: bool < Apparently removed from sisu model at some point in time

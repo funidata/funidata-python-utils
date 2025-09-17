@@ -72,7 +72,7 @@ class LocalizedString(HashableBaseModel):
 
 class OrganisationRoleShareBase(HashableBaseModel):
     organisationId: OTM_ID_REGEX_VALIDATED_STR | None
-    educationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
+    educationalInstitutionUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
     roleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('organisation-role'))]
     share: Annotated[float, Field(strict=False, ge=0, le=1)]
 

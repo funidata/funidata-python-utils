@@ -21,8 +21,8 @@ class MobilityPeriod(BaseModel):
     mobilityProgramDescription: str | None = None
     mobilityTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('mobility-type'))]
     countryUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
-    internationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('international-institution'))] | None = None
+    internationalInstitutionUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('international-institution'))] = None
     organisation: str | None = None
-    mobilityStudyRightTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('mobility-study-right-type'))] | None = None
+    mobilityStudyRightTypeUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('mobility-study-right-type'))] = None
     virtualMobilityType: Literal["None", "RemoteAttendance", "BlendedAttendance"] | None = None
     isCancelled: bool
