@@ -26,7 +26,7 @@ class Organisation(BaseModel):
     name: LocalizedString
     abbreviation: LocalizedString | None = None
     status: Literal['ACTIVE', 'INACTIVE']
-    educationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('educational-institution'))] | None = None
+    educationalInstitutionUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
     cooperationNetworkIdentifiers: CooperationNetworkIdentifiers | None = None
 
     @field_serializer('snapshotDateTime')

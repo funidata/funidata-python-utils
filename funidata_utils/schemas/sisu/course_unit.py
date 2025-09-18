@@ -30,7 +30,7 @@ class StudyYearRange(BaseModel):
 
 class CompletionMethodRepeat(BaseModel):
     studyYearRange: StudyYearRange
-    yearInterval: Annotated[int, Field(gt=0)] | None = None
+    yearInterval: Annotated[int | None, Field(gt=0)] = None
     repeatPossibility: conlist(STRING_WITH_3_SLASHES, min_length=1, max_length=SIS_MAX_SMALL_SET_SIZE)
 
 
@@ -50,7 +50,7 @@ class CompletionMethod(BaseModel):
 
 class CourseUnitSubstitution(BaseModel):
     courseUnitGroupId: OTM_ID_REGEX_VALIDATED_STR
-    credits: Annotated[float, Field(ge=1)] | None = None
+    credits: Annotated[float | None, Field(ge=1)] = None
 
 
 class LiteratureName(BaseModel):
@@ -147,8 +147,8 @@ class CourseUnit(BaseModel):
     studyFields: conlist(Annotated[str, Field(pattern=sis_code_urn_pattern('study-field'))], max_length=SIS_MAX_SMALL_SET_SIZE, min_length=1)
     studyLevel: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('study-level'))]
     courseUnitType: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('course-unit-type'))]
-    subject: Annotated[str, Field(pattern=sis_code_urn_pattern('subject'))] | None = None
-    cefrLevel: Annotated[str, Field(pattern=sis_code_urn_pattern('cefr-level'))] | None = None
+    subject: Annotated[str | None, Field(pattern=sis_code_urn_pattern('subject'))] = None
+    cefrLevel: Annotated[str | None, Field(pattern=sis_code_urn_pattern('cefr-level'))] = None
     responsibilityInfos: conlist(PersonWithModuleResponsibilityInfoType, min_length=1, max_length=SIS_MAX_MEDIUM_SET_SIZE)
     organisations: conlist(OrganisationRoleShare, max_length=SIS_MAX_MEDIUM_SET_SIZE, min_length=1)
     possibleAttainmentLanguages: conlist(
@@ -158,8 +158,8 @@ class CourseUnit(BaseModel):
     )
     equivalentCoursesInfo: LocalizedString | None = None
     curriculumPeriodIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_MEDIUM_SET_SIZE, min_length=1)
-    customCodeUrns: Annotated[dict[str, list[str]], Field(min_length=1)] | None = None
+    customCodeUrns: Annotated[dict[str | None, list[str]], Field(min_length=1)] = None
     inclusionApplicationInstruction: LocalizedString | None = None
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
-    s2r2Classification: Annotated[str, Field(pattern=sis_code_urn_pattern('subject'))] | None = None
+    s2r2Classification: Annotated[str | None, Field(pattern=sis_code_urn_pattern('subject'))] = None
     rdiCreditsEnabled: Literal['ENABLED', 'DISABLED']

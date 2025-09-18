@@ -61,7 +61,7 @@ class GradeAverage(BaseModel):
 
 class CreditTransferInfo(BaseModel):
     educationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('educational-institution'))]
-    internationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('international-institution'))] | None = None
+    internationalInstitutionUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('international-institution'))] = None
     organisation: str | None = None
     creditTransferDate: datetime.date
 
@@ -90,8 +90,8 @@ class Attainment(ObjectWithDocumentState):
     gradeId: int
     gradeAverage: GradeAverage | None = None
     additionalInfo: LocalizedString | None = None
-    administrativeNote: Annotated[STRIPPED_STR, Field(min_length=1, max_length=SIS_MAX_MEDIUM_STRING_LENGTH)] | None = None
-    studyFieldUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('study-field'))] | None = None
+    administrativeNote: Annotated[STRIPPED_STR | None, Field(min_length=1, max_length=SIS_MAX_MEDIUM_STRING_LENGTH)] = None
+    studyFieldUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('study-field'))] = None
     workflowId: str | None = None
     moduleContentApplicationId: str | None = None
     creditTransferInfo: CreditTransferInfo | None = None
@@ -196,7 +196,7 @@ class DegreeProgrammeAttainment(Attainment):
     acceptorPersons: list[PersonWithAttainmentAcceptorType] = Field(default_factory=lambda x: [])
     acceptorOrganisationIds: conlist(str, min_length=1, max_length=SIS_MAX_MEDIUM_SET_SIZE)
     educationClassificationUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('education-classification'))]
-    secondaryEducationClassificationUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('education-classification'))] | None = None
+    secondaryEducationClassificationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('education-classification'))] = None
     degreeTitleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-title'))]
-    honoraryTitleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('honorary-title'))] | None = None
+    honoraryTitleUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('honorary-title'))] = None
     internationalContractualDegree: dict | None = None
