@@ -37,13 +37,13 @@ class DatabaseConfig(SourceConfig):
             connect_args={}
         )
 
-    def get_by_statement(self, stmt: str, sql_params: dict | None = None):
+    def get_by_statement(self, stmt: str, sql_params_dict: dict | None = None):
         with self.get_engine().connect() as connection:
             with connection.begin():
                 return get_by_statement(
                     connection,
                     stmt,
-                    sql_params
+                    sql_params_dict
                 )
 
 
