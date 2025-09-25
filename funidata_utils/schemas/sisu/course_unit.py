@@ -158,7 +158,7 @@ class CourseUnit(BaseModel):
     )
     equivalentCoursesInfo: LocalizedString | None = None
     curriculumPeriodIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_MEDIUM_SET_SIZE, min_length=1)
-    customCodeUrns: Annotated[dict[str | None, list[str]], Field(min_length=1)] = None
+    customCodeUrns: Annotated[dict[str, list[str] | None], Field(min_length=1)] = None
     inclusionApplicationInstruction: LocalizedString | None = None
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     s2r2Classification: Annotated[str | None, Field(pattern=sis_code_urn_pattern('subject'))] = None
