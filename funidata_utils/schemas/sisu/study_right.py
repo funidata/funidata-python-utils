@@ -121,21 +121,21 @@ class StudyRight(BaseModel):
     id: str
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     snapshotDateTime: datetime.datetime | None
-    studentId: str = Field(description='PrivatePersonId')
+    studentId: str = Field(..., description='PrivatePersonId')
     educationId: str
     organisationId: str
     learningOpportunityId: str
     admissionTargetId: Optional[str] = None
     admissionIdentifier: Optional[str] = None
-    decreeOnUniversityDegreesUrn: Optional[str] = None
-    studyRightExpirationRulesUrn: str
+    decreeOnUniversityDegreesUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('decree-on-university-degrees'))] = None
+    studyRightExpirationRulesUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('study-right-expiration-rules'))] = None
     degreeRegulations: Optional[str] = None
     valid: LocalDateRange | None = None
     grantDate: str | None = None
     # studyStartDate: str < This cannot be set, sisu calculated field.
     transferOutDate: Optional[str] = None
-    transferOutUniversityUrn: Optional[str] = None
-    homeOrganisationUrn: Optional[str] = None
+    transferOutUniversityUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
+    homeOrganisationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
     termRegistrations: Optional[str] = None
     studyRightExtensions: Optional[list[StudyRightExtension]] = None
     studyRightCancellation: Optional[StudyRightCancellation] = None
@@ -150,16 +150,16 @@ class StudyRight(BaseModel):
     personalizedSelectionPath: Optional[dict] = None
     courseUnitSelections: Optional[list[StudyRightCourseUnitSelection]] = None
     moduleSelections: Optional[list] = None
-    studyFieldUrn: Optional[str] = None
-    phase1EducationClassificationUrn: Optional[str] = None
-    phase2EducationClassificationUrn: Optional[str] = None
+    studyFieldUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('study-field'))] = None
+    phase1EducationClassificationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('education-classification'))] = None
+    phase2EducationClassificationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('education-classification'))] = None
     phase1EducationClassificationLocked: bool = False
     phase2EducationClassificationLocked: bool = False
-    fundingSourceUrn: Optional[str] = None
+    fundingSourceUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('funding-source'))] = None
     phase1QualificationUrns: Optional[list] = None
     phase2QualificationUrns: Optional[list] = None
-    phase1EducationLocationUrn: str
-    phase2EducationLocationUrn: Optional[str] = None
+    phase1EducationLocationUrn: Annotated[STRIPPED_STR, Field(..., pattern=sis_code_urn_pattern('municipality'))]
+    phase2EducationLocationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('municipality'))] = None
     phase1InternationalContractualDegree: Optional[dict] = None
     phase2InternationalContractualDegree: Optional[dict] = None
     admissionTypeUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('admission-type'))] = None
@@ -168,7 +168,7 @@ class StudyRight(BaseModel):
     # basedOnEnrolmentRights: bool < Apparently removed from sisu model at some point in time
     cooperationNetworkRights: Optional[str] = None
     cooperationNetworkStatus: Optional[dict] = None
-    schoolEducationLanguageUrn: Optional[str] = None
+    schoolEducationLanguageUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('school-education-language'))] = None
 
     @field_serializer('snapshotDateTime')
     def serialize_ssdt(self, ssdt: datetime.datetime | None, _info):
@@ -177,17 +177,6 @@ class StudyRight(BaseModel):
 
         return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
 
-    @model_validator(mode='after')
-    def check_classification_urn_when_graduated(self):
-        graduation = self.studyRightGraduation
-        if not graduation:
-            return self
-
-        phase1_urn = self.phase1EducationClassificationUrn
-        if not phase1_urn:
-            raise ValueError("Must have classification urn if graduated")
-
-        return self
 
     @model_validator(mode='after')
     def check_personalized_selection_path_matches_accepted_path(self):
@@ -211,6 +200,12 @@ class StudyRight(BaseModel):
 
         if self.valid.startDate is None:
             raise ValueError("Start date must not be None when ACTIVE")
+
+        if (
+            self.valid.startDate or datetime.date(year=1, month=1, day=1)
+        ) >= (self.valid.endDate or datetime.date(year=9999, month=1, day=1)):
+            raise ValueError("Start date must be before end date")
+
 
         return self
 
