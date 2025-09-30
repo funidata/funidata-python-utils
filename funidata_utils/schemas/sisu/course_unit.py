@@ -3,9 +3,9 @@
 # ------------------------------------------------------------------------------
 
 import datetime
-from typing import Literal, Annotated
+from typing import Literal, Annotated, Self
 
-from pydantic import BaseModel, Field, field_serializer, conlist
+from pydantic import BaseModel, Field, field_serializer, conlist, model_validator, ValidationError
 
 from .common import (
     sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE, LocalDateRange,
@@ -77,7 +77,6 @@ class ModulePrerequisite(BaseModel):
 
 class PrerequisiteGroup(BaseModel):
     prerequisites: list[CourseUnitPrerequisite | ModulePrerequisite] | None = None
-    type: str
 
 
 class PersonWithModuleResponsibilityInfoType(BaseModel):
@@ -127,7 +126,7 @@ class CourseUnit(BaseModel):
     credits: CreditRange
     completionMethods: conlist(CompletionMethod, max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
     assessmentItemOrder: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_BIG_SET_SIZE) | None = None
-    substitutions: conlist(CourseUnitSubstitution, max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
+    substitutions: conlist(list[CourseUnitSubstitution], max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
     name: LocalizedString
     code: str
     abbreviation: str | None = None
@@ -163,3 +162,14 @@ class CourseUnit(BaseModel):
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     s2r2Classification: Annotated[str | None, Field(pattern=sis_code_urn_pattern('subject'))] = None
     rdiCreditsEnabled: Literal['ENABLED', 'DISABLED']
+
+    @model_validator(mode='wrap')
+    @classmethod
+    def handle_document_state_validations(cls, data, handler) -> Self:
+        try:
+            return handler(data)
+        except ValidationError as e:
+            if data['documentState'] != 'ACTIVE':
+                return cls.model_construct(**data)
+
+            raise e
