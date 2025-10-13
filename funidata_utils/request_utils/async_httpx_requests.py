@@ -86,19 +86,23 @@ async def _binary_search_enabled_post_httpx(
 
     match method:
         case 'POST':
+            _payload = flatten(payload) if is_complex_list_of_batches else payload
+            logger.debug("Sending POST with %d items to %s", len(_payload), path)
             response = await client.post(
                 path,
                 auth=auth,
-                json=flatten(payload) if is_complex_list_of_batches else payload,
+                json=_payload,
                 params=params,
                 timeout=120,
             )
 
         case 'PATCH':
+            _payload = flatten(payload) if is_complex_list_of_batches else payload
+            logger.debug("Sending PATCH with %d items to %s", len(_payload), path)
             response = await client.patch(
                 path,
                 auth=auth,
-                json=flatten(payload) if is_complex_list_of_batches else payload,
+                json=_payload,
                 params=params,
                 timeout=120,
             )

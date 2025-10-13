@@ -175,7 +175,7 @@ class CourseUnits(BaseResource):
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     legacy_imports = SisImport(
-        endpoint='/ori/api/course-units/v1/import/legacy',
+        endpoint='/kori/api/course-units/v1/import/legacy',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     patches = SisImport(
@@ -183,7 +183,7 @@ class CourseUnits(BaseResource):
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     legacy_patches = SisImport(
-        endpoint='/ori/api/course-units/v1/import/legacy',
+        endpoint='/kori/api/course-units/v1/import/legacy',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
     exports = SisExport(

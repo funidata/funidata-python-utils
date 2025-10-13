@@ -49,8 +49,12 @@ class Thesis(BaseModel):
         return val.isoformat()
 
     @field_serializer('organisations', 'responsibilityInfos')
-    def organisations_as_list(self, val: set[OrganisationRoleShareBase] | None, _info):
-        if val is None:
+    def organisations_as_list(self, v, _info):
+        if v is None:
             return None
 
-        return list(val)
+        try:
+            return list(set(v))
+        except Exception as e:
+            # If it can't be hashed to set, just return as list
+            return list(v)
