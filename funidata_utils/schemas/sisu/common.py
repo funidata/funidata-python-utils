@@ -6,10 +6,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, field_serializer, Field, BeforeValidator
 
-
-class HashableBaseModel(BaseModel):
-    def __hash__(self):
-        return hash((type(self),) + tuple(self.__dict__.values()))
+from funidata_utils.schemas.sisu.base import HashableBaseModel, SisBase
 
 
 SIS_MAX_VERY_LONG_STRING_LENGTH = 65000
