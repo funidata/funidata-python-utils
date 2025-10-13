@@ -111,8 +111,15 @@ class Attainment(ObjectWithDocumentState):
     attainmentDate: datetime.date
 
     @field_serializer('organisations')
-    def organisations_as_list(self, val: set[OrganisationRoleShareBase], _info):
-        return list(val)
+    def organisations_as_list(self, v: set[OrganisationRoleShareBase], _info):
+        if v is None:
+            return None
+
+        try:
+            return list(set(v))
+        except Exception as e:
+            # If it can't be hashed to set, just return as list
+            return list(v)
 
     @field_serializer('attainmentDate')
     def date_as_isoformat(self, val: datetime.date, _info):
