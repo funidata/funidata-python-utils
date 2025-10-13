@@ -151,14 +151,3 @@ class CourseUnit(SisBase):
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     s2r2Classification: Annotated[str | None, Field(pattern=sis_code_urn_pattern('subject'))] = None
     rdiCreditsEnabled: Literal['ENABLED', 'DISABLED']
-
-    @model_validator(mode='wrap')
-    @classmethod
-    def handle_document_state_validations(cls, data, handler) -> Self:
-        try:
-            return handler(data)
-        except ValidationError as e:
-            if data['documentState'] != 'ACTIVE':
-                return cls.model_construct(**data)
-
-            raise e
