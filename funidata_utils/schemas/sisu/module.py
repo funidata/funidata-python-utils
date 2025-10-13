@@ -1,10 +1,11 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-from typing import Literal, Annotated, Self, Any, Union
+from typing import Literal, Annotated, Any, Union
 
 from pydantic import BaseModel, Field, field_serializer, conset, ConfigDict, TypeAdapter, model_validator, ValidationError
 
+from .base import SisBase
 from .common import (
     OTM_ID_REGEX_PATTERN,
     LocalizedString, sis_code_urn_pattern,
@@ -18,7 +19,7 @@ class Rule(BaseModel):
     localId: str
 
 
-class Module(BaseModel):
+class Module(SisBase):
     model_config = ConfigDict(extra='allow')
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     type: Literal[
@@ -33,21 +34,6 @@ class Module(BaseModel):
     name: LocalizedString
     rule: Rule
     moduleContentApprovalRequired: bool
-
-    @model_validator(mode='wrap')
-    @classmethod
-    def handle_document_state_validations(cls, data, handler) -> Self:
-        """
-            Currently attempts to validate the class using the default validation handlers -
-            If an error occurs and the object is not ACTIVE - it will return a model_construct'ed version of the class
-        """
-        try:
-            return handler(data)
-        except ValidationError as e:
-            if data['documentState'] != 'ACTIVE':
-                return cls.model_construct(**data)
-
-            raise e
 
 
 class StudyModule(Module):
@@ -71,19 +57,6 @@ class StudyModule(Module):
     gradeScaleId: str | None = None
     customCodeUrns: Annotated[dict[str, list[str]] | None, Field(min_length=1)] = None
     contentFilter: Any
-
-    @model_validator(mode='after')
-    def document_state_active_validators(self):
-        if self.documentState != 'ACTIVE':
-            return self
-
-        if self.studyFields is None:
-            raise ValueError("StudyField may not be null on documentState ACTIVE")
-
-        if self.studyLevel is None:
-            raise ValueError("StudyField may not be null on documentState ACTIVE")
-
-        return self
 
     @field_serializer('searchTags', 'possibleAttainmentLanguages', 'studyFields')
     def sets_as_lists(self, v):
