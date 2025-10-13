@@ -7,6 +7,7 @@ from typing import Literal, Annotated, Self
 
 from pydantic import BaseModel, Field, field_serializer, conlist, model_validator, ValidationError
 
+from .base import SisBase
 from .common import (
     sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE, LocalDateRange,
     SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES, OrganisationRoleShare, PersonWithModuleResponsibilityInfoType,
@@ -100,7 +101,7 @@ class CooperationNetworkDetails(BaseModel):
         return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-class CourseUnit(BaseModel):
+class CourseUnit(SisBase):
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     id: OTM_ID_REGEX_VALIDATED_STR
     universityOrgIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)
