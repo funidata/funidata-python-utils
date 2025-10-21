@@ -1,7 +1,7 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-from .schemas import SisImport, SisExport
+from .schemas import SisImport, SisExport, SisDelete
 from re import sub
 
 
@@ -60,6 +60,9 @@ class OriPersons(BaseResource):
         endpoint='/ori/api/persons/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+    delete = SisDelete(
+        endpoint='/ori/api/persons/v1/delete',
+    )
 
 
 class AccessRolePersonAssignments(BaseResource):
@@ -94,6 +97,9 @@ class Attainments(BaseResource):
         endpoint='/ori/api/attainments/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+    delete = SisDelete(
+        endpoint='/kori/api/attainments/v1/delete'
+    )
 
 
 class StudyRights(BaseResource):
@@ -109,6 +115,9 @@ class StudyRights(BaseResource):
         endpoint='/ori/api/study-rights/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+    delete = SisDelete(
+        endpoint='/kori/api/study-rights/v1/delete'
+    )
 
 
 class TermRegistrations(BaseResource):
@@ -123,6 +132,9 @@ class TermRegistrations(BaseResource):
     exports = SisExport(
         endpoint='/ori/api/term-registrations/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+    delete = SisDelete(
+        endpoint='/kori/api/term-registrations/v1/delete'
     )
 
 
@@ -191,6 +203,9 @@ class CourseUnits(BaseResource):
         endpoint='/kori/api/course-units/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+    delete = SisImport(
+        endpoint='/kori/api/course-units/v1/batch-delete',
+    )
 
 
 class Educations(BaseResource):
@@ -205,6 +220,9 @@ class Educations(BaseResource):
     exports = SisExport(
         endpoint='/kori/api/educations/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+    delete = SisDelete(
+        endpoint='/kori/api/educations/v1/delete'
     )
 
 
@@ -229,6 +247,9 @@ class Modules(BaseResource):
         endpoint='/kori/api/modules/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+    delete = SisDelete(
+        endpoint='/kori/api/modules/v1/delete'
+    )
 
 
 class KoriPersons(BaseResource):
@@ -239,6 +260,9 @@ class KoriPersons(BaseResource):
     exports = SisExport(
         endpoint='/kori/api/persons/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+    delete = SisDelete(
+        endpoint='/kori/api/persons/v1/delete'
     )
 
 
