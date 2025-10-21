@@ -7,7 +7,7 @@ from typing import IO, overload, Literal
 
 import httpx
 
-from .protocols import SisImportable, SisPatchable, SisLegacyImportable, SisLegacyPatchable
+from .protocols import SisImportable, SisPatchable, SisLegacyImportable, SisLegacyPatchable, SisDeletable
 from ..auth.sis_auth import SisuConfig
 from ..request_utils.async_httpx_requests import send_post_with_binary_err_search_httpx
 
@@ -20,7 +20,8 @@ UNSET_BATCH_SIZE = -42
 async def import_to_sisu(
     sisu_config: SisuConfig,
     resource: SisImportable,
-    use_legacy_import: False,
+    use_legacy_import: Literal[False],
+    use_delete: Literal[False],
     fp: IO,
     batch_size: int | None,
     binary_search_max_depth: int | None,
@@ -35,7 +36,8 @@ async def import_to_sisu(
 async def import_to_sisu(
     sisu_config: SisuConfig,
     resource: SisLegacyImportable,
-    use_legacy_import: True,
+    use_legacy_import: Literal[True],
+    use_delete: Literal[False],
     fp: IO,
     batch_size: int | None,
     binary_search_max_depth: int | None,
@@ -51,6 +53,7 @@ async def import_to_sisu(
     sisu_config: SisuConfig,
     resource: SisImportable,
     use_legacy_import: Literal[False],
+    use_delete: Literal[False],
     data: list[dict],
     batch_size: int | None,
     binary_search_max_depth: int | None,
@@ -66,6 +69,23 @@ async def import_to_sisu(
     sisu_config: SisuConfig,
     resource: SisLegacyImportable,
     use_legacy_import: Literal[True],
+    use_delete: Literal[False],
+    data: list[dict],
+    batch_size: int | None,
+    binary_search_max_depth: int | None,
+    group_by_key: str | None,
+    binary_err_search_sublists: bool,
+    max_parallel_requests: int,
+) -> list[httpx.Response]:
+    ...
+
+
+@overload
+async def import_to_sisu(
+    sisu_config: SisuConfig,
+    resource: SisDeletable,
+    use_legacy_import: Literal[False],
+    use_delete: Literal[True],
     data: list[dict],
     batch_size: int | None,
     binary_search_max_depth: int | None,
@@ -78,8 +98,9 @@ async def import_to_sisu(
 
 async def import_to_sisu(
     sisu_config: SisuConfig,
-    resource: SisImportable | SisLegacyImportable,
+    resource: SisImportable | SisLegacyImportable | SisDeletable,
     use_legacy_import: Literal[True, False],
+    use_delete: Literal[True, False] = False,
     fp: IO | None = None,
     data: list[dict] | None = None,
     batch_size: int | None = UNSET_BATCH_SIZE,
@@ -92,15 +113,18 @@ async def import_to_sisu(
         raise NotImplementedError("Not yet implemented")
 
     # Maximum theoretical import payload size
-    if not batch_size or batch_size == UNSET_BATCH_SIZE:
-        if use_legacy_import:
-            batch_size = resource.legacy_imports.default_import_limit
-        else:
-            batch_size = resource.imports.default_import_limit
+    if use_delete:
+        _batch_size = batch_size
+    else:
+        if not batch_size or batch_size == UNSET_BATCH_SIZE:
+            if use_legacy_import:
+                batch_size = resource.legacy_imports.default_import_limit
+            else:
+                batch_size = resource.imports.default_import_limit
 
-    _batch_size = min(batch_size, 10000)
+        _batch_size = min(batch_size, 10000)
 
-    _path_postfix = resource.legacy_imports.endpoint if use_legacy_import else resource.imports.endpoint
+    _path_postfix = resource.delete.endpoint if use_delete else resource.legacy_imports.endpoint if use_legacy_import else resource.imports.endpoint
     responses = await send_post_with_binary_err_search_httpx(
         path=f"{sisu_config.host}{_path_postfix}",
         payload=data,

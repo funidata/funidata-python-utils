@@ -71,7 +71,7 @@ async def send_get_httpx(
 
 async def _binary_search_enabled_post_httpx(
     path: str,
-    payload: list[dict] | list[list[dict]],
+    payload: dict | list[dict] | list[list[dict]],
     client: httpx.AsyncClient,
     auth: Tuple[str, str] | None = None,
     params: dict | None = None,
@@ -163,7 +163,7 @@ async def _binary_search_enabled_post_httpx(
 
 async def send_post_with_binary_err_search_httpx(
     path: str,
-    payload: list[dict],
+    payload: list[dict] | dict,
     group_by_key: str | None = None,
     auth: Tuple[str, str] | None = None,
     proxies: dict | None = None,
