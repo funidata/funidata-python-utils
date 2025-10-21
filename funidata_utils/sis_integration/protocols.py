@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 from typing import Protocol, runtime_checkable
 
-from .resources.schemas import SisExport, SisImport
+from .resources.schemas import SisExport, SisImport, SisDelete
 
 
 class HasHostAndProxies(Protocol):
@@ -24,16 +24,20 @@ class SupportsExportAuthentication(HasHostAndProxies, Protocol):
 class SisExportable(Protocol):
     exports: SisExport
 
-
+@runtime_checkable
 class SisImportable(Protocol):
     imports: SisImport
+
+@runtime_checkable
+class SisDeletable(Protocol):
+    delete: SisDelete
 
 
 @runtime_checkable
 class SisLegacyImportable(Protocol):
     legacy_imports: SisImport
 
-
+@runtime_checkable
 class SisPatchable(Protocol):
     patches: SisImport
 
