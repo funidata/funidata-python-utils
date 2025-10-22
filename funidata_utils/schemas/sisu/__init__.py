@@ -38,3 +38,4 @@ from .module import (
     GroupingModule,
     ModuleTypeAdapter,
 )
+from .education import Education
