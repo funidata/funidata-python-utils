@@ -5,7 +5,6 @@ import json
 from typing import TextIO, overload, IO
 
 from .protocols import SisExportable, SupportsExportAuthentication
-from ..auth.sis_auth import SisuConfig
 from ..request_utils.httpx_requests import send_get_httpx
 
 
@@ -16,6 +15,7 @@ def _export_from_endpoint(
     fp: None,
     since_ordinal: int = 0,
     export_limit: int = 1000,
+    since: str = 'since'
 ) -> list[dict]:
     ...
 
@@ -27,6 +27,7 @@ def _export_from_endpoint(
     fp: IO,
     since_ordinal: int = 0,
     export_limit: int = 1000,
+    since: str = 'since'
 ) -> TextIO:
     ...
 
@@ -37,6 +38,7 @@ def _export_from_endpoint(
     fp: IO | None,
     since_ordinal: int = 0,
     export_limit: int = 1000,
+    since: str = 'since'
 ) -> IO | list[dict]:
     exported_entities = []
     greatest_ordinal = since_ordinal
@@ -46,7 +48,7 @@ def _export_from_endpoint(
         sis_response = send_get_httpx(
             path=f"{sis_settings.host}{endpoint}",
             auth=sis_settings.get_export_auth(),
-            params={'since': greatest_ordinal, 'limit': export_limit},
+            params={since: greatest_ordinal, 'limit': export_limit},
             proxies=sis_settings.proxies,
         )
         if sis_response.status_code == 200:
@@ -105,6 +107,7 @@ def export_from_sisu(
             export_limit=resource.exports.default_export_limit,
             sis_settings=sisu_config,
             since_ordinal=since_ordinal,
+            since=resource.exports.since,
             fp=fp
         )
 
@@ -113,5 +116,6 @@ def export_from_sisu(
         export_limit=resource.exports.default_export_limit,
         sis_settings=sisu_config,
         since_ordinal=since_ordinal,
+        since=resource.exports.since,
         fp=None
     )
