@@ -29,6 +29,7 @@ __all__ = [
     'Buildings',
     'Qualifications',
     'GradeScales',
+    'AdmissionTargets',
 ]
 
 
@@ -311,4 +312,16 @@ class GradeScales(BaseResource):
     exports = SisExport(
         endpoint='/kori/api/grade-scales/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class AdmissionTargets(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/admission-targets/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/admission-targets/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+        since='sinceOrdinal'
     )
