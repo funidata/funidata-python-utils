@@ -20,6 +20,9 @@ class Rule(BaseModel):
 
 
 class Module(SisBase):
+    """WIP Class representing a SISU module.
+    Fields and validations are not complete yet
+    """
     model_config = ConfigDict(extra='allow')
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     type: Literal[
@@ -67,10 +70,16 @@ class StudyModule(Module):
 
 
 class DegreeProgramme(Module):
+    """WIP Class representing a SISU degree programme.
+    Fields and validations are not complete yet
+    """
     type: Literal['DegreeProgramme']
 
 
 class GroupingModule(Module):
+    """WIP Class representing a SISU grouping module.
+    Fields and validations are not complete yet
+    """
     type: Literal['GroupingModule']
 
 
