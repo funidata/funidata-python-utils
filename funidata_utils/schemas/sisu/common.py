@@ -94,7 +94,7 @@ class GenericAddress(BaseModel):
     address: str | None = None
 
 
-class PersonWithModuleResponsibilityInfoType(SisBase):
+class PersonWithModuleResponsibilityInfoType(BaseModel):
     text: LocalizedString | None = None
     personId: OTM_ID_REGEX_VALIDATED_STR | None = None
     roleUrn: Literal[
