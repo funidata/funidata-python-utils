@@ -1,6 +1,7 @@
+import datetime
 from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator, Field
 
 
 class HashableBaseModel(BaseModel):
@@ -8,12 +9,32 @@ class HashableBaseModel(BaseModel):
         return hash((type(self),) + tuple(self.__dict__.values()))
 
 
-class SisBase(HashableBaseModel):
+class CommonBase(HashableBaseModel):
     """
-        Base model for depicting Sisu entities, with a custom model validator for ACTIVE class vs DRAFT/DELETED
+        Base model for depicting common pydantic models from attributes
     """
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SisMetadata(CommonBase):
+    revision: int
+    createdBy: str | None
+    createdOn: datetime.datetime | None = None
+    lastModifiedBy: str | None = None
+    lastModifiedOn: datetime.datetime | None = None
+    modificationOrdinal: int
+
+
+class SisBase(CommonBase):
+    """
+        Base model for depicting top level Sisu entities, with a custom model validator for ACTIVE class vs DRAFT/DELETED
+    """
+    metadata: SisMetadata | None = Field(
+        default=None,
+        exclude=True,
+        description="Read-only - Present when exported from sisu, not meant to be initialized separately"
+    )
 
     @model_validator(mode='wrap')
     @classmethod
