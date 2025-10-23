@@ -3,13 +3,14 @@
 # ------------------------------------------------------------------------------
 
 import datetime
-from typing import Literal, Annotated
+from typing import Literal, Annotated, Self
 
-from pydantic import BaseModel, Field, field_serializer, conlist
+from pydantic import BaseModel, Field, field_serializer, conlist, model_validator, ValidationError
 
+from .base import SisBase
 from .common import (
     sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE, LocalDateRange,
-    SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES, OrganisationRoleShare,
+    SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES, OrganisationRoleShare, PersonWithModuleResponsibilityInfoType,
 )
 
 
@@ -77,19 +78,6 @@ class ModulePrerequisite(BaseModel):
 
 class PrerequisiteGroup(BaseModel):
     prerequisites: list[CourseUnitPrerequisite | ModulePrerequisite] | None = None
-    type: str
-
-
-class PersonWithModuleResponsibilityInfoType(BaseModel):
-    text: LocalizedString | None = None
-    personId: OTM_ID_REGEX_VALIDATED_STR | None = None
-    roleUrn: Literal[
-        'urn:code:module-responsibility-info-type:responsible-teacher',
-        'urn:code:module-responsibility-info-type:administrative-person',
-        'urn:code:module-responsibility-info-type:contact-info',
-    ]
-    validity: LocalDateRange | None = None
-    validityPeriod: LocalDateRange | None = None
 
 
 class CooperationNetworkShare(BaseModel):
@@ -113,7 +101,7 @@ class CooperationNetworkDetails(BaseModel):
         return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-class CourseUnit(BaseModel):
+class CourseUnit(SisBase):
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     id: OTM_ID_REGEX_VALIDATED_STR
     universityOrgIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)
@@ -127,7 +115,7 @@ class CourseUnit(BaseModel):
     credits: CreditRange
     completionMethods: conlist(CompletionMethod, max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
     assessmentItemOrder: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_BIG_SET_SIZE) | None = None
-    substitutions: conlist(CourseUnitSubstitution, max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
+    substitutions: conlist(list[CourseUnitSubstitution], max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
     name: LocalizedString
     code: str
     abbreviation: str | None = None

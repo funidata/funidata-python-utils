@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 class SisExport(BaseModel):
     endpoint: str
     default_export_limit: Annotated[int, Field(ge=1, le=5000)]
+    since: str = 'since'
 
 
 class SisImport(BaseModel):

@@ -31,3 +31,11 @@ from .grade_scale import (GradeScale, Grade)
 from .qualification import Qualification
 from .organisation import Organisation
 from .course_unit import CourseUnit
+from .module import (
+    Module,
+    StudyModule,
+    DegreeProgramme,
+    GroupingModule,
+    ModuleTypeAdapter,
+)
+from .education import Education

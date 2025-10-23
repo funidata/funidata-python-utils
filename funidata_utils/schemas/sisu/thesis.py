@@ -9,6 +9,7 @@ from pydantic import BaseModel, field_serializer, Field, field_validator, conset
 
 from .attainment import PersonWithAttainmentAcceptorType
 from .common import LocalizedString, OrganisationRoleShareBase, sis_code_urn_pattern, STRIPPED_STR
+from ..common_serializers import serialize_as_list
 from ...utils import group_by
 
 
@@ -49,8 +50,6 @@ class Thesis(BaseModel):
         return val.isoformat()
 
     @field_serializer('organisations', 'responsibilityInfos')
-    def organisations_as_list(self, val: set[OrganisationRoleShareBase] | None, _info):
-        if val is None:
-            return None
-
-        return list(val)
+    def organisations_as_list(self, v, _info):
+        serialized_list = serialize_as_list(v)
+        return serialized_list

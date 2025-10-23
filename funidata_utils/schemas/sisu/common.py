@@ -2,14 +2,11 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, field_serializer, Field, BeforeValidator
 
-
-class HashableBaseModel(BaseModel):
-    def __hash__(self):
-        return hash((type(self),) + tuple(self.__dict__.values()))
+from funidata_utils.schemas.sisu.base import HashableBaseModel, SisBase
 
 
 SIS_MAX_VERY_LONG_STRING_LENGTH = 65000
@@ -95,3 +92,15 @@ class GenericAddress(BaseModel):
     isUserEditable: bool
     type: str = 'GenericAddress'
     address: str | None = None
+
+
+class PersonWithModuleResponsibilityInfoType(BaseModel):
+    text: LocalizedString | None = None
+    personId: OTM_ID_REGEX_VALIDATED_STR | None = None
+    roleUrn: Literal[
+        'urn:code:module-responsibility-info-type:responsible-teacher',
+        'urn:code:module-responsibility-info-type:administrative-person',
+        'urn:code:module-responsibility-info-type:contact-info',
+    ]
+    validity: LocalDateRange | None = None
+    validityPeriod: LocalDateRange | None = None
