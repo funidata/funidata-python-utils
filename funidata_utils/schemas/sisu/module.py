@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 from typing import Literal, Annotated, Any, Union
 
-from pydantic import BaseModel, Field, field_serializer, conset, ConfigDict, TypeAdapter, model_validator, ValidationError
+from pydantic import BaseModel, Field, field_serializer, conset, ConfigDict, TypeAdapter
 
 from .base import SisBase
 from .common import (
@@ -11,6 +11,7 @@ from .common import (
     LocalizedString, sis_code_urn_pattern,
     STRIPPED_STR, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_SMALL_SET_SIZE,
 )
+from ..common_serializers import serialize_as_list
 
 
 class Rule(BaseModel):
@@ -63,10 +64,8 @@ class StudyModule(Module):
 
     @field_serializer('searchTags', 'possibleAttainmentLanguages', 'studyFields')
     def sets_as_lists(self, v):
-        if v is None:
-            return None
-
-        return list(v)
+        serialized_list = serialize_as_list(v)
+        return serialized_list
 
 
 class DegreeProgramme(Module):

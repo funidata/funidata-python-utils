@@ -8,11 +8,12 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, conlist, Field, model_validator, field_validator, conset, field_serializer, AfterValidator
 
+from .base import HashableBaseModel
 from .common import (
     LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, OrganisationRoleShareBase,
     sis_code_urn_pattern, STRIPPED_STR,
 )
-from .base import HashableBaseModel
+from ..common_serializers import serialize_as_list
 from ...utils import group_by
 
 
@@ -111,15 +112,9 @@ class Attainment(ObjectWithDocumentState):
     attainmentDate: datetime.date
 
     @field_serializer('organisations')
-    def organisations_as_list(self, v: set[OrganisationRoleShareBase], _info):
-        if v is None:
-            return None
-
-        try:
-            return list(set(v))
-        except Exception as e:
-            # If it can't be hashed to set, just return as list
-            return list(v)
+    def organisations_as_list(self, v, _info) -> list[dict]:
+        serialized_list = serialize_as_list(v)
+        return serialized_list
 
     @field_serializer('attainmentDate')
     def date_as_isoformat(self, val: datetime.date, _info):

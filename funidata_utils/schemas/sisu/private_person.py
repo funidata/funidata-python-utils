@@ -4,9 +4,11 @@
 
 import datetime
 from typing import Literal, Annotated
+
 from pydantic import BaseModel, field_serializer, conset, Field
 
 from .common import FinnishAddress, GenericAddress, STRIPPED_STR, sis_code_urn_pattern
+from ..common_serializers import serialize_as_list
 
 
 CountryUrnStr = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
@@ -74,6 +76,5 @@ class PrivatePerson(BaseModel):
 
     @field_serializer('citizenshipUrns', 'schoolEducationLanguageUrns')
     def set_of_strings_as_list(self, val: set[str] | None, _info):
-        if not val:
-            return None
-        return list(val)
+        serialized_list = serialize_as_list(val)
+        return serialized_list
