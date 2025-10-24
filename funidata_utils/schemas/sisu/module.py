@@ -52,6 +52,10 @@ class DPSMBase(Module):
     approvalState: str  # TODO - enum
     validityPeriod: LocalDateRange
 
+    @field_serializer('curriculumPeriodIds')
+    def sets_as_list(self, v, _info) -> list[dict]:
+        serialized_list = serialize_as_list(v)
+        return serialized_list
 
 class StudyModule(DPSMBase):
     """WIP Class representing a SISU StudyModule object.
