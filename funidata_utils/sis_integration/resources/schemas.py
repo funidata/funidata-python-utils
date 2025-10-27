@@ -16,5 +16,6 @@ class SisImport(BaseModel):
     endpoint: str
     default_import_limit: Annotated[int, Field(ge=1, le=5000)] = 1500
 
+
 class SisDelete(BaseModel):
     endpoint: str

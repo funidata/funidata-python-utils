@@ -203,7 +203,7 @@ class CourseUnits(BaseResource):
         endpoint='/kori/api/course-units/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
-    delete = SisImport(
+    delete = SisDelete(
         endpoint='/kori/api/course-units/v1/batch-delete',
     )
 
