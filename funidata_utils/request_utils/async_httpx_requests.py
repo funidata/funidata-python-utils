@@ -9,17 +9,11 @@ from typing import Tuple, Any, Callable, Literal
 
 import httpx
 
-from ..utils import flatten, group_by
+from ..utils import flatten, group_by, batch
 
 
 ACCEPTED_RESPONSE_CODES = {200, 201, 202, 204}
 logger = logging.getLogger(__name__)
-
-
-def batch(iterable, steps=1):
-    length = len(iterable)
-    for index in range(0, length, steps):
-        yield iterable[index:min(index + steps, length)]
 
 
 def _collect_suitable_batches_grouped_by_key(
@@ -71,7 +65,7 @@ async def send_get_httpx(
 
 async def _binary_search_enabled_post_httpx(
     path: str,
-    payload: dict | list[dict] | list[list[dict]],
+    payload: list[dict] | list[list[dict]],
     client: httpx.AsyncClient,
     auth: Tuple[str, str] | None = None,
     params: dict | None = None,
@@ -163,7 +157,7 @@ async def _binary_search_enabled_post_httpx(
 
 async def send_post_with_binary_err_search_httpx(
     path: str,
-    payload: list[dict] | dict,
+    payload: list[dict],
     group_by_key: str | None = None,
     auth: Tuple[str, str] | None = None,
     proxies: dict | None = None,

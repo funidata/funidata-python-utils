@@ -9,7 +9,7 @@ from .resources.schemas import SisExport, SisImport, SisDelete
 class HasHostAndProxies(Protocol):
     host: str
     proxies: dict | None
-    
+
 
 class SupportsIntegrationAuthentication(HasHostAndProxies, Protocol):
     def get_integration_auth(self) -> tuple[str, str]:
@@ -24,9 +24,11 @@ class SupportsExportAuthentication(HasHostAndProxies, Protocol):
 class SisExportable(Protocol):
     exports: SisExport
 
+
 @runtime_checkable
 class SisImportable(Protocol):
     imports: SisImport
+
 
 @runtime_checkable
 class SisDeletable(Protocol):
@@ -36,6 +38,7 @@ class SisDeletable(Protocol):
 @runtime_checkable
 class SisLegacyImportable(Protocol):
     legacy_imports: SisImport
+
 
 @runtime_checkable
 class SisPatchable(Protocol):

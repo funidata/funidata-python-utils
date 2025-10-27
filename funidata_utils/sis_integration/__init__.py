@@ -6,4 +6,7 @@ from .exports import export_from_sisu
 from .async_imports import (
     import_to_sisu, patch_to_sisu,
 )
+from .async_deletes import (
+    soft_delete_from_sisu
+)
 from . import resources as SisResources
