@@ -11,7 +11,7 @@ readme = "README.md"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python",
   "Framework :: Pydantic",
   "Framework :: Pydantic :: 2",
