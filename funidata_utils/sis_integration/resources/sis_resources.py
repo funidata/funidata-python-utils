@@ -30,6 +30,7 @@ __all__ = [
     'Qualifications',
     'GradeScales',
     'AdmissionTargets',
+    'OsuvaPlans',
 ]
 
 
@@ -324,4 +325,15 @@ class AdmissionTargets(BaseResource):
         endpoint='/kori/api/admission-targets/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
         since='sinceOrdinal'
+    )
+
+
+class OsuvaPlans(BaseResource):
+    imports = SisImport(
+        endpoint='/osuva/api/plans/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/osuva/api/plans/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
