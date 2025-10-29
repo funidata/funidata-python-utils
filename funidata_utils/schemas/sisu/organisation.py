@@ -18,7 +18,7 @@ class CooperationNetworkIdentifiers(BaseModel):
 class Organisation(BaseModel):
     id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
-    snapshotDateTime: datetime.datetime
+    snapshotDateTime: datetime.datetime | None
     universityOrgId: OTM_ID_REGEX_VALIDATED_STR
     parentId: OTM_ID_REGEX_VALIDATED_STR | None = None
     predecessorIds: conset(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)
