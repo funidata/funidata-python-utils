@@ -64,3 +64,9 @@ def response_statistics(
         'min': _prty(_min),
         'max': _prty(_max),
     }
+
+
+def batch(iterable, steps=1):
+    length = len(iterable)
+    for index in range(0, length, steps):
+        yield iterable[index:min(index + steps, length)]

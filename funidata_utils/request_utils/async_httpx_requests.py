@@ -9,17 +9,11 @@ from typing import Tuple, Any, Callable, Literal
 
 import httpx
 
-from ..utils import flatten, group_by
+from ..utils import flatten, group_by, batch
 
 
 ACCEPTED_RESPONSE_CODES = {200, 201, 202, 204}
 logger = logging.getLogger(__name__)
-
-
-def batch(iterable, steps=1):
-    length = len(iterable)
-    for index in range(0, length, steps):
-        yield iterable[index:min(index + steps, length)]
 
 
 def _collect_suitable_batches_grouped_by_key(

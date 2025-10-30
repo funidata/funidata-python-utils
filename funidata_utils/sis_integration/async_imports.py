@@ -20,7 +20,7 @@ UNSET_BATCH_SIZE = -42
 async def import_to_sisu(
     sisu_config: SisuConfig,
     resource: SisImportable,
-    use_legacy_import: False,
+    use_legacy_import: Literal[False],
     fp: IO,
     batch_size: int | None,
     binary_search_max_depth: int | None,
@@ -35,7 +35,7 @@ async def import_to_sisu(
 async def import_to_sisu(
     sisu_config: SisuConfig,
     resource: SisLegacyImportable,
-    use_legacy_import: True,
+    use_legacy_import: Literal[True],
     fp: IO,
     batch_size: int | None,
     binary_search_max_depth: int | None,
