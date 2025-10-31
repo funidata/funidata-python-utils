@@ -5,7 +5,7 @@
 import datetime
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, field_serializer, conset, Field
+from pydantic import BaseModel, field_serializer, conset, Field, AfterValidator
 
 from .common import FinnishAddress, GenericAddress, STRIPPED_STR, sis_code_urn_pattern
 from ..common_serializers import serialize_as_list
@@ -14,6 +14,15 @@ from ..common_serializers import serialize_as_list
 CountryUrnStr = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('country'))]
 SchoolEducationLangUrnStr = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('school-education-language'))]
 
+OID_REGEX_PATTERN = '^1\.2\.246\.562\.24\.[1-9][0-9]{10}$'
+
+def oid_luhn_validator(oid: str) -> str:
+    last_digits = [int(ch) for ch in oid.split('.')[-1]]
+    if (sum(last_digits[0::2]) + sum(sum(divmod(d*2,10)) for d in last_digits[1::2])) % 10 != 0:
+        raise ValueError('OID is not valid')
+    return oid
+
+OID_STR = Annotated[str, Field(pattern=OID_REGEX_PATTERN), AfterValidator(oid_luhn_validator)]
 
 class ClassifiedPersonInfo(BaseModel):
     isPhoneNumberClassified: bool | None = None
@@ -57,7 +66,7 @@ class PrivatePerson(BaseModel):
     schoolEducationLanguageUrns: conset(SchoolEducationLangUrnStr, min_length=1) | None = None
     municipalityUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('municipality'))] = None
     oppijanumero: str | None = None
-    oids: list[str] = []
+    oids: list[OID_STR] = []
     dead: bool = False
     classifiedPersonInfo: ClassifiedPersonInfo | None = None
     personalDataSafetyNonDisclosure: bool | None = None
