@@ -5,7 +5,7 @@
 import datetime
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, field_serializer, conset, Field, AfterValidator
+from pydantic import BaseModel, field_serializer, conset, Field, AfterValidator, AliasChoices
 
 from .common import FinnishAddress, GenericAddress, STRIPPED_STR, sis_code_urn_pattern
 from ..common_serializers import serialize_as_list
@@ -75,7 +75,7 @@ class PrivatePerson(BaseModel):
     firstNames: str | None = None
     callName: str | None = None
     lastName: str | None = None
-    username: str | None = None
+    userName: str | None = Field(validation_alias=AliasChoices('userName', 'username'), default=None)
     eduPersonPrincipalName: str | None = None
     employeeNumber: str | None = None
     phoneNumber: str | None = None
