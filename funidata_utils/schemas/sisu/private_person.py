@@ -75,7 +75,7 @@ class PrivatePerson(BaseModel):
     firstNames: str | None = None
     callName: str | None = None
     lastName: str | None = None
-    username: str | None = None
+    userName: str | None = None
     eduPersonPrincipalName: str | None = None
     employeeNumber: str | None = None
     phoneNumber: str | None = None
