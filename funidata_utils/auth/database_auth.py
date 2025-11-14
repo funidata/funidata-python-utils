@@ -4,10 +4,13 @@
 from pathlib import PosixPath
 from typing import ClassVar, override
 
-from pydantic import SecretStr, BaseModel, ConfigDict
+from pydantic import SecretStr, BaseModel, ConfigDict, model_validator
 
 from .source_config import SourceConfig
 from ..database.db_util import get_engine, get_by_statement
+
+
+UNSET_DEFAULT = b'x_unset'
 
 
 class DatabaseConfig(SourceConfig):
@@ -19,20 +22,33 @@ class DatabaseConfig(SourceConfig):
     name: ClassVar[str] = 'base-database-config'
     connection_template: str = "{sql_server_type}+{sql_driver}://{uname}:{pwd}@{host}:{port}/{database}"
 
-    override_connection_uri: str | None = None
-    host: str | None = None
-    sql_server_type: str | None = None
-    sql_driver: str | None = None
-    username: str | None = None
-    password: SecretStr | None = None
-    port: int | None = None
-    database: str | None = None
+    override_connection_uri: SecretStr | None = None
+    host: str | None = UNSET_DEFAULT
+    sql_server_type: str | None = UNSET_DEFAULT
+    sql_driver: str | None = UNSET_DEFAULT
+    username: str | None = UNSET_DEFAULT
+    password: SecretStr | None = UNSET_DEFAULT
+    port: int | None = UNSET_DEFAULT
+    database: str | None = UNSET_DEFAULT
 
     connect_args: dict | None = None
 
+    @model_validator(mode='after')
+    def override_or_params_required(self):
+        if self.override_connection_uri:
+            return self
+
+        if any(
+            x == UNSET_DEFAULT
+                for x in {self.host, self.sql_driver, self.sql_server_type, self.username, self.password, self.port, self.database}
+        ):
+            raise ValueError('Explicitly define config parameters when not using override_connection_uri')
+
+        return self
+
     def get_connection_uri(self) -> str:
         if self.override_connection_uri:
-            return self.override_connection_uri
+            return self.override_connection_uri.get_secret_value()
 
         return self.connection_template.format(
             uname=self.username,
@@ -100,12 +116,12 @@ class PymySqlConnectArgs(BaseModel):
 class MariaDbConfig(DatabaseConfig):
     name: ClassVar[str] = 'mariadb-sql'
     connection_template: str = "{sql_server_type}+{sql_driver}://{uname}:{pwd}@{host}:{port}/"
-    override_connection_uri: str | None = None
+    override_connection_uri: SecretStr | None = None
     sql_server_type: str = 'mariadb'
     sql_driver: str = 'pymysql'
-    username: str | None = None
-    password: SecretStr | None = None
-    port: int | None = None
+    username: str | None = UNSET_DEFAULT
+    password: SecretStr | None = UNSET_DEFAULT
+    port: int | None = UNSET_DEFAULT
     database: None = None
 
     connect_args: PymySqlConnectArgs | None = None
