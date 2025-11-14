@@ -102,15 +102,15 @@ class PyMySqlSslConnectArgs(BaseModel):
     ca: PosixPath | None = None
     cert: PosixPath | None = None
     key: PosixPath | None = None
-    verify_cert: bool | None = None
-    verify_identity: bool | None = None
-    check_hostname: bool | None = None
+    verify_cert: bool | None = True
+    verify_identity: bool | None = True
+    check_hostname: bool | None = True
 
 
 class PymySqlConnectArgs(BaseModel):
     model_config = ConfigDict(extra='allow')
 
-    ssl: PyMySqlSslConnectArgs | None = None
+    ssl: PyMySqlSslConnectArgs | None = PyMySqlSslConnectArgs()
 
 
 class MariaDbConfig(DatabaseConfig):
@@ -124,7 +124,7 @@ class MariaDbConfig(DatabaseConfig):
     port: int | None = UNSET_DEFAULT
     database: None = None
 
-    connect_args: PymySqlConnectArgs | None = None
+    connect_args: PymySqlConnectArgs | None = PymySqlConnectArgs()
 
     @override
     def _get_connect_args(self) -> dict:
