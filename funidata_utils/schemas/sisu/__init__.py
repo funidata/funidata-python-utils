@@ -39,3 +39,5 @@ from .module import (
     ModuleTypeAdapter,
 )
 from .education import Education
+
+from .public_person import PublicPerson
