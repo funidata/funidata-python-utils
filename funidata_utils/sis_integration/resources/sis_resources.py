@@ -19,6 +19,7 @@ __all__ = [
     'StudyRightPrimalities',
     'Organisations',
     'CourseUnits',
+    'CourseUnitRealisations',
     'Educations',
     'Modules',
     'KoriPersons',
@@ -206,6 +207,34 @@ class CourseUnits(BaseResource):
     )
     delete = SisDelete(
         endpoint='/kori/api/course-units/v1/batch-delete',
+    )
+
+
+class CourseUnitRealisations(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/course-unit-realisations/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_imports = SisImport(
+        endpoint='/kori/api/course-unit-realisations/v1/import/legacy',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+
+    patches = SisImport(
+        endpoint='/kori/api/course-unit-realisations/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    legacy_patches = SisImport(
+        endpoint='/kori/api/course-unit-realisations/v1/import/legacy',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+
+    exports = SisExport(
+        endpoint='/kori/api/course-unit-realisations/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+    delete = SisDelete(
+        endpoint='/kori/api/course-unit-realisations/v1/delete',
     )
 
 
