@@ -32,6 +32,7 @@ __all__ = [
     'GradeScales',
     'AdmissionTargets',
     'OsuvaPlans',
+    'TermRegistrationRequirements',
 ]
 
 
@@ -378,6 +379,17 @@ class AdmissionTargets(BaseResource):
         endpoint='/kori/api/admission-targets/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
         since='sinceOrdinal'
+    )
+
+
+class TermRegistrationRequirements(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/term-registration-requirements/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/term-registration-requirements/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
 
 
