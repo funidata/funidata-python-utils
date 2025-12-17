@@ -4,18 +4,21 @@
 import datetime
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field, field_serializer, conlist
 
-from .common import LocalizedString, CreditRange, sis_code_urn_pattern, OrganisationRoleShareBase, STRIPPED_STR
+from .common import (
+    LocalizedString, CreditRange, sis_code_urn_pattern, OrganisationRoleShareBase, STRIPPED_STR, OTM_ID_REGEX_VALIDATED_STR,
+    SIS_MAX_SMALL_SET_SIZE, PersonWithModuleResponsibilityInfoType, SIS_MAX_MEDIUM_SET_SIZE,
+)
 
 
 PossibleAttainmentLanguage = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))]
 
 
 class AssessmentItem(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
-    universityOrgId: str
+    universityOrgIds: conlist(OTM_ID_REGEX_VALIDATED_STR, min_length=1, max_length=1)
     credits: CreditRange
     name: LocalizedString
     nameSpecifier: LocalizedString | None = None
@@ -27,14 +30,14 @@ class AssessmentItem(BaseModel):
     grading: LocalizedString | None = None
     learningMaterial: LocalizedString | None = None
     literature: list[dict] | None = None  # TODO: Define LiteratureName + LiteratureReference
-    studyField: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('study-field'))]
-    subject: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('subject'))]
+    studyField: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('study-field'))] | None = None
+    subject: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('subject'))] | None = None
     snapshotDateTime: datetime.datetime | None = None
-    responsibilityInfos: list[dict] | None = None  # TODO: PersonWithModuleResponsibilityType
+    responsibilityInfos: conlist(PersonWithModuleResponsibilityInfoType, max_length=SIS_MAX_MEDIUM_SET_SIZE) | None = None
     organisations: list[OrganisationRoleShareBase]
-    primaryCourseUnitGroupId: str
+    primaryCourseUnitGroupId: OTM_ID_REGEX_VALIDATED_STR
     cooperationNetworkDetails: dict | None = None  # TODO: CooperationNetworkDetails
-    rdiCreditsEnabled: bool
+    rdiCreditsEnabled: Literal['ENABLED', 'DISABLED']
 
     @field_serializer('snapshotDateTime')
     def serialize_ssdt(self, ssdt: datetime.datetime | None, _info):
