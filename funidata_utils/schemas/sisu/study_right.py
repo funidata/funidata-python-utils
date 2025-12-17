@@ -18,7 +18,7 @@ from .common import (
     SIS_MAX_LONG_STRING_LENGTH,
     OTM_ID_REGEX_PATTERN,
     SIS_MAX_TERSE_STRING_LENGTH,
-    LocalDateRange, STRIPPED_STR, sis_code_urn_pattern,
+    LocalDateRange, STRIPPED_STR, sis_code_urn_pattern, OTM_ID_REGEX_VALIDATED_STR,
 )
 
 
@@ -118,7 +118,7 @@ CodeUrnsStr = Annotated[STRIPPED_STR, Field(pattern='(urn:code)(:[A-z_0-9]+)*')]
 
 
 class StudyRight(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     snapshotDateTime: datetime.datetime | None
     studentId: str = Field(..., description='PrivatePersonId')

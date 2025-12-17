@@ -6,11 +6,11 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field
 
-from .common import LocalDateRange, sis_code_urn_pattern, STRIPPED_STR
+from .common import LocalDateRange, sis_code_urn_pattern, STRIPPED_STR, OTM_ID_REGEX_VALIDATED_STR
 
 
 class MobilityPeriod(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     studyRightId: str
     personId: str

@@ -5,11 +5,11 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from .common import LocalizedString, FinnishAddress, GenericAddress
+from .common import LocalizedString, FinnishAddress, GenericAddress, OTM_ID_REGEX_VALIDATED_STR
 
 
 class Building(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     universityOrgIds: list[str]
     name: LocalizedString

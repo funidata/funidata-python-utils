@@ -5,11 +5,11 @@ from typing import Literal
 
 from pydantic import BaseModel, field_validator
 
-from .common import LocalDateRange, LocalizedString
+from .common import LocalDateRange, LocalizedString, OTM_ID_REGEX_VALIDATED_STR
 
 
 class CurriculumPeriod(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     universityOrgId: str
     name: LocalizedString

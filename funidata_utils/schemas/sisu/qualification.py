@@ -6,11 +6,11 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field, field_serializer
 
-from .common import LocalizedString, sis_code_urn_pattern, STRIPPED_STR
+from .common import LocalizedString, sis_code_urn_pattern, STRIPPED_STR, OTM_ID_REGEX_VALIDATED_STR
 
 
 class Qualification(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     universityOrgId: str
     type: Literal['FORMAL', 'CUSTOM', 'COMPETENCY']

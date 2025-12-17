@@ -57,6 +57,7 @@ class DPSMBase(Module):
         serialized_list = serialize_as_list(v)
         return serialized_list
 
+
 class StudyModule(DPSMBase):
     """WIP Class representing a SISU StudyModule object.
     Fields and validations are not complete yet"""

@@ -7,8 +7,14 @@ from typing import Literal, Annotated
 from pydantic import BaseModel, Field, field_serializer, conlist
 
 from .common import (
-    LocalizedString, CreditRange, sis_code_urn_pattern, OrganisationRoleShareBase, STRIPPED_STR, OTM_ID_REGEX_VALIDATED_STR,
-    SIS_MAX_SMALL_SET_SIZE, PersonWithModuleResponsibilityInfoType, SIS_MAX_MEDIUM_SET_SIZE,
+    PersonWithModuleResponsibilityInfoType,
+    SIS_MAX_MEDIUM_SET_SIZE,
+    LocalizedString,
+    CreditRange,
+    sis_code_urn_pattern,
+    OrganisationRoleShareBase,
+    STRIPPED_STR,
+    OTM_ID_REGEX_VALIDATED_STR,
 )
 
 
