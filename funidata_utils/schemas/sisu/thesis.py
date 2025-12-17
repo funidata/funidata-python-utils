@@ -8,13 +8,13 @@ from typing import Literal, Annotated
 from pydantic import BaseModel, field_serializer, Field, field_validator, conset
 
 from .attainment import PersonWithAttainmentAcceptorType
-from .common import LocalizedString, OrganisationRoleShareBase, sis_code_urn_pattern, STRIPPED_STR
+from .common import LocalizedString, OrganisationRoleShareBase, sis_code_urn_pattern, STRIPPED_STR, OTM_ID_REGEX_VALIDATED_STR
 from ..common_serializers import serialize_as_list
 from ...utils import group_by
 
 
 class Thesis(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     personId: str = Field(description='PrivatePersonId')
     attainmentId: str | None = None

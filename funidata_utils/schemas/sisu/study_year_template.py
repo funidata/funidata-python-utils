@@ -5,7 +5,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, conlist, field_validator, Field
 
-from .common import LocalDateRange, LocalizedString, SIS_MAX_SMALL_SET_SIZE
+from .common import LocalDateRange, LocalizedString, SIS_MAX_SMALL_SET_SIZE, OTM_ID_REGEX_VALIDATED_STR
 
 
 class StudyPeriodTemplate(BaseModel):
@@ -30,7 +30,7 @@ class StudyTermTemplate(BaseModel):
 
 
 class StudyYearTemplate(BaseModel):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     valid: LocalDateRange
     org: str
     studyTerms: conlist(StudyTermTemplate, min_length=1, max_length=SIS_MAX_SMALL_SET_SIZE)

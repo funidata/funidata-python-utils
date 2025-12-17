@@ -7,7 +7,7 @@ from .common import LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_S
 
 
 class PublicPerson(SisBase):
-    id: str = None
+    id: OTM_ID_REGEX_VALIDATED_STR
     universityOrgIds: conlist(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)
     titles: LocalizedString | None = None
     firstName: str | None = None

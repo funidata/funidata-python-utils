@@ -7,7 +7,7 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, field_serializer, conset, Field, AfterValidator, AliasChoices
 
-from .common import FinnishAddress, GenericAddress, STRIPPED_STR, sis_code_urn_pattern
+from .common import FinnishAddress, GenericAddress, STRIPPED_STR, sis_code_urn_pattern, OTM_ID_REGEX_VALIDATED_STR
 from ..common_serializers import serialize_as_list
 
 
@@ -16,18 +16,21 @@ SchoolEducationLangUrnStr = Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_p
 
 OID_REGEX_PATTERN = '^1\.2\.246\.562\.(?:24|98)\.[1-9][0-9]{10}$'
 
+
 def calculate_oid_luhn_checksum(digits: list[int]) -> int:
     return 10 - ((sum(digits[0::2]) + sum(sum(divmod(d * 2, 10)) for d in digits[1::2])) % 10) % 10
 
+
 def calculate_oid_ibm_checksum(digits: list[int]) -> int:
-    checksum=0
-    weights=[7, 3, 1]
+    checksum = 0
+    weights = [7, 3, 1]
 
     for i, numericValue in enumerate(reversed(digits)):
         weight = weights[i % len(weights)]
         checksum += numericValue * weight
 
     return (10 - (checksum % 10)) % 10
+
 
 def oid_validator(oid: str) -> str:
     split_oid = oid.split('.')
@@ -46,7 +49,9 @@ def oid_validator(oid: str) -> str:
             raise ValueError('OID tree space is not valid')
     return oid
 
+
 OID_STR = Annotated[str, Field(pattern=OID_REGEX_PATTERN), AfterValidator(oid_validator)]
+
 
 class ClassifiedPersonInfo(BaseModel):
     isPhoneNumberClassified: bool | None = None
@@ -66,7 +71,7 @@ class ClassifiedPersonInfo(BaseModel):
 
 
 class PrivatePerson(BaseModel):
-    id: str = None
+    id: OTM_ID_REGEX_VALIDATED_STR
     studentNumber: str | None = None
     personalIdentityCode: str | None = None
     finnAuthId: str | None = None

@@ -11,7 +11,7 @@ from pydantic import BaseModel, conlist, Field, model_validator, field_validator
 from .base import HashableBaseModel
 from .common import (
     LocalizedString, SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_MEDIUM_STRING_LENGTH, OTM_ID_REGEX_PATTERN, OrganisationRoleShareBase,
-    sis_code_urn_pattern, STRIPPED_STR,
+    sis_code_urn_pattern, STRIPPED_STR, OTM_ID_REGEX_VALIDATED_STR,
 )
 from ..common_serializers import serialize_as_list
 from ...utils import group_by
@@ -73,7 +73,7 @@ class CreditTransferInfo(BaseModel):
 
 
 class Attainment(ObjectWithDocumentState):
-    id: str
+    id: OTM_ID_REGEX_VALIDATED_STR
     personId: str = Field(description='PrivatePersonId')
     verifierPersonId: str | None = Field(default=None, description='PublicPersonId', pattern=OTM_ID_REGEX_PATTERN)
     studyRightId: str | None = None
