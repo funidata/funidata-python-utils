@@ -71,7 +71,7 @@ class ClassifiedPersonInfo(BaseModel):
 
 
 class PrivatePerson(BaseModel):
-    id: OTM_ID_REGEX_VALIDATED_STR = None
+    id: OTM_ID_REGEX_VALIDATED_STR
     studentNumber: str | None = None
     personalIdentityCode: str | None = None
     finnAuthId: str | None = None
