@@ -149,5 +149,5 @@ class CourseUnit(SisBase):
     customCodeUrns: Annotated[dict[str, list[str]] | None, Field(min_length=1)] = None
     inclusionApplicationInstruction: LocalizedString | None = None
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
-    s2r2Classification: Annotated[str | None, Field(pattern=sis_code_urn_pattern('subject'))] = None
+    s2r2Classification: Annotated[str | None, Field(pattern=sis_code_urn_pattern('s2r2-classification'))] = None
     rdiCreditsEnabled: Literal['ENABLED', 'DISABLED']
