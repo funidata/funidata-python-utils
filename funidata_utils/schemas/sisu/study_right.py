@@ -178,7 +178,7 @@ class StudyRight(BaseModel):
         return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
 
     @field_serializer('grantDate', 'transferOutDate')
-    def serialize_date_fields(self, _date: datetime.datetime | None, _info):
+    def serialize_date_fields(self, _date: datetime.date | None, _info):
         if _date is None:
             return None
 
