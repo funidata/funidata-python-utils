@@ -11,12 +11,8 @@ from .base import SisBase
 from .common import (
     sis_code_urn_pattern, STRIPPED_STR, LocalizedString, OTM_ID_REGEX_VALIDATED_STR, SIS_MAX_SMALL_SET_SIZE, LocalDateRange,
     SIS_MAX_MEDIUM_SET_SIZE, SIS_MAX_BIG_SET_SIZE, STRING_WITH_3_SLASHES, OrganisationRoleShare, PersonWithModuleResponsibilityInfoType,
+    CreditRange,
 )
-
-
-class CreditRange(BaseModel):
-    min: float
-    max: float | None = None
 
 
 class IntRange(BaseModel):

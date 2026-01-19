@@ -101,7 +101,7 @@ class Attainments(BaseResource):
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
     delete = SisDelete(
-        endpoint='/kori/api/attainments/v1/delete'
+        endpoint='/ori/api/attainments/v1/delete'
     )
 
 
@@ -119,7 +119,7 @@ class StudyRights(BaseResource):
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
     delete = SisDelete(
-        endpoint='/kori/api/study-rights/v1/delete'
+        endpoint='/ori/api/study-rights/v1/delete'
     )
 
 
@@ -137,7 +137,7 @@ class TermRegistrations(BaseResource):
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
     delete = SisDelete(
-        endpoint='/kori/api/term-registrations/v1/delete'
+        endpoint='/ori/api/term-registrations/v1/delete'
     )
 
 
