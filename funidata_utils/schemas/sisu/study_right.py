@@ -131,9 +131,9 @@ class StudyRight(BaseModel):
     studyRightExpirationRulesUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('study-right-expiration-rules'))] = None
     degreeRegulations: Optional[str] = None
     valid: LocalDateRange | None = None
-    grantDate: str | None = None
+    grantDate: datetime.date | None = None
     # studyStartDate: str < This cannot be set, sisu calculated field.
-    transferOutDate: Optional[str] = None
+    transferOutDate: Optional[datetime.date] = None
     transferOutUniversityUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
     homeOrganisationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
     termRegistrations: Optional[str] = None
@@ -177,6 +177,12 @@ class StudyRight(BaseModel):
 
         return ssdt.strftime("%Y-%m-%dT%H:%M:%S")
 
+    @field_serializer('grantDate', 'transferOutDate')
+    def serialize_date_fields(self, _date: datetime.datetime | None, _info):
+        if _date is None:
+            return None
+
+        return _date.isoformat()
 
     @model_validator(mode='after')
     def check_personalized_selection_path_matches_accepted_path(self):
@@ -205,7 +211,6 @@ class StudyRight(BaseModel):
             self.valid.startDate or datetime.date(year=1, month=1, day=1)
         ) >= (self.valid.endDate or datetime.date(year=9999, month=1, day=1)):
             raise ValueError("Start date must be before end date")
-
 
         return self
 
