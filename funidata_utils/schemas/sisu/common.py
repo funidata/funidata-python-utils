@@ -56,6 +56,17 @@ class LocalDateRange(BaseModel):
         return dt.isoformat()
 
 
+class LocalDateTimeRange(BaseModel):
+    startDateTime: datetime.datetime | None = None
+    endDateTime: datetime.datetime | None = None
+
+    @field_serializer('startDateTime', 'endDateTime')
+    def serialize_dt(self, dt: datetime.datetime | None, _info):
+        if dt is None:
+            return dt
+        return dt.isoformat()
+
+
 class CreditRange(BaseModel):
     min: float
     max: float | None = None

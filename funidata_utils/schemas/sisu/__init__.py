@@ -41,3 +41,4 @@ from .module import (
 from .education import Education
 
 from .public_person import PublicPerson
+from .cooperation_network import CooperationNetwork
