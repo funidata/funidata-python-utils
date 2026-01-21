@@ -33,6 +33,7 @@ __all__ = [
     'AdmissionTargets',
     'OsuvaPlans',
     'TermRegistrationRequirements',
+    'CooperationNetworks',
 ]
 
 
@@ -389,6 +390,17 @@ class TermRegistrationRequirements(BaseResource):
     )
     exports = SisExport(
         endpoint='/kori/api/term-registration-requirements/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class CooperationNetworks(BaseResource):
+    imports = SisImport(
+        endpoint='/kori/api/cooperation-networks/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/kori/api/cooperation-networks/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
 
