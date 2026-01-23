@@ -40,7 +40,7 @@ class CompletionMethod(BaseModel):
     require: IntRange | None = None
     typeOfRequire: Literal['OPTIONAL_WITH_REQUIRE_RANGE', 'OPTIONAL_WITH_DESCRIPTION', 'ALL_SELECTED_REQUIRED']
     assessmentItemIds: conlist(OTM_ID_REGEX_VALIDATED_STR, min_length=1, max_length=SIS_MAX_SMALL_SET_SIZE)
-    repeats: conlist(CompletionMethodRepeat, max_length=SIS_MAX_SMALL_SET_SIZE) | None = None
+    repeats: conlist(CompletionMethodRepeat, max_length=SIS_MAX_SMALL_SET_SIZE)
     evaluationCriteria: LocalizedString | None = None
     prerequisites: LocalizedString | None = None
 
