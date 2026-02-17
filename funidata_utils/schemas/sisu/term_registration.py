@@ -35,7 +35,8 @@ class TermRegistration(BaseModel):
 
 class StudyRightStatePeriod(BaseModel):
     state: Literal[
-        'NOT_STARTED', 'ACTIVE', 'ACTIVE_NONATTENDING', 'GRADUATED', 'RESCINDED', 'CANCELLED_BY_ADMINISTRATION', 'TENTATIVE', 'DENIED', 'PASSIVE', 'EXPIRED']
+        'NOT_STARTED', 'ACTIVE', 'ACTIVE_NONATTENDING', 'GRADUATED', 'RESCINDED', 'CANCELLED_BY_ADMINISTRATION', 'TENTATIVE', 'DENIED', 'PASSIVE', 'EXPIRED'
+    ]
     startDate: datetime.date | None = None
     endDate: datetime.date | None = None
 
