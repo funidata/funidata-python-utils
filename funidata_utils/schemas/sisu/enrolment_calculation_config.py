@@ -15,7 +15,7 @@ from funidata_utils.schemas.sisu.common import (
 class AttainedCreditRangeRule(BaseModel):
     type: Literal['AttainedCreditRange'] = 'AttainedCreditRange'
     educationIds: conset(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)  # noqa
-    degreeProgramTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-program-type'))] | None
+    degreeProgramTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-program-type'))] | None = None
     creditRange: CreditRange | None = None
     creditOrder: Literal['NONE', 'ASCENDING', 'DESCENDING']
 
