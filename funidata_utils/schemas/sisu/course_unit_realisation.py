@@ -82,7 +82,7 @@ class CopyDetails(BaseModel):
 class CourseUnitRealisation(SisBase):
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     id: OTM_ID_REGEX_VALIDATED_STR
-    universityOrgIds: conset(OTM_ID_REGEX_VALIDATED_STR, min_length=1)  # noqa
+    universityOrgIds: conset(OTM_ID_REGEX_VALIDATED_STR, min_length=1, max_length=1)  # noqa
     flowState: Literal['NOT_READY', 'PUBLISHED', 'CANCELLED', 'ARCHIVED'] | None = None
     massExamSessionId: OTM_ID_REGEX_VALIDATED_STR | None = None
     massExamSessionName: LocalizedString | None = None
