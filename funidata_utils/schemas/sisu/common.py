@@ -72,6 +72,11 @@ class CreditRange(BaseModel):
     max: float | None = None
 
 
+class IntegerRange(BaseModel):
+    min: int | None = None
+    max: int | None = None
+
+
 class LocalizedString(HashableBaseModel):
     fi: str | None = None
     en: str | None = None

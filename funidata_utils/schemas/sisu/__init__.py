@@ -31,6 +31,7 @@ from .grade_scale import (GradeScale, Grade)
 from .qualification import Qualification
 from .organisation import Organisation
 from .course_unit import CourseUnit
+from .course_unit_realisation import CourseUnitRealisation
 from .module import (
     Module,
     StudyModule,
