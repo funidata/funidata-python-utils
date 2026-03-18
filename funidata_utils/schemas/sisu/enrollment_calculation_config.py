@@ -26,7 +26,7 @@ class BaseRule(BaseModel):
 
 
 class AttainedCreditRangeRule(BaseRule):
-    education_ids: conset(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)  # noqa
+    educationIds: conset(OTM_ID_REGEX_VALIDATED_STR, max_length=SIS_MAX_SMALL_SET_SIZE)  # noqa
     degreeProgrammeTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-program-type'))] | None
     creditRange: CreditRange | None = None
     creditOrder: Literal['NONE', 'ASCENDING', 'DESCENDING']
