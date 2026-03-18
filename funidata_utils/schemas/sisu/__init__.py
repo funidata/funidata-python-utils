@@ -43,4 +43,4 @@ from .education import Education
 from .public_person import PublicPerson
 from .cooperation_network import CooperationNetwork
 from .term_registration import (TermRegistration, StudyRightTermRegistrations)
-from .enrollment_calculation_config import EnrolmentCalculationConfig
+from .enrolment_calculation_config import EnrolmentCalculationConfig
