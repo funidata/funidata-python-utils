@@ -5,11 +5,11 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, Field, conset, conlist
 
-from funidata_utils.schemas.sisu import LocalizedString
 from funidata_utils.schemas.sisu.base import SisBase, HashableBaseModel
 from funidata_utils.schemas.sisu.common import (
     LocalDateRange, LocalDateTimeRange, OTM_ID_REGEX_VALIDATED_STR, sis_code_urn_pattern,
     STRIPPED_STR, IntegerRange, SIS_MAX_MEDIUM_SET_SIZE, OrganisationRoleShare, SIS_MAX_SMALL_SET_SIZE,
+    LocalizedString,
 )
 from funidata_utils.schemas.sisu.course_unit import CooperationNetworkDetails
 
