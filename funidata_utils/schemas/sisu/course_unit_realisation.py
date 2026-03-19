@@ -102,7 +102,7 @@ class CourseUnitRealisation(SisBase):
     courseUnitRealisationTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('course-unit-realisation-type'))]
     studyGroupSets: list[StudyGroupSet]
     responsibilityInfos: conlist(PersonWithCourseUnitResponsibilityInfoType, max_length=SIS_MAX_MEDIUM_SET_SIZE)  # noqa
-    organisations: conlist(OrganisationRoleShare, max_length=SIS_MAX_MEDIUM_SET_SIZE)  # noqa
+    organisations: conlist(OrganisationRoleShare, min_length=1, max_length=SIS_MAX_MEDIUM_SET_SIZE)  # noqa
     enrolmentPeriod: LocalDateTimeRange | None = None
     lateEnrolmentEnd: datetime | None = None
     enrolmentAdditionalCancellationEnd: datetime | None = None
