@@ -34,6 +34,7 @@ __all__ = [
     'OsuvaPlans',
     'TermRegistrationRequirements',
     'CooperationNetworks',
+    'EnrolmentCalculationConfigs',
 ]
 
 
@@ -412,5 +413,15 @@ class OsuvaPlans(BaseResource):
     )
     exports = SisExport(
         endpoint='/osuva/api/plans/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+class EnrolmentCalculationConfigs(BaseResource):
+    imports = SisImport(
+        endpoint='/ilmo/api/enrolment-calculation-configs/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ilmo/api/enrolment-calculation-configs/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
