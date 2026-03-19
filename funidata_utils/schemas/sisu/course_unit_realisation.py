@@ -16,13 +16,13 @@ from funidata_utils.schemas.sisu.course_unit import CooperationNetworkDetails
 
 
 class LiteratureName(HashableBaseModel):
-    localId: OTM_ID_REGEX_VALIDATED_STR
+    localId: str
     type: Literal["LiteratureName"]
     name: str
 
 
 class LiteratureReference(HashableBaseModel):
-    localId: OTM_ID_REGEX_VALIDATED_STR
+    localId: str
     type: Literal["LiteratureReference"]
     url: str
 
@@ -75,7 +75,7 @@ class PersonWithCourseUnitResponsibilityInfoType(BaseModel):
     validityPeriod: LocalDateRange | None = None
 
 
-class ExternalLink(BaseModel):
+class LocalizedLink(BaseModel):
     url: LocalizedString | None = None
     label: LocalizedString | None = None
 
@@ -112,12 +112,12 @@ class CourseUnitRealisation(SisBase):
     enrolmentPeriod: LocalDateTimeRange | None = None
     lateEnrolmentEnd: datetime | None = None
     enrolmentAdditionalCancellationEnd: datetime | None = None
-    externalEnrolmentLink: ExternalLink | None = None
+    externalEnrolmentLink: LocalizedLink | None = None
     usesExternalEnrolment: bool | None = None
     customCodeUrns: Annotated[dict[str, list[str]], Field(min_length=1)] | None = None
     classificationCodeUrns: Annotated[dict[str, list[str]], Field(min_length=1)] | None = None
     continuousEnrolment: bool | None = None
-    externalStructureLink: ExternalLink | None = None
+    externalStructureLink: LocalizedLink | None = None
     usesExternalStructure: bool | None = None
     confirmedStudySubGroupModificationAllowed: bool | None = None
     confirmedStudySubGroupModificationEnd: datetime | None = None
