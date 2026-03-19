@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, conset, conlist
 from funidata_utils.schemas.sisu.base import SisBase, HashableBaseModel
 from funidata_utils.schemas.sisu.common import (
     LocalDateRange, LocalDateTimeRange, OTM_ID_REGEX_VALIDATED_STR, sis_code_urn_pattern,
-    STRIPPED_STR, IntegerRange, SIS_MAX_MEDIUM_SET_SIZE, OrganisationRoleShare, SIS_MAX_SMALL_SET_SIZE,
+    STRIPPED_STR, IntRange, SIS_MAX_MEDIUM_SET_SIZE, OrganisationRoleShare, SIS_MAX_SMALL_SET_SIZE,
     LocalizedString,
 )
 from funidata_utils.schemas.sisu.course_unit import CooperationNetworkDetails
@@ -53,7 +53,7 @@ class StudyGroupSet(BaseModel):
     localId: str
     name: LocalizedString
     studySubGroups: list[StudySubGroup]
-    subGroupRange: IntegerRange
+    subGroupRange: IntRange
 
 
 class PersonWithCourseUnitResponsibilityInfoType(BaseModel):
@@ -82,7 +82,7 @@ class CopyDetails(BaseModel):
 class CourseUnitRealisation(SisBase):
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
     id: OTM_ID_REGEX_VALIDATED_STR
-    universityOrgIds: conset(OTM_ID_REGEX_VALIDATED_STR, min_length=1, max_length=1)  # noqa
+    universityOrgIds: conlist(OTM_ID_REGEX_VALIDATED_STR, min_length=1, max_length=1)  # noqa
     flowState: Literal['NOT_READY', 'PUBLISHED', 'CANCELLED', 'ARCHIVED'] | None = None
     massExamSessionId: OTM_ID_REGEX_VALIDATED_STR | None = None
     massExamSessionName: LocalizedString | None = None
@@ -108,8 +108,8 @@ class CourseUnitRealisation(SisBase):
     enrolmentAdditionalCancellationEnd: datetime | None = None
     externalEnrolmentLink: ExternalLink | None = None
     usesExternalEnrolment: bool | None = None
-    customCodeUrns: dict[str, list[str]] | None = None
-    classificationCodeUrns: dict[str, list[str]] | None = None
+    customCodeUrns: Annotated[dict[str, list[str]], Field(min_length=1)] | None = None
+    classificationCodeUrns: Annotated[dict[str, list[str]], Field(min_length=1)] | None = None
     continuousEnrolment: bool | None = None
     externalStructureLink: ExternalLink | None = None
     usesExternalStructure: bool | None = None

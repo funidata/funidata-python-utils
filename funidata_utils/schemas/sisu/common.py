@@ -72,8 +72,8 @@ class CreditRange(BaseModel):
     max: float | None = None
 
 
-class IntegerRange(BaseModel):
-    min: int | None = None
+class IntRange(BaseModel):
+    min: int
     max: int | None = None
 
 
