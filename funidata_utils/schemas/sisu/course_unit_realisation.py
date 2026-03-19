@@ -3,8 +3,9 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, Field, conset, conlist
+from pydantic import BaseModel, Field, conset, conlist, field_serializer
 
+from funidata_utils.schemas.common_serializers import serialize_as_list
 from funidata_utils.schemas.sisu.base import SisBase, HashableBaseModel
 from funidata_utils.schemas.sisu.common import (
     LocalDateRange, LocalDateTimeRange, OTM_ID_REGEX_VALIDATED_STR, sis_code_urn_pattern,
@@ -47,6 +48,11 @@ class StudySubGroup(BaseModel):
     cancelled: bool | None = None
     size: int | None = None
     externalId: str | None = None
+
+    @field_serializer("studyEventIds", "teacherIds")
+    def serialize_set_as_list(self, v, _info) -> list[dict]:
+        serialized_list = serialize_as_list(v)
+        return serialized_list
 
 
 class StudyGroupSet(BaseModel):
@@ -117,3 +123,14 @@ class CourseUnitRealisation(SisBase):
     confirmedStudySubGroupModificationEnd: datetime | None = None
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     copyDetails: CopyDetails | None = None
+
+    @field_serializer("assessmentItemIds", "literature", "learningEnvironments")
+    def serialize_set_as_list(self, v, _info) -> list[dict]:
+        serialized_list = serialize_as_list(v)
+        return serialized_list
+
+    @field_serializer('lateEnrolmentEnd', 'enrolmentAdditionalCancellationEnd', 'confirmedStudySubGroupModificationEnd')
+    def datetime_as_isoformat(self, val: datetime, _info):
+        if isinstance(val, datetime):
+            return val.isoformat()
+        return val
