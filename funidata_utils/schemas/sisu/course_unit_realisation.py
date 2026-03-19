@@ -50,7 +50,7 @@ class StudySubGroup(BaseModel):
     externalId: str | None = None
 
     @field_serializer("studyEventIds", "teacherIds")
-    def serialize_set_as_list(self, v, _info) -> list[dict]:
+    def serialize_set_as_list(self, v, _info) -> list[str] | None:
         serialized_list = serialize_as_list(v)
         return serialized_list
 
@@ -125,12 +125,18 @@ class CourseUnitRealisation(SisBase):
     copyDetails: CopyDetails | None = None
 
     @field_serializer("assessmentItemIds", "literature", "learningEnvironments")
-    def serialize_set_as_list(self, v, _info) -> list[dict]:
+    def serialize_set_as_list(self, v, _info) -> list[dict] | None:
         serialized_list = serialize_as_list(v)
         return serialized_list
 
     @field_serializer('lateEnrolmentEnd', 'enrolmentAdditionalCancellationEnd', 'confirmedStudySubGroupModificationEnd')
-    def datetime_as_isoformat(self, val: datetime, _info):
-        if isinstance(val, datetime):
-            return val.isoformat()
-        return val
+    def serialize_date_time_as_str(self, dt: datetime | None, _info):
+        if dt is None:
+            return dt
+        return dt.isoformat()
+
+    @field_serializer('publishDate')
+    def serialize_date_as_str(self, dt: date | None, _info):
+        if dt is None:
+            return dt
+        return dt.isoformat()
