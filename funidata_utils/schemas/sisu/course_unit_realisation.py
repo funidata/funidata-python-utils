@@ -124,8 +124,13 @@ class CourseUnitRealisation(SisBase):
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     copyDetails: CopyDetails | None = None
 
-    @field_serializer("assessmentItemIds", "literature", "learningEnvironments")
+    @field_serializer("literature", "learningEnvironments")
     def serialize_set_as_list(self, v, _info) -> list[dict] | None:
+        serialized_list = serialize_as_list(v)
+        return serialized_list
+
+    @field_serializer("assessmentItemIds")
+    def serialize_set_as_list_str(self, v, _info) -> list[str] | None:
         serialized_list = serialize_as_list(v)
         return serialized_list
 
