@@ -102,7 +102,7 @@ class CourseUnitRealisation(SisBase):
     learningEnvironments: conset(LearningEnvironment, max_length=SIS_MAX_SMALL_SET_SIZE) | None = None  # noqa
     studyFormat: LocalizedString | None = None
     additionalInfo: LocalizedString | None = None
-    publishDate: date
+    publishDate: date | None = None
     activityPeriod: LocalDateRange
     teachingLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))] | None = None
     courseUnitRealisationTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('course-unit-realisation-type'))]
