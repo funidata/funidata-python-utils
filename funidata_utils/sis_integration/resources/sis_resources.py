@@ -315,6 +315,10 @@ class CodeBooks(BaseResource):
         endpoint='/kori/api/codebooks/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+    imports = SisImport(
+        endpoint='/kori/api/codebooks/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
 
 
 class CurriculumPeriods(BaseResource):
