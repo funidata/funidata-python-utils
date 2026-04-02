@@ -10,12 +10,9 @@ from funidata_utils.schemas.sisu.base import SisBase, HashableBaseModel
 from funidata_utils.schemas.sisu.common import (
     LocalDateRange, LocalDateTimeRange, OTM_ID_REGEX_VALIDATED_STR, sis_code_urn_pattern,
     STRIPPED_STR, IntRange, SIS_MAX_MEDIUM_SET_SIZE, OrganisationRoleShare, SIS_MAX_SMALL_SET_SIZE,
-    LocalizedString,
+    LocalizedString, SIS_MAX_TWEET_LENGTH,
 )
 from funidata_utils.schemas.sisu.course_unit import CooperationNetworkDetails
-
-
-TWEET_TEXT_MAX_LENGTH = 160
 
 class LiteratureName(HashableBaseModel):
     localId: str
@@ -130,7 +127,7 @@ class CourseUnitRealisation(SisBase):
     def tweet_text_max_len(cls, val: LocalizedString | None) -> LocalizedString | None:
         if val is None:
             return None
-        if len(val.fi) > TWEET_TEXT_MAX_LENGTH or len(val.sv) > TWEET_TEXT_MAX_LENGTH or len(val.en) > TWEET_TEXT_MAX_LENGTH:
+        if len(val.fi) > SIS_MAX_TWEET_LENGTH or len(val.sv) > SIS_MAX_TWEET_LENGTH or len(val.en) > SIS_MAX_TWEET_LENGTH:
             raise ValueError('Tweet text exceeds max length')
         return val
 
