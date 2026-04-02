@@ -127,7 +127,7 @@ class CourseUnitRealisation(SisBase):
     def tweet_text_max_len(cls, val: LocalizedString | None) -> LocalizedString | None:
         if val is None:
             return None
-        if len(val.fi) > SIS_MAX_TWEET_LENGTH or len(val.sv) > SIS_MAX_TWEET_LENGTH or len(val.en) > SIS_MAX_TWEET_LENGTH:
+        if len(val.fi or '') > SIS_MAX_TWEET_LENGTH or len(val.sv or '') > SIS_MAX_TWEET_LENGTH or len(val.en or '') > SIS_MAX_TWEET_LENGTH:
             raise ValueError('Tweet text exceeds max length')
         return val
 
