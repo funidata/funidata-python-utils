@@ -3,17 +3,16 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, Field, conset, conlist, field_serializer
+from pydantic import BaseModel, Field, conset, conlist, field_serializer, field_validator
 
 from funidata_utils.schemas.common_serializers import serialize_as_list
 from funidata_utils.schemas.sisu.base import SisBase, HashableBaseModel
 from funidata_utils.schemas.sisu.common import (
     LocalDateRange, LocalDateTimeRange, OTM_ID_REGEX_VALIDATED_STR, sis_code_urn_pattern,
     STRIPPED_STR, IntRange, SIS_MAX_MEDIUM_SET_SIZE, OrganisationRoleShare, SIS_MAX_SMALL_SET_SIZE,
-    LocalizedString,
+    LocalizedString, SIS_MAX_TWEET_LENGTH,
 )
 from funidata_utils.schemas.sisu.course_unit import CooperationNetworkDetails
-
 
 class LiteratureName(HashableBaseModel):
     localId: str
@@ -123,6 +122,14 @@ class CourseUnitRealisation(SisBase):
     confirmedStudySubGroupModificationEnd: datetime | None = None
     cooperationNetworkDetails: CooperationNetworkDetails | None = None
     copyDetails: CopyDetails | None = None
+
+    @field_validator('tweetText')
+    def tweet_text_max_len(cls, val: LocalizedString | None) -> LocalizedString | None:
+        if val is None:
+            return None
+        if len(val.fi or '') > SIS_MAX_TWEET_LENGTH or len(val.sv or '') > SIS_MAX_TWEET_LENGTH or len(val.en or '') > SIS_MAX_TWEET_LENGTH:
+            raise ValueError('Tweet text exceeds max length')
+        return val
 
     @field_serializer("literature", "learningEnvironments")
     def serialize_set_as_list(self, v, _info) -> list[dict] | None:
