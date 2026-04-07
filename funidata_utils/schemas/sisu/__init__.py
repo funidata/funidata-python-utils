@@ -45,3 +45,4 @@ from .public_person import PublicPerson
 from .cooperation_network import CooperationNetwork
 from .term_registration import (TermRegistration, StudyRightTermRegistrations)
 from .enrolment_calculation_config import EnrolmentCalculationConfig
+from .code_book import CodeBook
