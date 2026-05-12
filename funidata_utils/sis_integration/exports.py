@@ -2,7 +2,7 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 import json
-from typing import TextIO, overload, IO
+from typing import TextIO, overload, IO, Generator, Literal
 
 from .protocols import SisExportable, SupportsExportAuthentication
 from ..request_utils.httpx_requests import send_get_httpx
@@ -41,6 +41,36 @@ def _export_from_endpoint(
     since: str = 'since'
 ) -> IO | list[dict]:
     exported_entities = []
+    for entities in export_from_endpoint_generator(
+        sis_settings=sis_settings,
+        endpoint=endpoint,
+        since_ordinal=since_ordinal,
+        export_limit=export_limit,
+        since=since,
+    ):
+        if fp is None:
+            exported_entities += entities
+        else:
+            for json_entity in entities:
+                fp.write(json.dumps(json_entity))
+                fp.write('\n')
+
+        if len(entities) == 0 or len(entities) < export_limit:
+            break
+
+    if fp is None:
+        return exported_entities
+
+    return fp
+
+
+def export_from_endpoint_generator(
+    sis_settings: SupportsExportAuthentication,
+    endpoint: str,
+    since_ordinal: int = 0,
+    export_limit: int = 1000,
+    since: str = 'since'
+) -> Generator[list[dict], None, None]:
     greatest_ordinal = since_ordinal
     export_limit = export_limit
 
@@ -53,14 +83,9 @@ def _export_from_endpoint(
         )
         if sis_response.status_code == 200:
             response_json = sis_response.json()
-            entities = response_json.get("entities", [])
+            entities: list[dict] = response_json.get("entities", [])
 
-            if fp is None:
-                exported_entities += entities
-            else:
-                for json_entity in entities:
-                    fp.write(json.dumps(json_entity))
-                    fp.write('\n')
+            yield entities
 
             if len(entities) == 0 or len(entities) < export_limit:
                 break
@@ -69,18 +94,14 @@ def _export_from_endpoint(
         else:
             raise Exception(f"Error in export: {sis_response.status_code} : {sis_response.content}")
 
-    if fp is None:
-        return exported_entities
-
-    return fp
-
 
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
-    fp: None = None,
-    since_ordinal: int = 0,
+    fp: None,
+    since_ordinal: int,
+    as_generator: Literal[False]
 ) -> list[dict]:
     ...
 
@@ -90,8 +111,20 @@ def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
     fp: IO,
-    since_ordinal: int = 0,
+    since_ordinal: int,
+    as_generator: Literal[False]
 ) -> IO:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportable,
+    fp: None,
+    since_ordinal: int,
+    as_generator: Literal[True]
+) -> Generator[list[dict], None, None]:
     ...
 
 
@@ -100,7 +133,17 @@ def export_from_sisu(
     resource: SisExportable,
     fp: IO | None = None,
     since_ordinal: int = 0,
-) -> list[dict] | IO:
+    as_generator: bool = False
+) -> list[dict] | IO | Generator[list[dict], None, None]:
+    if as_generator:
+        return export_from_endpoint_generator(
+            endpoint=resource.exports.endpoint,
+            export_limit=resource.exports.default_export_limit,
+            sis_settings=sisu_config,
+            since_ordinal=since_ordinal,
+            since=resource.exports.since,
+        )
+
     if fp:
         return _export_from_endpoint(
             endpoint=resource.exports.endpoint,
