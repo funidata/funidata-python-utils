@@ -4,9 +4,9 @@
 
 import datetime
 from abc import ABC
-from typing import Literal, Annotated
+from typing import Literal, Annotated, Union, Self
 
-from pydantic import BaseModel, conlist, Field, model_validator, field_validator, conset, field_serializer, AfterValidator
+from pydantic import BaseModel, conlist, Field, model_validator, field_validator, conset, field_serializer, AfterValidator, TypeAdapter
 
 from .base import HashableBaseModel
 from .common import (
@@ -25,15 +25,15 @@ class AttainmentNode(BaseModel, ABC):
     type: Literal['AttainmentReferenceNode', 'AttainmentGroupNode']
 
 
-class AttainmentGroupNode(AttainmentNode):
-    type: Literal['AttainmentGroupNode'] = 'AttainmentGroupNode'
-    name: LocalizedString
-    nodes: list[AttainmentNode]
-
-
 class AttainmentReferenceNode(AttainmentNode):
     type: Literal['AttainmentReferenceNode'] = 'AttainmentReferenceNode'
     attainmentId: str
+
+
+class AttainmentGroupNode(AttainmentNode):
+    type: Literal['AttainmentGroupNode'] = 'AttainmentGroupNode'
+    name: LocalizedString
+    nodes: list[AttainmentReferenceNode | Self]
 
 
 class PersonWithAttainmentAcceptorType(HashableBaseModel):
@@ -187,14 +187,14 @@ class CustomModuleAttainment(Attainment):
     type: Literal['CustomModuleAttainment'] = 'CustomModuleAttainment'
     code: str
     name: LocalizedStringWithRequiredOneValue
-    nodes: list[AttainmentNode] | None = None
+    nodes: list[Union[AttainmentGroupNode, AttainmentReferenceNode]] | None = None
 
 
 class DegreeProgrammeAttainment(Attainment):
     type: Literal['DegreeProgrammeAttainment'] = 'DegreeProgrammeAttainment'
     moduleId: str
     moduleGroupId: str
-    nodes: list[AttainmentNode] | None = None
+    nodes: list[Union[AttainmentGroupNode, AttainmentReferenceNode]] | None = None
     embeddedModules: list[dict] | None = None
     acceptorPersons: list[PersonWithAttainmentAcceptorType] = Field(default_factory=lambda x: [])
     acceptorOrganisationIds: conlist(str, min_length=1, max_length=SIS_MAX_MEDIUM_SET_SIZE)
