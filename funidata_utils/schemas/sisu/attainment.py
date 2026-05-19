@@ -6,7 +6,9 @@ import datetime
 from abc import ABC
 from typing import Literal, Annotated, Union, Self
 
-from pydantic import BaseModel, conlist, Field, model_validator, field_validator, conset, field_serializer, AfterValidator,
+from pydantic import (
+    BaseModel, conlist, Field, model_validator, field_validator, conset, field_serializer, AfterValidator,
+)
 
 from .base import HashableBaseModel
 from .common import (
