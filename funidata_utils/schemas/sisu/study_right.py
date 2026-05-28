@@ -117,6 +117,22 @@ def _get_start_and_end_date_from_range(date_range: LocalDateRange | None):
 CodeUrnsStr = Annotated[STRIPPED_STR, Field(pattern='(urn:code)(:[A-z_0-9]+)*')]
 
 
+class StudyRightTransfer(BaseModel):
+    originalStartDate: datetime.date | None = None
+    originalUniversityUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('educational-institution'))] = None
+    usedTerms: int = 0
+    usedAbsenceTerms: int = 0
+    usedStatutoryAbsenceTerms: int = 0
+    transferComments: str | None = None
+
+    @field_serializer('originalStartDate')
+    def serialize_date_fields(self, _date: datetime.date | None, _info):
+        if _date is None:
+            return None
+
+        return _date.isoformat()
+
+
 class StudyRight(BaseModel):
     id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
@@ -142,7 +158,7 @@ class StudyRight(BaseModel):
     studyRightGraduation: Optional[dict] = None
     acceptedSelectionPath: dict
     # requestedSelectionPath: Optional[dict] = None # Causes pain and suffering this does.
-    studyRightTransfer: Optional[dict] = None
+    studyRightTransfer: Optional[StudyRightTransfer] = None
     # state: < Cannot be set, sisu generated
     # statePeriods: < Cannot be set, sisu generated
     phase1MinorSelections: Optional[list[StudyRightMinorSelection]] = None
