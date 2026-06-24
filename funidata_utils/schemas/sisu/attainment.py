@@ -207,3 +207,10 @@ class DegreeProgrammeAttainment(Attainment):
     degreeTitleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-title'))]
     honoraryTitleUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('honorary-title'))] = None
     internationalContractualDegree: dict | None = None
+
+
+class AssessmentItemAttainment(Attainment):
+    courseUnitId: str
+    courseUnitGroupId: str
+    assessmentItemId: str
+    courseUnitRealisationId: str | None
