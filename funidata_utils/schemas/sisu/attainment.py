@@ -79,8 +79,8 @@ class Attainment(ObjectWithDocumentState):
     personId: str = Field(description='PrivatePersonId')
     verifierPersonId: str | None = Field(default=None, description='PublicPersonId', pattern=OTM_ID_REGEX_PATTERN)
     studyRightId: str | None = None
-    registrationDate: str
-    expiryDate: str | None = None
+    registrationDate: datetime.date
+    expiryDate: datetime.date | None = None
     attainmentLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))]
     acceptorPersons: conlist(PersonWithAttainmentAcceptorType, min_length=1)
     organisations: conset(OrganisationRoleShareBase, min_length=1)
@@ -118,8 +118,10 @@ class Attainment(ObjectWithDocumentState):
         serialized_list = serialize_as_list(v)
         return serialized_list
 
-    @field_serializer('attainmentDate')
+    @field_serializer('attainmentDate', 'registrationDate', 'expiryDate')
     def date_as_isoformat(self, val: datetime.date, _info):
+        if val is None:
+            return None
         return val.isoformat()
 
     @field_validator('attainmentDate')
