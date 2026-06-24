@@ -149,6 +149,12 @@ class Attainment(ObjectWithDocumentState):
             raise ValueError("Substituted attainment should have CreditTransferInfo")
         return self
 
+    @model_validator(mode='after')
+    def valid_rdi_credits(self):
+        if (self.rdiCredits or 0) > self.credits:
+            raise ValueError("RDI credits cannot exceed credits")
+        return self
+
     @field_validator("organisations")
     def has_valid_set_of_organisation_shares(cls, val: list[OrganisationRoleShareBase], _info):
         orgs_by_role_urn = group_by(
