@@ -81,23 +81,23 @@ async def _binary_search_enabled_post_httpx(
 
     match method:
         case 'POST':
-            _payload = flatten(payload) if is_complex_list_of_batches else payload
-            logger.debug("Sending POST with %d items to %s", len(_payload), path)
+            _request_payload = flatten(payload) if is_complex_list_of_batches else payload
+            logger.debug("Sending POST with %d items to %s", len(_request_payload), path)
             response = await client.post(
                 path,
                 auth=auth,
-                json=_payload,
+                json=_request_payload,
                 params=params,
                 timeout=120,
             )
 
         case 'PATCH':
-            _payload = flatten(payload) if is_complex_list_of_batches else payload
-            logger.debug("Sending PATCH with %d items to %s", len(_payload), path)
+            _request_payload = flatten(payload) if is_complex_list_of_batches else payload
+            logger.debug("Sending PATCH with %d items to %s", len(_request_payload), path)
             response = await client.patch(
                 path,
                 auth=auth,
-                json=_payload,
+                json=_request_payload,
                 params=params,
                 timeout=120,
             )
@@ -143,18 +143,27 @@ async def _binary_search_enabled_post_httpx(
             pass
 
     # If everything is failed, stop.
-    if len(failing_ids) == len(payload):
+    # _request_payload here is the flattened payload, aka "amount of entities sent equals amount of failing ids"
+    if len(failing_ids) == len(_request_payload):
         return [response]
 
     # try to convert the payload into "failed" and "not failed" lists
     first_batch = []
     second_batch = []
     if failing_ids:
-        for x in payload:
-            if x['id'] in failing_ids:
-                first_batch.append(x)
-            else:
-                second_batch.append(x)
+        if is_complex_list_of_batches:
+            # If we are in the context of "complex" aka grouped data: [ [person_1_1, person_1_2], [person_2_1] ]
+            for subset in payload:
+                if any(_id in subset for _id in failing_ids):
+                    first_batch.append(subset)
+                else:
+                    second_batch.append(subset)
+        else:
+            for x in payload:
+                if x['id'] in failing_ids:
+                    first_batch.append(x)
+                else:
+                    second_batch.append(x)
 
     # If we were unable to find any of the failing ids somehow, fallback to default splitting.
     if len(first_batch) <= 0:
