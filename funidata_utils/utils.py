@@ -1,13 +1,19 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-
+import sys
 from collections import defaultdict
 from functools import reduce
 from statistics import mean, stdev
 from typing import Any, Generator, Callable
 
 import httpx
+
+
+if sys.version_info >= (3, 12):
+    from .compat.utils_312 import group_by  # noqa: F401 ("Unused import")
+else:
+    from .compat.utils_legacy import group_by  # noqa: F401 ("Unused import")
 
 
 def _recursive_flatten(
@@ -25,13 +31,6 @@ def flatten(
     lst: list
 ) -> list:
     return list(_recursive_flatten(lst))
-
-
-def group_by[T](
-    seq: list[T],
-    key: Callable
-) -> dict[Any, list[T]]:
-    return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
 
 def group_indexes_by(

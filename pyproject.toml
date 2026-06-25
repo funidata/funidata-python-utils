@@ -6,11 +6,12 @@ build-backend = "pdm.backend"
 name = "funidata-utils"
 dynamic = ["version"]
 description = "A collection of utility packages for interacting with Funidata products"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python",

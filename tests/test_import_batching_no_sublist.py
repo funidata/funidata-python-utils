@@ -1,7 +1,7 @@
 import pytest
 
 from funidata_utils.request_utils.async_httpx_requests import _binary_search_enabled_post_httpx
-from tests.test_utils import mock_client, get_entity_counts_by_status_code
+from tests.helpers import mock_client, get_entity_counts_by_status_code
 
 
 @pytest.mark.asyncio
