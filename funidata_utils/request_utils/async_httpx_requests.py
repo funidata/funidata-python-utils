@@ -118,7 +118,7 @@ async def _binary_search_enabled_post_httpx(
     else:
         if len(payload) <= 1 and not binary_err_search_sublists:
             return [response]
-        # Final batch, cannot split into further batches
+        # Final batch, cannot split into further batches, but can split into sublist if enabled
         if len(payload) == 1 and binary_err_search_sublists:
             return await _binary_search_enabled_post_httpx(
                 path=path,
@@ -136,7 +136,10 @@ async def _binary_search_enabled_post_httpx(
     if 400 <= response.status_code < 500:
         # Try to find the "failingIds" from the response of 400-status codes
         try:
-            err_json = json.loads(response.json())
+            err_json = response.json()
+            if isinstance(err_json, str):
+                err_json = json.loads(err_json)
+
             if err_json.get('failingIds'):
                 failing_ids = err_json['failingIds']
         except Exception:
@@ -153,14 +156,26 @@ async def _binary_search_enabled_post_httpx(
     if failing_ids:
         if is_complex_list_of_batches:
             # If we are in the context of "complex" aka grouped data: [ [person_1_1, person_1_2], [person_2_1] ]
-            for subset in payload:
-                if any(_id in subset for _id in failing_ids):
-                    first_batch.append(subset)
-                else:
-                    second_batch.append(subset)
+            if binary_err_search_sublists:
+                # If we allow searching sublists, we can split entities by passing/failing directly
+                for subset in payload:
+                    for _entity in subset:
+                        if _entity.get('id') in failing_ids:
+                            first_batch.append(_entity)
+                        else:
+                            second_batch.append(_entity)
+            else:
+                # If we don't allow sublist searching, split according to existence of fail in a batch
+                for subset in payload:
+                    subset_ids = {x.get('id') for x in subset}
+                    if any(_id in subset_ids for _id in failing_ids):
+                        first_batch.append(subset)
+                    else:
+                        second_batch.append(subset)
         else:
+            # Payload is not a list of lists, can directly check against it.
             for x in payload:
-                if x['id'] in failing_ids:
+                if x.get('id') in failing_ids:
                     first_batch.append(x)
                 else:
                     second_batch.append(x)
