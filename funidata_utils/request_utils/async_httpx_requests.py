@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 
 import asyncio
+import json
 import logging
 import typing
 from typing import Tuple, Any, Callable, Literal
@@ -117,6 +118,7 @@ async def _binary_search_enabled_post_httpx(
     else:
         if len(payload) <= 1 and not binary_err_search_sublists:
             return [response]
+        # Final batch, cannot split into further batches
         if len(payload) == 1 and binary_err_search_sublists:
             return await _binary_search_enabled_post_httpx(
                 path=path,
@@ -130,9 +132,38 @@ async def _binary_search_enabled_post_httpx(
                 method=method,
             )
 
+    failing_ids = []
+    if 400 <= response.status_code < 500:
+        # Try to find the "failingIds" from the response of 400-status codes
+        try:
+            err_json = json.loads(response.json())
+            if err_json.get('failingIds'):
+                failing_ids = err_json['failingIds']
+        except Exception:
+            pass
+
+    # If everything is failed, stop.
+    if len(failing_ids) == len(payload):
+        return [response]
+
+    # try to convert the payload into "failed" and "not failed" lists
+    first_batch = []
+    second_batch = []
+    if failing_ids:
+        for x in payload:
+            if x['id'] in failing_ids:
+                first_batch.append(x)
+            else:
+                second_batch.append(x)
+
+    # If we were unable to find any of the failing ids somehow, fallback to default splitting.
+    if len(first_batch) <= 0:
+        first_batch = payload[::2]
+        second_batch = payload[1::2]
+
     first_half_responses = await _binary_search_enabled_post_httpx(
         path=path,
-        payload=payload[::2],
+        payload=first_batch,
         auth=auth,
         params=params,
         client=client,
@@ -143,7 +174,7 @@ async def _binary_search_enabled_post_httpx(
     )
     second_half_responses = await _binary_search_enabled_post_httpx(
         path=path,
-        payload=payload[1::2],
+        payload=second_batch,
         auth=auth,
         params=params,
         client=client,
