@@ -12,6 +12,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python",
     "Framework :: Pydantic",
     "Framework :: Pydantic :: 2",
@@ -50,10 +51,7 @@ version = { source = "scm", fallback_version = "0.0.0" }
 
 
 [tool.pdm.build]
-source-includes = [
-    "tests/",
-    "requirements*.txt",
-]
+excludes = ["tests/"]
 
 [tool.pytest.ini_options]
 addopts = [
