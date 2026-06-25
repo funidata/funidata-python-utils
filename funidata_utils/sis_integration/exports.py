@@ -110,10 +110,21 @@ def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
     since_ordinal: int,
-    as_generator: Literal[False],
     params: dict | None = None,
 ) -> list[dict]:
     # Regular call, no generator or FP reference
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportable,
+    since_ordinal: int,
+    as_generator: Literal[False],
+    params: dict | None = None,
+) -> list[dict]:
+    # Regular call, generator explicit false, no FP reference
     ...
 
 
