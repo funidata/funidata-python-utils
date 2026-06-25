@@ -180,8 +180,8 @@ async def _binary_search_enabled_post_httpx(
                 else:
                     second_batch.append(x)
 
-    # If we were unable to find any of the failing ids somehow, fallback to default splitting.
-    if len(first_batch) <= 0:
+    # If we were unable to create a split at all, continue with default behavior.
+    if len(first_batch) == 0 or len(second_batch) == 0:
         first_batch = payload[::2]
         second_batch = payload[1::2]
 
