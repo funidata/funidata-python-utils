@@ -15,6 +15,11 @@ def mock_client():
 def invalid_handler(request: httpx.Request):
     _content = json.loads(request.content)
     _failing_ids = [_x['id'] for _x in _content if _x.get('invalid')]
+    _exception_ids = [_x['id'] for _x in _content if _x.get('exception')]
+    if _exception_ids:
+        return httpx.Response(
+            status_code=500, json={"reason": "HV000029"}
+        )
     if _failing_ids:
         return httpx.Response(
             status_code=422, json={"failingIds": _failing_ids}
