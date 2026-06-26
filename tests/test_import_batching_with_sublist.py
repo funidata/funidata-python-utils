@@ -49,6 +49,7 @@ async def test_recursive_import_batching_with_sublists_on_no_fails(mock_client):
         _state=_state,
     )
     assert _state['max_seen_depth'] == 0
+    assert _state['sent_requests'] == 1
     assert get_entity_counts_by_status_code(results)[200] == 6
     assert get_entity_counts_by_status_code(results).get(422) is None
 
@@ -99,6 +100,7 @@ async def test_recursive_import_batching_with_sublists_on_one_fail(mock_client):
         _state=_state,
     )
     assert _state['max_seen_depth'] == 1
+    assert _state['sent_requests'] == 3
     assert get_entity_counts_by_status_code(results)[200] == 5
     assert get_entity_counts_by_status_code(results)[422] == 1
 
@@ -151,6 +153,7 @@ async def test_recursive_import_batching_with_sublists_on_multiple_fails(mock_cl
         _state=_state,
     )
     assert _state['max_seen_depth'] == 3
+    assert _state['sent_requests'] == 7
     assert get_entity_counts_by_status_code(results)[200] == 3
     assert get_entity_counts_by_status_code(results)[422] == 3
 
@@ -206,7 +209,7 @@ async def test_recursive_import_batching_with_sublists_on_all_fails(mock_client)
         _state=_state,
     )
     assert _state['max_seen_depth'] == 0
-
+    assert _state['sent_requests'] == 1
     assert get_entity_counts_by_status_code(results).get(200) is None
     assert get_entity_counts_by_status_code(results)[422] == 6
 
@@ -262,6 +265,7 @@ async def test_recursive_import_batching_with_sublists_on_all_exceptions(mock_cl
         _state=_state,
     )
     assert _state['max_seen_depth'] == 4
+    assert _state['sent_requests'] == 14
 
     assert get_entity_counts_by_status_code(results).get(200) is None
     assert get_entity_counts_by_status_code(results)[500] == 6
@@ -318,6 +322,7 @@ async def test_recursive_import_batching_with_sublists_on_all_exceptions_limited
         _state=_state,
     )
     assert _state['max_seen_depth'] == 4
+    assert _state['sent_requests'] == 14
 
     _state = {'max_seen_depth': 0}
     results = await _binary_search_enabled_post_httpx(
@@ -329,6 +334,7 @@ async def test_recursive_import_batching_with_sublists_on_all_exceptions_limited
         _state=_state,
     )
     assert _state['max_seen_depth'] == 1
+    assert _state['sent_requests'] == 3
 
     assert get_entity_counts_by_status_code(results).get(200) is None
     assert get_entity_counts_by_status_code(results)[500] == 6

@@ -74,14 +74,13 @@ async def _binary_search_enabled_post_httpx(
     binary_search_max_depth: int | None = None,
     binary_err_search_sublists: bool = True,
     method: Literal['POST', 'PATCH'] = 'POST',
-    _state: dict[Literal['max_seen_depth'], int] | None = None,
+    _state: dict[
+                Literal['max_seen_depth', 'sent_requests'], int
+            ] | None = None,
 ) -> list[httpx.Response]:
     is_complex_list_of_batches = False
     if isinstance(payload, list) and all(isinstance(x, list) for x in payload[::3]):
         is_complex_list_of_batches = True
-
-    if _state:
-        _state['max_seen_depth'] = max(_state['max_seen_depth'], binary_search_depth)
 
     match method:
         case 'POST':
@@ -108,6 +107,10 @@ async def _binary_search_enabled_post_httpx(
 
         case _:
             raise Exception(f'Unsupported method: {method}')
+
+    if _state:
+        _state['sent_requests'] = _state.get('sent_requests', 0) + 1
+        _state['max_seen_depth'] = max(_state.get('max_seen_depth', 0), binary_search_depth)
 
     if (
         binary_search_max_depth == 0 or
