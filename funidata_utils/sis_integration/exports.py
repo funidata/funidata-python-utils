@@ -88,7 +88,7 @@ def export_from_endpoint_generator(
         sis_response = send_get_httpx(
             path=f"{sis_settings.host}{endpoint}",
             auth=sis_settings.get_export_auth(),
-            params={since: greatest_ordinal, 'limit': export_limit} | params,
+            params=params | {since: greatest_ordinal, 'limit': export_limit},
             proxies=sis_settings.proxies,
         )
         if sis_response.status_code == 200:
