@@ -1,0 +1,27 @@
+x-tests-common: &tests-common
+    volumes:
+      - ./tests:/app/tests
+      - ./funidata_utils:/app/funidata_utils
+
+
+services:
+  pytest_311:
+    build:
+      context: .
+      args:
+        - PYTHON_VERSION=3.11
+    <<: *tests-common
+
+  pytest_312:
+    build:
+      context: .
+      args:
+        - PYTHON_VERSION=3.12
+    <<: *tests-common
+
+  pytest_313:
+    build:
+      context: .
+      args:
+        - PYTHON_VERSION=3.13
+    <<: *tests-common

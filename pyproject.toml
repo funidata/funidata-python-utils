@@ -6,12 +6,14 @@ build-backend = "pdm.backend"
 name = "funidata-utils"
 dynamic = ["version"]
 description = "A collection of utility packages for interacting with Funidata products"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python",
     "Framework :: Pydantic",
     "Framework :: Pydantic :: 2",
@@ -50,10 +52,7 @@ version = { source = "scm", fallback_version = "0.0.0" }
 
 
 [tool.pdm.build]
-source-includes = [
-    "tests/",
-    "requirements*.txt",
-]
+excludes = ["tests/"]
 
 [tool.pytest.ini_options]
 addopts = [

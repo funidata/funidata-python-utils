@@ -22,11 +22,12 @@ async def import_to_sisu(
     resource: SisImportable,
     use_legacy_import: Literal[False],
     fp: IO,
-    batch_size: int | None,
-    binary_search_max_depth: int | None,
-    group_by_key: str | None,
-    binary_err_search_sublists: bool,
-    max_parallel_requests: int,
+    batch_size: int | None = UNSET_BATCH_SIZE,
+    binary_search_max_depth: int | None = 0,
+    group_by_key: str | None = None,
+    binary_err_search_sublists: bool = False,
+    max_parallel_requests: int = 1,
+    params: dict | None = None,
 ) -> list[httpx.Response]:
     ...
 
@@ -37,11 +38,12 @@ async def import_to_sisu(
     resource: SisLegacyImportable,
     use_legacy_import: Literal[True],
     fp: IO,
-    batch_size: int | None,
-    binary_search_max_depth: int | None,
-    group_by_key: str | None,
-    binary_err_search_sublists: bool,
-    max_parallel_requests: int,
+    batch_size: int | None = UNSET_BATCH_SIZE,
+    binary_search_max_depth: int | None = 0,
+    group_by_key: str | None = None,
+    binary_err_search_sublists: bool = False,
+    max_parallel_requests: int = 1,
+    params: dict | None = None,
 ) -> list[httpx.Response]:
     ...
 
@@ -52,11 +54,12 @@ async def import_to_sisu(
     resource: SisImportable,
     use_legacy_import: Literal[False],
     data: list[dict],
-    batch_size: int | None,
-    binary_search_max_depth: int | None,
-    group_by_key: str | None,
-    binary_err_search_sublists: bool,
-    max_parallel_requests: int,
+    batch_size: int | None = UNSET_BATCH_SIZE,
+    binary_search_max_depth: int | None = 0,
+    group_by_key: str | None = None,
+    binary_err_search_sublists: bool = False,
+    max_parallel_requests: int = 1,
+    params: dict | None = None,
 ) -> list[httpx.Response]:
     ...
 
@@ -67,11 +70,12 @@ async def import_to_sisu(
     resource: SisLegacyImportable,
     use_legacy_import: Literal[True],
     data: list[dict],
-    batch_size: int | None,
-    binary_search_max_depth: int | None,
-    group_by_key: str | None,
-    binary_err_search_sublists: bool,
-    max_parallel_requests: int,
+    batch_size: int | None = UNSET_BATCH_SIZE,
+    binary_search_max_depth: int | None = 0,
+    group_by_key: str | None = None,
+    binary_err_search_sublists: bool = False,
+    max_parallel_requests: int = 1,
+    params: dict | None = None,
 ) -> list[httpx.Response]:
     ...
 
@@ -86,7 +90,8 @@ async def import_to_sisu(
     binary_search_max_depth: int | None = 0,
     group_by_key: str | None = None,
     binary_err_search_sublists: bool = False,
-    max_parallel_requests: int = 1
+    max_parallel_requests: int = 1,
+    params: dict | None = None,
 ) -> list[httpx.Response]:
     if fp:
         raise NotImplementedError("Not yet implemented")
@@ -112,6 +117,7 @@ async def import_to_sisu(
         group_by_key=group_by_key,
         method='POST',
         max_parallel_requests=max_parallel_requests,
+        params=params,
     )
 
     return responses
@@ -127,7 +133,8 @@ async def patch_to_sisu(
     binary_search_max_depth: int | None = 0,
     group_by_key: str | None = None,
     binary_err_search_sublists: bool = False,
-    max_parallel_requests: int = 1
+    max_parallel_requests: int = 1,
+    params: dict | None = None,
 ) -> list[httpx.Response]:
     if fp:
         raise NotImplementedError("Not yet implemented")
@@ -153,6 +160,7 @@ async def patch_to_sisu(
         group_by_key=group_by_key,
         method='PATCH',
         max_parallel_requests=max_parallel_requests,
+        params=params,
     )
 
     return responses

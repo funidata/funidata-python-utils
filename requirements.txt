@@ -1,2 +1,4 @@
 -e .[all]
--r requirements-tests.txt
+pytest>=9.1.1, <10.0.0
+coverage[toml] >= 7.9.2,< 8.0
+pytest-asyncio==1.4.0

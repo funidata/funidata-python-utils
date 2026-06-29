@@ -1,12 +1,7 @@
-from typing import Iterable
+import sys
 
 
-def serialize_as_list[typevar](v: set[typevar] | list[typevar] | None) -> list[typevar] | None:
-    if v is None:
-        return None
-
-    try:
-        return list(set(v))
-    except Exception as e:
-        # If it can't be hashed to set, just return as list
-        return list(v)
+if sys.version_info >= (3, 12):
+    from .compat.common_serializers_312 import serialize_as_list  # noqa: F401 ("Unused import")
+else:
+    from .compat.common_serializers_legacy import serialize_as_list  # noqa: F401 ("Unused import")
