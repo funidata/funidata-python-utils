@@ -79,8 +79,8 @@ class Attainment(ObjectWithDocumentState):
     personId: str = Field(description='PrivatePersonId')
     verifierPersonId: str | None = Field(default=None, description='PublicPersonId', pattern=OTM_ID_REGEX_PATTERN)
     studyRightId: str | None = None
-    registrationDate: str
-    expiryDate: str | None = None
+    registrationDate: datetime.date
+    expiryDate: datetime.date | None = None
     attainmentLanguageUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('language'))]
     acceptorPersons: conlist(PersonWithAttainmentAcceptorType, min_length=1)
     organisations: conset(OrganisationRoleShareBase, min_length=1)
@@ -118,8 +118,10 @@ class Attainment(ObjectWithDocumentState):
         serialized_list = serialize_as_list(v)
         return serialized_list
 
-    @field_serializer('attainmentDate')
+    @field_serializer('attainmentDate', 'registrationDate', 'expiryDate')
     def date_as_isoformat(self, val: datetime.date, _info):
+        if val is None:
+            return None
         return val.isoformat()
 
     @field_validator('attainmentDate')
@@ -145,6 +147,12 @@ class Attainment(ObjectWithDocumentState):
             raise ValueError("Attained attainment cannot have CreditTransferInfo")
         if self.state == 'SUBSTITUTED' and not self.creditTransferInfo:
             raise ValueError("Substituted attainment should have CreditTransferInfo")
+        return self
+
+    @model_validator(mode='after')
+    def valid_rdi_credits(self):
+        if (self.rdiCredits or 0) > self.credits:
+            raise ValueError("RDI credits cannot exceed credits")
         return self
 
     @field_validator("organisations")
@@ -205,3 +213,10 @@ class DegreeProgrammeAttainment(Attainment):
     degreeTitleUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('degree-title'))]
     honoraryTitleUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('honorary-title'))] = None
     internationalContractualDegree: dict | None = None
+
+
+class AssessmentItemAttainment(Attainment):
+    courseUnitId: str
+    courseUnitGroupId: str
+    assessmentItemId: str
+    courseUnitRealisationId: str | None
