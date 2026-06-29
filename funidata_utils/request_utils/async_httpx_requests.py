@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 
 import asyncio
+import json
 import logging
 import typing
 from typing import Tuple, Any, Callable, Literal
@@ -73,6 +74,9 @@ async def _binary_search_enabled_post_httpx(
     binary_search_max_depth: int | None = None,
     binary_err_search_sublists: bool = True,
     method: Literal['POST', 'PATCH'] = 'POST',
+    _state: dict[
+                Literal['max_seen_depth', 'sent_requests'], int
+            ] | None = None,
 ) -> list[httpx.Response]:
     is_complex_list_of_batches = False
     if isinstance(payload, list) and all(isinstance(x, list) for x in payload[::3]):
@@ -80,29 +84,33 @@ async def _binary_search_enabled_post_httpx(
 
     match method:
         case 'POST':
-            _payload = flatten(payload) if is_complex_list_of_batches else payload
-            logger.debug("Sending POST with %d items to %s", len(_payload), path)
+            _request_payload = flatten(payload) if is_complex_list_of_batches else payload
+            logger.debug("Sending POST with %d items to %s", len(_request_payload), path)
             response = await client.post(
                 path,
                 auth=auth,
-                json=_payload,
+                json=_request_payload,
                 params=params,
                 timeout=120,
             )
 
         case 'PATCH':
-            _payload = flatten(payload) if is_complex_list_of_batches else payload
-            logger.debug("Sending PATCH with %d items to %s", len(_payload), path)
+            _request_payload = flatten(payload) if is_complex_list_of_batches else payload
+            logger.debug("Sending PATCH with %d items to %s", len(_request_payload), path)
             response = await client.patch(
                 path,
                 auth=auth,
-                json=_payload,
+                json=_request_payload,
                 params=params,
                 timeout=120,
             )
 
         case _:
             raise Exception(f'Unsupported method: {method}')
+
+    if _state:
+        _state['sent_requests'] = _state.get('sent_requests', 0) + 1
+        _state['max_seen_depth'] = max(_state.get('max_seen_depth', 0), binary_search_depth)
 
     if (
         binary_search_max_depth == 0 or
@@ -117,6 +125,7 @@ async def _binary_search_enabled_post_httpx(
     else:
         if len(payload) <= 1 and not binary_err_search_sublists:
             return [response]
+        # Final batch, cannot split into further batches, but can split into sublist if enabled
         if len(payload) == 1 and binary_err_search_sublists:
             return await _binary_search_enabled_post_httpx(
                 path=path,
@@ -128,11 +137,65 @@ async def _binary_search_enabled_post_httpx(
                 binary_search_max_depth=binary_search_max_depth,
                 binary_err_search_sublists=False,
                 method=method,
+                _state=_state
             )
+
+    failing_ids = []
+    if 400 <= response.status_code < 500:
+        # Try to find the "failingIds" from the response of 400-status codes
+        try:
+            err_json = response.json()
+            if isinstance(err_json, str):
+                err_json = json.loads(err_json)
+
+            if err_json.get('failingIds'):
+                failing_ids = err_json['failingIds']
+        except Exception:
+            pass
+
+    # If everything is failed, stop.
+    # _request_payload here is the flattened payload, aka "amount of entities sent equals amount of failing ids"
+    if len(failing_ids) == len(_request_payload):
+        return [response]
+
+    # try to convert the payload into "failed" and "not failed" lists
+    first_batch = []
+    second_batch = []
+    if failing_ids:
+        if is_complex_list_of_batches:
+            # If we are in the context of "complex" aka grouped data: [ [person_1_1, person_1_2], [person_2_1] ]
+            if binary_err_search_sublists:
+                # If we allow searching sublists, we can split entities by passing/failing directly
+                for subset in payload:
+                    for _entity in subset:
+                        if _entity.get('id') in failing_ids:
+                            first_batch.append(_entity)
+                        else:
+                            second_batch.append(_entity)
+            else:
+                # If we don't allow sublist searching, split according to existence of fail in a batch
+                for subset in payload:
+                    subset_ids = {x.get('id') for x in subset}
+                    if any(_id in subset_ids for _id in failing_ids):
+                        first_batch.append(subset)
+                    else:
+                        second_batch.append(subset)
+        else:
+            # Payload is not a list of lists, can directly check against it.
+            for x in payload:
+                if x.get('id') in failing_ids:
+                    first_batch.append(x)
+                else:
+                    second_batch.append(x)
+
+    # If we were unable to create a split at all, continue with default behavior.
+    if len(first_batch) == 0 or len(second_batch) == 0:
+        first_batch = payload[::2]
+        second_batch = payload[1::2]
 
     first_half_responses = await _binary_search_enabled_post_httpx(
         path=path,
-        payload=payload[::2],
+        payload=first_batch,
         auth=auth,
         params=params,
         client=client,
@@ -140,10 +203,11 @@ async def _binary_search_enabled_post_httpx(
         binary_search_max_depth=binary_search_max_depth,
         binary_err_search_sublists=binary_err_search_sublists,
         method=method,
+        _state=_state,
     )
     second_half_responses = await _binary_search_enabled_post_httpx(
         path=path,
-        payload=payload[1::2],
+        payload=second_batch,
         auth=auth,
         params=params,
         client=client,
@@ -151,6 +215,7 @@ async def _binary_search_enabled_post_httpx(
         binary_search_max_depth=binary_search_max_depth,
         binary_err_search_sublists=binary_err_search_sublists,
         method=method,
+        _state=_state
     )
     return first_half_responses + second_half_responses
 
