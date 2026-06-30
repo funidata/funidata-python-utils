@@ -23,8 +23,8 @@ class Thesis(BaseModel):
     thesisTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('thesis-type'))]
     responsibilityInfos: conset(PersonWithAttainmentAcceptorType, min_length=1)
     organisations: conset(OrganisationRoleShareBase, min_length=1) | None = None
-    courseUnitId: str
-    courseUnitGroupId: str
+    courseUnitId: str | None = None
+    courseUnitGroupId: str | None = None
     state: Literal['ATTAINED']
     publicInspectionDate: datetime.date | None = None
     commissionType: Literal['COMMISSION', 'NONE']
