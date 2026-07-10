@@ -124,13 +124,6 @@ class Attainment(ObjectWithDocumentState):
             return None
         return val.isoformat()
 
-    @field_validator('attainmentDate')
-    def attainment_date_valid(cls, val: datetime.date, _info):
-        if val > datetime.date.today():
-            raise ValueError("Attainment date must not be in the future")
-
-        return val
-
     @model_validator(mode='after')
     def valid_primary_attainment(self):
         if self.documentState == 'DELETED' or not self.primary:
@@ -183,6 +176,13 @@ class CourseUnitAttainment(Attainment):
     evaluationCriteria: LocalizedString | None = None
     assessmentItemAttainmentIds: list[str] | None = None
 
+    @field_validator('attainmentDate')
+    def attainment_date_valid(cls, val: datetime.date, _info):
+        if val > datetime.date.today():
+            raise ValueError("Attainment date must not be in the future")
+
+        return val
+
 
 class CustomCourseUnitAttainment(Attainment):
     type: Literal['CustomCourseUnitAttainment'] = 'CustomCourseUnitAttainment'
@@ -191,6 +191,13 @@ class CustomCourseUnitAttainment(Attainment):
     courseUnitTypeUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('course-unit-type'))]
     code: str
     customStudyDraftId: str | None = None
+
+    @field_validator('attainmentDate')
+    def attainment_date_valid(cls, val: datetime.date, _info):
+        if val > datetime.date.today():
+            raise ValueError("Attainment date must not be in the future")
+
+        return val
 
 
 class CustomModuleAttainment(Attainment):
