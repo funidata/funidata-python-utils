@@ -229,3 +229,11 @@ class AssessmentItemAttainment(Attainment):
     courseUnitGroupId: str
     assessmentItemId: str
     courseUnitRealisationId: str | None
+
+
+class StudyModuleAttainment(Attainment):
+    type: Literal['ModuleAttainment'] = 'ModuleAttainment'
+    moduleId: str
+    moduleGroupId: str
+    nodes: list[Union[AttainmentGroupNode, AttainmentReferenceNode]] | None = None
+    embeddedModules: list[dict] | None = None
