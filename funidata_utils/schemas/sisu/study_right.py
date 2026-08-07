@@ -133,6 +133,17 @@ class StudyRightTransfer(BaseModel):
         return _date.isoformat()
 
 
+class AttainableDegree(BaseModel):
+    degreeName: str | None = None
+    internationalInstitutionUrn: Annotated[STRIPPED_STR, Field(pattern=sis_code_urn_pattern('international-institution'))]
+
+
+class InternationalContractualDegree(BaseModel):
+    localId: str
+    internationalContractualDegreeAgreementId: str
+    attainableDegrees: list[AttainableDegree]
+
+
 class StudyRight(BaseModel):
     id: OTM_ID_REGEX_VALIDATED_STR
     documentState: Literal['ACTIVE', 'DRAFT', 'DELETED']
@@ -176,8 +187,8 @@ class StudyRight(BaseModel):
     phase2QualificationUrns: Optional[list] = None
     phase1EducationLocationUrn: Annotated[STRIPPED_STR, Field(..., pattern=sis_code_urn_pattern('municipality'))]
     phase2EducationLocationUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('municipality'))] = None
-    phase1InternationalContractualDegree: Optional[dict] = None
-    phase2InternationalContractualDegree: Optional[dict] = None
+    phase1InternationalContractualDegree: InternationalContractualDegree | None = None
+    phase2InternationalContractualDegree: InternationalContractualDegree | None = None
     admissionTypeUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('admission-type'))] = None
     codeUrns: list[CodeUrnsStr]
     additionalInformation: Optional[dict] = None
