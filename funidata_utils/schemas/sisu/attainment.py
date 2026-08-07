@@ -112,6 +112,7 @@ class Attainment(ObjectWithDocumentState):
         'DegreeProgrammeAttainment'
     ]
     attainmentDate: datetime.date
+    s2r2Classification: str | None = None
 
     @field_serializer('organisations')
     def organisations_as_list(self, v, _info) -> list[dict]:
