@@ -5,9 +5,9 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, Field, conset, field_serializer
 
-from funidata_utils.schemas.common_serializers import serialize_as_list
-from funidata_utils.schemas.sisu.base import SisBase
-from funidata_utils.schemas.sisu.common import (
+from ..common_serializers import serialize_as_list
+from .base import SisBase
+from .common import (
     OTM_ID_REGEX_VALIDATED_STR, LocalizedString, STRIPPED_STR, sis_code_urn_pattern, CreditRange,
     SIS_MAX_SMALL_SET_SIZE,
 )
