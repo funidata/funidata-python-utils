@@ -223,6 +223,7 @@ class DegreeProgrammeAttainment(Attainment):
 
 
 class AssessmentItemAttainment(Attainment):
+    type: Literal['AssessmentItemAttainment'] = 'AssessmentItemAttainment'
     courseUnitId: str
     courseUnitGroupId: str
     assessmentItemId: str
