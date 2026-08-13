@@ -8,6 +8,8 @@ from .study_right import (
     StudyRightCancellation,
     StudyRightCourseUnitSelection,
     StudyRightMinorSelection,
+    InternationalContractualDegree,
+    AttainableDegree,
 )
 from .common import LocalizedString
 from .attainment import (
@@ -15,6 +17,7 @@ from .attainment import (
     CustomCourseUnitAttainment,
     CustomModuleAttainment,
     DegreeProgrammeAttainment,
+    StudyModuleAttainment,
 )
 from .mobility_period import MobilityPeriod
 from .thesis import Thesis
@@ -46,3 +49,5 @@ from .cooperation_network import CooperationNetwork
 from .term_registration import (TermRegistration, StudyRightTermRegistrations)
 from .enrolment_calculation_config import EnrolmentCalculationConfig
 from .code_book import CodeBook
+from .study_right_cooperation_network_status import CooperationNetworkStatus
+from .attained_qualification import AttainedQualification

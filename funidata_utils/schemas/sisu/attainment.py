@@ -112,6 +112,7 @@ class Attainment(ObjectWithDocumentState):
         'DegreeProgrammeAttainment'
     ]
     attainmentDate: datetime.date
+    s2r2Classification: str | None = None
 
     @field_serializer('organisations')
     def organisations_as_list(self, v, _info) -> list[dict]:
@@ -223,7 +224,16 @@ class DegreeProgrammeAttainment(Attainment):
 
 
 class AssessmentItemAttainment(Attainment):
+    type: Literal['AssessmentItemAttainment'] = 'AssessmentItemAttainment'
     courseUnitId: str
     courseUnitGroupId: str
     assessmentItemId: str
     courseUnitRealisationId: str | None
+
+
+class StudyModuleAttainment(Attainment):
+    type: Literal['ModuleAttainment'] = 'ModuleAttainment'
+    moduleId: str
+    moduleGroupId: str
+    nodes: list[Union[AttainmentGroupNode, AttainmentReferenceNode]] | None = None
+    embeddedModules: list[dict] | None = None
