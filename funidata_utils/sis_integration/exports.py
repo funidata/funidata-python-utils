@@ -4,7 +4,7 @@
 import json
 from typing import TextIO, overload, IO, Generator, Literal
 
-from .protocols import SisExportable, SupportsExportAuthentication
+from .protocols import SisExportable, SupportsExportAuthentication, ScramblingClass, SisExportableSupportScrambling
 from ..request_utils.httpx_requests import send_get_httpx
 
 
@@ -17,6 +17,7 @@ def _export_from_endpoint(
     export_limit: int = 1000,
     since: str = 'since',
     params: dict | None = None,
+    scrambling_classes: list[ScramblingClass] | None = None
 ) -> list[dict]:
     ...
 
@@ -30,6 +31,7 @@ def _export_from_endpoint(
     export_limit: int = 1000,
     since: str = 'since',
     params: dict | None = None,
+    scrambling_classes: list[ScramblingClass] | None = None
 ) -> TextIO:
     ...
 
@@ -42,6 +44,7 @@ def _export_from_endpoint(
     export_limit: int = 1000,
     since: str = 'since',
     params: dict | None = None,
+    scrambling_classes: list[ScramblingClass] | None = None
 ) -> IO | list[dict]:
     if not params:
         params = {}
@@ -54,6 +57,7 @@ def _export_from_endpoint(
         export_limit=export_limit,
         since=since,
         params=params,
+        scrambling_classes=scrambling_classes
     ):
         if fp is None:
             exported_entities += entities
@@ -78,6 +82,7 @@ def export_from_endpoint_generator(
     export_limit: int = 1000,
     since: str = 'since',
     params: dict | None = None,
+    scrambling_classes: list[ScramblingClass] | None = None
 ) -> Generator[list[dict], None, None]:
     greatest_ordinal = since_ordinal
     export_limit = export_limit
@@ -94,8 +99,15 @@ def export_from_endpoint_generator(
         if sis_response.status_code == 200:
             response_json = sis_response.json()
             entities: list[dict] = response_json.get("entities", [])
-
-            yield entities
+            if scrambling_classes:
+                _data = [
+                    scrambling_class.scramble(entity)
+                    for entity in entities
+                    for scrambling_class in scrambling_classes
+                ]
+                yield _data
+            else:
+                yield entities
 
             if len(entities) == 0 or len(entities) < export_limit:
                 break
@@ -109,57 +121,100 @@ def export_from_endpoint_generator(
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
     resource: SisExportable,
-    since_ordinal: int,
-    params: dict | None = None,
-) -> list[dict]:
-    # Regular call, no generator or FP reference
-    ...
-
-
-@overload
-def export_from_sisu(
-    sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
-    since_ordinal: int,
-    as_generator: Literal[False],
-    params: dict | None = None,
-) -> list[dict]:
-    # Regular call, generator explicit false, no FP reference
-    ...
-
-
-@overload
-def export_from_sisu(
-    sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
-    since_ordinal: int,
-    as_generator: Literal[True],
-    params: dict | None = None,
-) -> Generator[list[dict], None, None]:
-    # Call with as_generator does not allow FP reference
-    ...
-
-
-@overload
-def export_from_sisu(
-    sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
-    fp: IO,
-    since_ordinal: int,
-    params: dict | None = None,
-) -> IO:
-    # Call with FP reference does not allow as_generator
-    ...
-
-
-def export_from_sisu(
-    sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
-    fp: IO | None = None,
+    *,
     since_ordinal: int = 0,
-    as_generator: bool = False,
     params: dict | None = None,
+    fp: None = None,
+    as_generator: Literal[False] = False,
+    scramble: Literal[False] = False,
+) -> list[dict]:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportableSupportScrambling,
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: None = None,
+    as_generator: Literal[False] = False,
+    scramble: bool = False,
+) -> list[dict]:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportable,
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: None = None,
+    as_generator: Literal[True] = True,
+    scramble: Literal[False] = False,
+) -> Generator[list[dict], None, None]:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportableSupportScrambling,
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: None = None,
+    as_generator: Literal[True] = True,
+    scramble: bool = True,
+) -> Generator[list[dict], None, None]:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportable,
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: IO,
+    as_generator: Literal[False] = False,
+    scramble: Literal[False] = False,
+) -> IO:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportableSupportScrambling,
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: IO,
+    as_generator: Literal[False] = False,
+    scramble: bool = True,
+) -> IO:
+    ...
+
+
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: SisExportable | SisExportableSupportScrambling,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: IO | None = None,
+    as_generator: bool = False,
+    scramble: bool = False,
 ) -> list[dict] | IO | Generator[list[dict], None, None]:
+    if scramble:
+        scrambling_classes = resource.scrambling_classes
+    else:
+        scrambling_classes = None
+
     if as_generator:
         return export_from_endpoint_generator(
             endpoint=resource.exports.endpoint,
@@ -168,6 +223,7 @@ def export_from_sisu(
             since_ordinal=since_ordinal,
             since=resource.exports.since,
             params=params,
+            scrambling_classes=scrambling_classes,
         )
 
     if fp:
@@ -179,6 +235,7 @@ def export_from_sisu(
             since=resource.exports.since,
             fp=fp,
             params=params,
+            scrambling_classes=scrambling_classes,
         )
 
     return _export_from_endpoint(
@@ -188,5 +245,6 @@ def export_from_sisu(
         since_ordinal=since_ordinal,
         since=resource.exports.since,
         fp=None,
-        params=params
+        params=params,
+        scrambling_classes=scrambling_classes,
     )

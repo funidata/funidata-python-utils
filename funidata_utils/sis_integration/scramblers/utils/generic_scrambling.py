@@ -33,7 +33,7 @@ def _mask_range_with_value(original: str, start_index: int, end_index: int, mask
     return beginning + middle + end
 
 
-def get_random_date(n: int | str):
+def get_random_date(n: int | str, *args, **kwargs):
     '''
     Given input n, outputs date inside range of [1950-01-01, 2010-12-31]
 
