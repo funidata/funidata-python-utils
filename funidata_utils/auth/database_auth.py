@@ -1,8 +1,16 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
+import sys
 from pathlib import PosixPath
-from typing import ClassVar, override
+
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
+from typing import ClassVar
 
 from pydantic import SecretStr, BaseModel, ConfigDict, model_validator
 
