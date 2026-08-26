@@ -228,6 +228,8 @@ def export_from_sisu(
 ) -> list[dict] | IO | Generator[list[dict], None, None]:
     if scramble:
         scrambling_classes = resource.scrambling_classes
+        if not scrambling_classes:
+            raise Exception("Requested scrambling for a resource that has no scrambling_classes")
     else:
         scrambling_classes = None
 
