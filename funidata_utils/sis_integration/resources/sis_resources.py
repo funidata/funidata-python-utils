@@ -4,7 +4,7 @@
 from .schemas import SisImport, SisExport, SisDelete
 from re import sub
 
-from ..scramblers.private_person import PrivatePersonScrambler
+from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500

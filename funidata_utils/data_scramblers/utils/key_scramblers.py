@@ -2,8 +2,8 @@ import typing
 
 from pydantic import BaseModel
 
-from funidata_utils.sis_integration.scramblers.replacement_data import first_names, last_names
-from funidata_utils.sis_integration.scramblers.utils.generic_scrambling import (
+from funidata_utils.data_scramblers.replacement_data import first_names, last_names
+from funidata_utils.data_scramblers.utils.generic_scrambling import (
     replace_from_list, scramble_with_weighted_pseudorandom,
     get_string_shuffled_with_mask, get_weighted_random_value,
 )

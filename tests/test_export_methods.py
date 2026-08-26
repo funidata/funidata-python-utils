@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from funidata_utils.request_utils import httpx_requests
 from funidata_utils.sis_integration.exports import export_from_sisu
 from funidata_utils.sis_integration.resources import OriPersons, CodeBooks
-from funidata_utils.sis_integration.scramblers.replacement_data import first_names, last_names
+from funidata_utils.data_scramblers.replacement_data import last_names, first_names
 from tests.helpers import mock_sync_client, _get_mock_httpx_client
 
 
