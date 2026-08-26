@@ -222,7 +222,7 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
 
         for key, scramblers in scrambling_keys.items():
             if not scramblers:
-                _out_entity[key] = entity[key]
+                _out_entity[key] = entity.get(key)
             else:
                 for _scrambler in scramblers:
                     if isinstance(_scrambler, Tuple):

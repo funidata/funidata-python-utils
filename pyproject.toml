@@ -61,6 +61,12 @@ addopts = [
 ]
 xfail_strict = true
 junit_family = "xunit2"
+log_cli = true
+markers = [
+    "unit: marks test as unit tests that should can be ran at any time",
+    "e2e: marks tests as e2e (deselect with '-m \"not e2e\"')",
+    "slow: marks the test as slow (deselect with '-m \"not slow\"')",
+]
 
 [tool.coverage.run]
 parallel = true

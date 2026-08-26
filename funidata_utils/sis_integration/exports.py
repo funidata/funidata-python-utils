@@ -2,10 +2,14 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 import json
+import logging
 from typing import TextIO, overload, IO, Generator, Literal
 
 from .protocols import SisExportable, SupportsExportAuthentication, ScramblingClass, SisExportableSupportScrambling
 from ..request_utils.httpx_requests import send_get_httpx
+
+
+logger = logging.getLogger(__name__)
 
 
 @overload
@@ -89,6 +93,7 @@ def export_from_endpoint_generator(
     if not params:
         params = {}
 
+    scrambling_warning_triggered_keys = set()
     while True:
         sis_response = send_get_httpx(
             path=f"{sis_settings.host}{endpoint}",
@@ -105,6 +110,17 @@ def export_from_endpoint_generator(
                     for entity in entities
                     for scrambling_class in scrambling_classes
                 ]
+                # Check first and last entity of both output data and original data keys
+                _keys = {
+                    x for x in
+                    (entities[0].keys() | entities[-1].keys())
+                    if x not in _data[0].keys() or x not in _data[-1].keys()
+                }
+                if _keys:
+                    _new_warning_keys = _keys.difference(scrambling_warning_triggered_keys)
+                    logger.warning("Original export data contains keys not handled in scrambling: %s", ', '.join(_keys))
+                    scrambling_warning_triggered_keys |= _new_warning_keys
+
                 yield _data
             else:
                 yield entities

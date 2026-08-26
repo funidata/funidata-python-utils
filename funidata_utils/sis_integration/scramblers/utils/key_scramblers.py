@@ -24,7 +24,7 @@ def get_scrambled_email(
 def get_scrambled_first_name(
     entity: dict | BaseModel | None = None,
     hash_key_getter_func: typing.Callable = lambda x: x['id'],
-    old_value_key_getter_func: typing.Callable = lambda x: x['firstNames'],
+    old_value_key_getter_func: typing.Callable = lambda x: x.get('firstNames'),
     *args,
     **kwargs
 ) -> str | None:
@@ -40,7 +40,7 @@ def get_scrambled_first_name(
 def get_phone_number_shuffled_with_mask(
     entity: dict | BaseModel | None = None,
     seed_getter_func: typing.Callable = lambda x: x['id'],
-    old_value_key_getter_func: typing.Callable = lambda x: x['phoneNumber'],
+    old_value_key_getter_func: typing.Callable = lambda x: x.get('phoneNumber'),
     *args,
     **kwargs
 ) -> str | None:
@@ -54,7 +54,7 @@ def get_phone_number_shuffled_with_mask(
 def get_scrambled_last_name(
     entity: dict | BaseModel | None = None,
     hash_key_getter_func: typing.Callable = lambda x: x['id'],
-    old_value_key_getter_func: typing.Callable = lambda x: x['lastName'],
+    old_value_key_getter_func: typing.Callable = lambda x: x.get('lastName'),
     *args,
     **kwargs
 ) -> str | None:
@@ -72,8 +72,8 @@ def get_scrambled_nationalities(
     *args,
     **kwargs
 ):
-    if not entity['citizenshipUrns']:
-        return entity['citizenshipUrns']
+    if not entity.get('citizenshipUrns'):
+        return entity.get('citizenshipUrns')
 
     random_nationality_count = get_weighted_random_value(
         value_weight_dict={
@@ -100,7 +100,7 @@ def get_scrambled_nationalities(
                 },
                 scramble_seed_key=str(entity['id']) + x
             )
-            for x in entity['citizenshipUrns']
+            for x in entity.get('citizenshipUrns')
         ]
 
     return [
