@@ -1,6 +1,7 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
+import typing
 from typing import Protocol, runtime_checkable
 
 from .resources.schemas import SisExport, SisImport, SisDelete
@@ -21,8 +22,17 @@ class SupportsExportAuthentication(HasHostAndProxies, Protocol):
         ...
 
 
+class ScramblingClass(typing.Protocol):
+    def scramble(self, entity) -> dict:
+        ...
+
+
 class SisExportable(Protocol):
     exports: SisExport
+
+
+class SisExportableSupportScrambling(SisExportable, Protocol):
+    scrambling_classes: list[ScramblingClass] | None = None
 
 
 @runtime_checkable

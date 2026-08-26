@@ -4,6 +4,8 @@
 from .schemas import SisImport, SisExport, SisDelete
 from re import sub
 
+from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
+
 
 _DEFAULT_EXPORT_LIMIT = 2500
 _DEFAULT_IMPORT_LIMIT = 1500
@@ -53,6 +55,9 @@ class BaseResource(metaclass=BaseMeta):
 
 
 class OriPersons(BaseResource):
+    scrambling_classes = [
+        PrivatePersonScrambler
+    ]
     imports = SisImport(
         endpoint='/ori/api/persons/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -419,6 +424,7 @@ class OsuvaPlans(BaseResource):
         endpoint='/osuva/api/plans/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
+
 
 class EnrolmentCalculationConfigs(BaseResource):
     imports = SisImport(

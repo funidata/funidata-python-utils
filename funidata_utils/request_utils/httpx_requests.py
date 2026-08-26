@@ -5,6 +5,8 @@
 from typing import Tuple, Any, Callable, Literal
 
 import httpx
+from httpx import Client
+
 from ..utils import flatten, group_by
 
 
@@ -48,11 +50,7 @@ def send_get_httpx(
     proxies: dict | None = None,
     params: dict | None = None,
 ) -> httpx.Response:
-    proxy_mounts = {
-        "http://": httpx.HTTPTransport(proxy=proxies.get('http')),
-        "https://": httpx.HTTPTransport(proxy=proxies.get('https')),
-    } if proxies else None
-    client = httpx.Client(mounts=proxy_mounts, auth=auth)
+    client = _get_httpx_client(auth, proxies)
     response = client.get(
         path,
         auth=auth,
@@ -60,6 +58,15 @@ def send_get_httpx(
         timeout=600,
     )
     return response
+
+
+def _get_httpx_client(auth: tuple[str, str] | None, proxies: dict[Any, Any] | None) -> Client:
+    proxy_mounts = {
+        "http://": httpx.HTTPTransport(proxy=proxies.get('http')),
+        "https://": httpx.HTTPTransport(proxy=proxies.get('https')),
+    } if proxies else None
+    client = httpx.Client(mounts=proxy_mounts, auth=auth)
+    return client
 
 
 def _binary_search_enabled_post_httpx(
