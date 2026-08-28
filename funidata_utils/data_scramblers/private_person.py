@@ -1,8 +1,7 @@
 from typing import Tuple
 
-from .replacement_data import first_names, last_names
 from .utils.generic_scrambling import (
-    replace_from_list, scramble_with_weighted_pseudorandom, hashlib_hash, random_shuffle, get_random_date,
+    scramble_with_weighted_pseudorandom, hashlib_hash, get_random_date,
 )
 from .utils.key_scramblers import (
     get_scrambled_first_name, get_scrambled_last_name, get_scrambled_nationalities, get_phone_number_shuffled_with_mask,
