@@ -12,10 +12,8 @@ from ..data_scramblers.base import SingletonMetaScrambler
 
 class PrivatePersonScrambler(SingletonMetaScrambler):
     @classmethod
-    def scramble(cls, entity: dict) -> dict:
+    def scramble(cls, entity: dict, processed_keys: dict) -> dict:
         """ Only allow returning keys that have been verified to be scramble-able or non-scrambleable!"""
-        _out_entity = {}
-
         # key=None means "Keep the original value"
         # lambda x: None means -> set the value None
         scrambling_keys = dict(
@@ -220,13 +218,14 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
         )
 
         for key, scramblers in scrambling_keys.items():
+            processed_keys[key].append(scramblers)
             if not scramblers:
-                _out_entity[key] = entity.get(key)
-            else:
-                for _scrambler in scramblers:
-                    if isinstance(_scrambler, Tuple):
-                        _out_entity[key] = _scrambler[0](entity=entity, **_scrambler[1])
-                    else:
-                        _out_entity[key] = _scrambler(entity)
+                continue
 
-        return _out_entity
+            for _scrambler in scramblers:
+                if isinstance(_scrambler, Tuple):
+                    entity[key] = _scrambler[0](entity=entity, **_scrambler[1])
+                else:
+                    entity[key] = _scrambler(entity)
+
+        return entity

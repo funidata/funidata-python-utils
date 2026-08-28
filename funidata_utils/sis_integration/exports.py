@@ -3,9 +3,11 @@
 # ------------------------------------------------------------------------------
 import json
 import logging
+from collections import defaultdict
 from typing import TextIO, overload, IO, Generator, Literal
 
 from .protocols import SisExportable, SupportsExportAuthentication, ScramblingClass, SisExportableSupportScrambling
+from ..data_scramblers.generic_sis_scramble import SisMetadataScrambler, UnprocessedKeysDropperScrambler
 from ..request_utils.httpx_requests import send_get_httpx
 
 
@@ -105,22 +107,14 @@ def export_from_endpoint_generator(
             response_json = sis_response.json()
             entities: list[dict] = response_json.get("entities", [])
             if scrambling_classes:
+                scrambling_classes.append(SisMetadataScrambler)
+                scrambling_classes.append(UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys))
+                processed_keys = defaultdict(list)
                 _data = [
-                    scrambling_class.scramble(entity)
+                    scrambling_class.scramble(entity, processed_keys)
                     for entity in entities
                     for scrambling_class in scrambling_classes
                 ]
-                # Check first and last entity of both output data and original data keys
-                _keys = {
-                    x for x in
-                    (entities[0].keys() | entities[-1].keys())
-                    if x not in _data[0].keys() or x not in _data[-1].keys()
-                }
-                if _keys:
-                    _new_warning_keys = _keys.difference(scrambling_warning_triggered_keys)
-                    logger.warning("Original export data contains keys not handled in scrambling: %s", ', '.join(_keys))
-                    scrambling_warning_triggered_keys |= _new_warning_keys
-
                 yield _data
             else:
                 yield entities
@@ -131,6 +125,9 @@ def export_from_endpoint_generator(
             greatest_ordinal = response_json['greatestOrdinal']
         else:
             raise Exception(f"Error in export: {sis_response.status_code} : {sis_response.content}")
+
+    if scrambling_warning_triggered_keys:
+        logger.warning("Original export data contains keys not handled in scrambling: %s", ', '.join(scrambling_warning_triggered_keys))
 
 
 @overload

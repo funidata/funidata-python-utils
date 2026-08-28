@@ -1,85 +1,20 @@
 import logging
-from typing import Tuple, Any
+from typing import Tuple
 
 from .utils.generic_scrambling import (
-    scramble_with_weighted_pseudorandom, hashlib_hash, get_random_date,
-)
-from .utils.key_scramblers import (
-    get_scrambled_first_name, get_scrambled_last_name, get_scrambled_nationalities, get_phone_number_shuffled_with_mask,
-    get_scrambled_email,
+    scramble_with_weighted_pseudorandom,
 )
 from ..data_scramblers.base import SingletonMetaScrambler
+from ..utils import update_inner_dictionary_key
 
 
 logger = logging.getLogger(__name__)
 
 
-def recursive_dict_fetch(
-    entity: dict,
-    keys: list
-):
-    if len(keys) == 1:
-        return entity[keys[0]]
-
-    return recursive_dict_fetch(entity[keys[0]], keys[1:])
-
-
-def _dict_update_by_key_split(
-    entity: dict,
-    keys: list,
-    new_value
-):
-    _first_key = keys[0]
-    if _first_key not in entity:
-        return None
-
-    if entity[_first_key] is None:
-        return None
-
-    _current_entity_ref = entity
-    for _key in keys[:-1]:
-        if _current_entity_ref is None:
-            return None
-
-        if not isinstance(_current_entity_ref, dict):
-            raise ValueError(f"Expected nested dictionaries, {_key} value is not a dict")
-
-        _current_entity_ref = _current_entity_ref[_key]
-
-    if not isinstance(_current_entity_ref, dict):
-        raise ValueError(f"Expected nested dictionaries, {_key} value is not a dict")
-
-    final_key = keys[-1]
-    if final_key not in _current_entity_ref:
-        raise KeyError(f"Key {final_key} not found")
-
-    _current_entity_ref[final_key] = new_value
-
-    return entity
-
-
-def update_inner_dictionary_key(
-    entity: dict,
-    dot_separated_key: str,
-    new_value: Any,
-):
-    parts = dot_separated_key.split('.')
-    if not parts:
-        raise ValueError("dot_separated_key required")
-
-    diu = _dict_update_by_key_split(entity, parts, new_value)
-    if diu is None:
-        return None
-
-    return entity.get(parts[0])
-
-
 class StudyRightScrambler(SingletonMetaScrambler):
     @classmethod
-    def scramble(cls, entity: dict) -> dict:
-        """ Only allow returning keys that have been verified to be scramble-able or non-scrambleable!"""
-        _out_entity = {}
-
+    def scramble(cls, entity: dict, processed_keys: dict) -> dict:
+        """ Scramble StudyRight fields and add the scramblers to processed_keys """
         # key=None means "Keep the original value"
         # lambda x: None means -> set the value None
         scrambling_keys = dict(
@@ -97,9 +32,7 @@ class StudyRightScrambler(SingletonMetaScrambler):
             degreeRegulations=None,
             valid=None,
             grantDate=None,
-            studyStartDate=[  # Readonly attr
-                lambda x: None
-            ],
+            studyStartDate=None,  # Readonly attr
             alternativeStudyStartDate=None,
             transferOutDate=None,
             transferOutUniversityUrn=None,
@@ -111,17 +44,19 @@ class StudyRightScrambler(SingletonMetaScrambler):
                 lambda x: [
                     # Override grant + delete reasons with lorem ipsum, otherwise retain original extensions
                     original_extension | dict(
-                        grantReason="Lorem Ipsum" if original_extension['grantReason'] else None,
-                        deleteReason="Lorem Ipsum" if original_extension['deleteReason'] else None
+                        grantReason="Extension grant Raisin: Lorem Ipsum" if original_extension['grantReason'] else None,
+                        deleteReason="Extension Delete Raisin: Lorem Ipsum" if original_extension['deleteReason'] else None
                     )
                     for original_extension in x.get('studyRightExtensions', []) or []
                 ]
             ],
             studyRightCancellation=[
-                lambda original_val: update_inner_dictionary_key(
-                    original_val,
-                    'studyRightCancellation.cancellationReason',
-                    'Lorem Ipsum'
+                (
+                    update_inner_dictionary_key,
+                    dict(
+                        dot_separated_key='studyRightCancellation.cancellationReason',
+                        new_value='studyRightCancellation.cancellationReason: Lorem Ipsum'
+                    )
                 ),
             ],
             studyRightPassivations=[
@@ -130,7 +65,7 @@ class StudyRightScrambler(SingletonMetaScrambler):
                     lambda original_val: update_inner_dictionary_key(
                         original_passivation,
                         'additionalInfo',
-                        'Lorem Ipsum'
+                        'studyRightPassivations.additionalInfo: Lorem Ipsum'
                     )
                     for original_passivation in x.get('studyRightPassivations', []) or []
                 ]
@@ -139,7 +74,7 @@ class StudyRightScrambler(SingletonMetaScrambler):
                 lambda original_val: update_inner_dictionary_key(
                     original_val,
                     'studyRightTermination.terminationReason',
-                    'Lorem Ipsum'
+                    'studyRightTermination.terminationReason: Lorem Ipsum'
                 ),
             ],
             studyRightGraduation=None,
@@ -149,7 +84,8 @@ class StudyRightScrambler(SingletonMetaScrambler):
                 lambda original_val: update_inner_dictionary_key(
                     original_val,
                     'studyRightTransfer.transferComments',
-                    'Lorem Ipsum'
+                    'studyRightTransfer.transferComments: Lorem Ipsum',
+                    missing_key_handler='skip',
                 ),
             ],
             phase1MinorSelections=None,
@@ -158,12 +94,13 @@ class StudyRightScrambler(SingletonMetaScrambler):
                 lambda original_val: update_inner_dictionary_key(
                     original_val,
                     'personalizedSelectionPath.phase1.rationale',
-                    'Lorem Ipsum'
+                    'personalizedSelectionPath.phase1.rationale: Lorem Ipsum'
                 ),
                 lambda original_val: update_inner_dictionary_key(
                     original_val,
-                    'personalizedSelectionPath.phase1.rationale',
-                    'Lorem Ipsum'
+                    'personalizedSelectionPath.phase2.rationale',
+                    'personalizedSelectionPath.phase2.rationale: Lorem Ipsum',
+                    missing_key_handler='skip',
                 ),
             ],
             courseUnitSelections=None,
@@ -188,27 +125,41 @@ class StudyRightScrambler(SingletonMetaScrambler):
                     dict(
                         key='additionalInformation',
                         weights=[
-                            (None, 2500),
-                            ({'fi': 'Lorem Ipsum'}, 1000),
+                            ({'fi': 'additionalInformation: Lorem Ipsum'}, 1000),
                             ({'fi': 'Pallerojumppa'}, 42),
                         ],
-                        scramble_seed_key=entity['id']
+                        scramble_seed_key=entity['id'],
+                        scramble_empty_values=False
                     )
                 )
             ],
             cooperationNetworkRights=None,
-            cooperationNetworkStatus=None,
+            cooperationNetworkStatus=[
+                lambda original_val: update_inner_dictionary_key(
+                    original_val,
+                    dot_separated_key='cooperationNetworkStatus.rejectionReason',
+                    new_value=None,
+                    missing_key_handler='skip'
+                ),
+                lambda original_val: update_inner_dictionary_key(
+                    original_val,
+                    'cooperationNetworkStatus.outboundStatusMessage',
+                    new_value=None,
+                    missing_key_handler='skip'
+                ),
+            ],
             schoolEducationLanguageUrn=None,
         )
 
         for key, scramblers in scrambling_keys.items():
+            processed_keys[key].append(scramblers)
             if not scramblers:
-                _out_entity[key] = entity.get(key)
-            else:
-                for _scrambler in scramblers:
-                    if isinstance(_scrambler, Tuple):
-                        _out_entity[key] = _scrambler[0](entity=entity, **_scrambler[1])
-                    else:
-                        _out_entity[key] = _scrambler(entity)
+                continue
 
-        return _out_entity
+            for _scrambler in scramblers:
+                if isinstance(_scrambler, Tuple):
+                    entity[key] = _scrambler[0](entity=entity, **_scrambler[1])
+                else:
+                    entity[key] = _scrambler(entity)
+
+        return entity
