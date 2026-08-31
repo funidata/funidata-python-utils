@@ -110,12 +110,12 @@ def export_from_endpoint_generator(
                 scrambling_classes.append(SisMetadataScrambler)
                 scrambling_classes.append(UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys))
                 processed_keys = defaultdict(list)
-                _data = [
-                    scrambling_class.scramble(entity, processed_keys)
-                    for entity in entities
-                    for scrambling_class in scrambling_classes
-                ]
-                yield _data
+
+                for entity in entities:
+                    for scrambling_class in scrambling_classes:
+                        entity = scrambling_class.scramble(entity, processed_keys)
+
+                yield entities
             else:
                 yield entities
 
