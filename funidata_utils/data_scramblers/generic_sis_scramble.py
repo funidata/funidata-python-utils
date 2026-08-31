@@ -1,4 +1,10 @@
-from typing import Tuple, Callable, override
+import sys
+
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 from funidata_utils.data_scramblers.base import SingletonMetaScrambler
 from funidata_utils.utils import update_inner_dictionary_key
