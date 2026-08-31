@@ -109,7 +109,7 @@ def export_from_endpoint_generator(
             if scrambling_classes:
                 scrambling_classes.append(SisMetadataScrambler)
                 scrambling_classes.append(UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys))
-                processed_keys = defaultdict(list)
+                processed_keys = set()
 
                 for entity in entities:
                     for scrambling_class in scrambling_classes:
@@ -127,7 +127,10 @@ def export_from_endpoint_generator(
             raise Exception(f"Error in export: {sis_response.status_code} : {sis_response.content}")
 
     if scrambling_warning_triggered_keys:
-        logger.warning("Original export data contains keys not handled in scrambling: %s", ', '.join(scrambling_warning_triggered_keys))
+        logger.warning(
+            "Original export data contains keys not handled in scrambling, thus have been removed: %s",
+            ', '.join(scrambling_warning_triggered_keys)
+        )
 
 
 @overload
