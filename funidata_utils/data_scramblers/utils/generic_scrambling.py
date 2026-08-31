@@ -2,6 +2,7 @@ import hashlib
 import math
 import random
 import typing
+from functools import lru_cache
 
 from dateutil import rrule, parser
 from pydantic import BaseModel
@@ -65,6 +66,7 @@ def get_weighted_random_value(
     return random.choices(values, weights=weights)[0]
 
 
+@lru_cache(maxsize=256)
 def default_hash(key, hash_function='sha512', return_int=True):
     return hashlib_hash(str(key), hash_function, return_int)
 
