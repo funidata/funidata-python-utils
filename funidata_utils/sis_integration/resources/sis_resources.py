@@ -6,6 +6,7 @@ from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
+from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -133,6 +134,9 @@ class StudyRights(BaseResource):
 
 
 class TermRegistrations(BaseResource):
+    scrambling_classes = [
+        StudyRightTermRegistrationScrambler
+    ]
     imports = SisImport(
         endpoint='/ori/api/term-registrations/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
