@@ -39,7 +39,7 @@ class UnprocessedKeysDropperScrambler(SingletonMetaScrambler):
 
     # Instance method override to provide access to self._loggable_keys, and also provide different scrambling logic from other classes
     @override
-    def scramble(self, entity: dict, processed_keys: dict) -> dict:  # noqa: instance method signature does not match cls method
+    def scramble(self, entity: dict, processed_keys: set) -> dict:  # noqa: instance method signature does not match cls method
         """ Pops any keys that are not present in processed_keys """
         entity_keys = set(entity.keys())
         _keys = set()
