@@ -5,6 +5,7 @@ from .schemas import SisImport, SisExport, SisDelete
 from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
+from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 
 
@@ -88,6 +89,9 @@ class AccessRolePersonAssignments(BaseResource):
 
 
 class Attainments(BaseResource):
+    scrambling_classes = [
+        AttainmentScrambler
+    ]
     imports = SisImport(
         endpoint='/ori/api/attainments/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
