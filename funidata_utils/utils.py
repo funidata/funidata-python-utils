@@ -5,7 +5,7 @@ import sys
 from collections import defaultdict
 from functools import reduce
 from statistics import mean, stdev
-from typing import Any, Generator, Callable, Literal
+from typing import Any, Generator, Callable, Literal, Tuple
 
 import httpx
 
@@ -72,10 +72,16 @@ def batch(iterable, steps=1):
 
 
 def recursive_dict_fetch(
-    entity: dict,
+    entity: Any,
     keys: list
 ):
+    if not entity:
+        return None
+
     if len(keys) == 1:
+        if isinstance(entity, list):
+            return entity
+
         return entity[keys[0]]
 
     return recursive_dict_fetch(entity[keys[0]], keys[1:])
@@ -149,14 +155,19 @@ def _dict_update_by_key_split(
 def update_inner_dictionary_key(
     entity: dict,
     dot_separated_key: str,
-    new_value: Any,
+    new_value: str | bool | int | Tuple[Callable, dict] | None,
     missing_key_handler: Literal['skip', 'exception', 'add_missing'] = 'exception'
 ):
     parts = dot_separated_key.split('.')
     if not parts:
         raise ValueError("dot_separated_key required")
 
-    diu = _dict_update_by_key_split(entity, parts, new_value, missing_key_handler=missing_key_handler)
+    if isinstance(new_value, Tuple):
+        _new_value = new_value[0](entity=entity, **new_value[1])
+    else:
+        _new_value = new_value
+
+    diu = _dict_update_by_key_split(entity, parts, _new_value, missing_key_handler=missing_key_handler)
     if diu is None:
         return None
 
