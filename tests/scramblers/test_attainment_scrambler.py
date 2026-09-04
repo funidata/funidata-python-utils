@@ -6,7 +6,7 @@ from funidata_utils.data_scramblers.attainment import AttainmentScrambler
 
 
 @pytest.mark.unit
-def test_attainment_scramlber_scrambles_acceptorPersons():
+def test_attainment_scrambler_scrambles_acceptorPersons():
     data = {
         'id': '1',
         'acceptorPersons': [
@@ -24,7 +24,27 @@ def test_attainment_scramlber_scrambles_acceptorPersons():
 
 
 @pytest.mark.unit
-def test_attainment_scramlber_scrambles_CTI():
+def test_attainment_scrambler_handles_empty_acceptorPersons():
+    data = {
+        'id': '1',
+        'acceptorPersons': []
+    }
+
+    scrambled_data = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_handles_null_acceptorPersons():
+    data = {
+        'id': '1',
+        'acceptorPersons': None
+    }
+
+    scrambled_data = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_scrambles_CTI():
     data = {
         'id': '1',
         "creditTransferInfo": {
@@ -41,7 +61,16 @@ def test_attainment_scramlber_scrambles_CTI():
 
 
 @pytest.mark.unit
-def test_attainment_scramlber_scrambles_cooperationNetworkStatus():
+def test_attainment_scrambler_handles_missing_CTI():
+    data = {
+        'id': '1',
+        "creditTransferInfo": None
+    }
+    AttainmentScrambler.scramble(copy.deepcopy(data), set())
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_scrambles_cooperationNetworkStatus():
     data = {
         'id': '1',
         "cooperationNetworkStatus": {
@@ -66,3 +95,12 @@ def test_attainment_scramlber_scrambles_cooperationNetworkStatus():
         scrambled_data['cooperationNetworkStatus']['rejectionReason'].get(lang) != data['cooperationNetworkStatus']['rejectionReason'].get(lang)
             for lang in {'fi', 'en', 'sv'}
     )
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_handles_missing_cooperation_network_status():
+    data = {
+        'id': '1',
+        "cooperationNetworkStatus": None
+    }
+    AttainmentScrambler.scramble(copy.deepcopy(data), set())
