@@ -36,11 +36,11 @@ class AttainmentScrambler(SingletonMetaScrambler):
         acceptorPersons=[
             lambda entity: update_inner_dictionary_key(
                 entity,
-                dot_separated_key='acceptorPersons',
+                dot_separated_key='acceptorPersons.text',
                 new_value=(
                     scramble_with_weighted_pseudorandom,
                     dict(
-                        key='acceptorPersons.text',
+                        key='text',
                         weights=[
                             ({'fi': 'acceptorPersons.text: Kalle'}, 1000),
                             ({'fi': 'acceptorPersons.text: Olle'}, 1000),
@@ -86,7 +86,7 @@ class AttainmentScrambler(SingletonMetaScrambler):
                 new_value=(
                     scramble_with_weighted_pseudorandom,
                     dict(
-                        key='creditTransferInfo.organisation',
+                        key='organisation',
                         weights=[
                             ({'fi': 'creditTransferInfo.organisation'}, 1000),
                             ({'fi': 'Pallerojumppa'}, 42),
@@ -105,7 +105,7 @@ class AttainmentScrambler(SingletonMetaScrambler):
                 new_value=(
                     scramble_with_weighted_pseudorandom,
                     dict(
-                        key='cooperationNetworkStatus.rejectionReason',
+                        key='rejectionReason',
                         weights=[
                             ({'fi': 'cooperationNetworkStatus.rejectionReason'}, 1000),
                             ({'fi': 'Pallerojumppa'}, 42),
