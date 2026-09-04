@@ -5,6 +5,8 @@ from .schemas import SisImport, SisExport, SisDelete
 from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
+from ...data_scramblers.ilmo_enrolment import IlmoEnrolmentScrambler
+from ...data_scramblers.study_right import StudyRightScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -37,6 +39,7 @@ __all__ = [
     'TermRegistrationRequirements',
     'CooperationNetworks',
     'EnrolmentCalculationConfigs',
+    'IlmoEnrolments',
 ]
 
 
@@ -113,6 +116,7 @@ class Attainments(BaseResource):
 
 
 class StudyRights(BaseResource):
+    scrambling_classes = [StudyRightScrambler]
     imports = SisImport(
         endpoint='/ori/api/study-rights/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -434,4 +438,22 @@ class EnrolmentCalculationConfigs(BaseResource):
     exports = SisExport(
         endpoint='/ilmo/api/enrolment-calculation-configs/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class IlmoEnrolments(BaseResource):
+    scrambling_classes = [
+        IlmoEnrolmentScrambler
+    ]
+    imports = SisImport(
+        endpoint='/ilmo/api/enrolments/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ilmo/api/enrolments/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+    patches = SisImport(
+        endpoint='/ilmo/api/enrolments/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
     )
