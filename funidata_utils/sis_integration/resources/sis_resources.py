@@ -7,6 +7,7 @@ from re import sub
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
+from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -422,6 +423,9 @@ class CooperationNetworks(BaseResource):
 
 
 class OsuvaPlans(BaseResource):
+    scrambling_classes = [
+        OsuvaPlanScrambler
+    ]
     imports = SisImport(
         endpoint='/osuva/api/plans/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
