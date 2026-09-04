@@ -176,12 +176,7 @@ def update_inner_dictionary_key(
     if not parts:
         raise ValueError("dot_separated_key required")
 
-    if isinstance(new_value, Tuple):
-        _new_value = new_value[0](entity=entity, **new_value[1])
-    else:
-        _new_value = new_value
-
-    diu = _dict_update_by_key_split(entity, parts, _new_value, missing_key_handler=missing_key_handler)
+    diu = _dict_update_by_key_split(entity, parts, new_value, missing_key_handler=missing_key_handler)
     if diu is None:
         return None
 
