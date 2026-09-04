@@ -102,11 +102,13 @@ def scramble_with_weighted_pseudorandom(
     entity: dict,
     key: str,
     weights: dict | list[tuple],
-    scramble_seed_key: str | None = None,
+    scramble_seed_key: str | typing.Callable | None = None,
     scramble_empty_values: bool = True,
     **kwargs
 ):
-    if scramble_seed_key:
+    if isinstance(scramble_seed_key, typing.Callable):
+        seed_key = scramble_seed_key(entity)
+    elif scramble_seed_key:
         seed_key = scramble_seed_key
     else:
         if key not in entity:
