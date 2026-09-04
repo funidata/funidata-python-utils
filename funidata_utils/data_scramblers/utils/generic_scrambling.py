@@ -2,9 +2,12 @@ import hashlib
 import math
 import random
 import typing
+from functools import lru_cache
 
 from dateutil import rrule, parser
 from pydantic import BaseModel
+
+from funidata_utils.utils import recursive_dict_fetch, get_recursive_dict_value
 
 
 # Default salt for hashlib functions
@@ -53,12 +56,19 @@ def replace_from_list(original_value, replacement_list):
     return val
 
 
-def get_weighted_random_value(value_weight_dict, in_seed):
+def get_weighted_random_value(
+    value_weight_dict: dict | list[tuple],
+    in_seed
+):
     random.seed(in_seed)
-    values, weights = zip(*value_weight_dict.items())
+    if isinstance(value_weight_dict, list):
+        values, weights = zip(*value_weight_dict)
+    else:
+        values, weights = zip(*value_weight_dict.items())
     return random.choices(values, weights=weights)[0]
 
 
+@lru_cache(maxsize=256)
 def default_hash(key, hash_function='sha512', return_int=True):
     return hashlib_hash(str(key), hash_function, return_int)
 
@@ -93,20 +103,39 @@ def hashlib_hash(
 def scramble_with_weighted_pseudorandom(
     entity: dict,
     key: str,
-    weights: dict,
-    scramble_seed_key: str | None = None,
+    weights: dict | list[tuple],
+    scramble_seed_key: str | typing.Callable | None = None,
     scramble_empty_values: bool = True,
     **kwargs
 ):
-    if scramble_seed_key:
+    _original_value = get_recursive_dict_value(entity, key)
+
+    # If the final part before the replaceable value is a list, perform replacement on all list entities
+    if isinstance(_original_value, list):
+        _final_key_part = key.split('.')[-1]
+        return [
+            _x | (
+                {
+                    _final_key_part: scramble_with_weighted_pseudorandom(
+                        _x,
+                        key=_final_key_part,
+                        weights=weights,
+                        scramble_seed_key=scramble_seed_key + str(_x),
+                        scramble_empty_values=scramble_empty_values,
+                    )
+                } or {}
+            )
+            for _x in _original_value
+        ]
+
+    if isinstance(scramble_seed_key, typing.Callable):
+        seed_key = scramble_seed_key(entity)
+    elif scramble_seed_key:
         seed_key = scramble_seed_key
     else:
-        if key not in entity:
-            raise KeyError(f"Key '{key}' not in entity")
+        seed_key = _original_value
 
-        seed_key = entity[key]
-
-    if not entity.get(key):  # yes, this could be an oneliner, but it hurts the eyes...
+    if not _original_value:  # yes, this could be an oneliner, but it hurts the eyes...
         if not scramble_empty_values:
             return None
 
