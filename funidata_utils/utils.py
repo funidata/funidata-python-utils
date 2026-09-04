@@ -127,7 +127,7 @@ def _dict_update_by_key_split(
 
         _current_entity_ref = _current_entity_ref[_key]
 
-    if not isinstance(_current_entity_ref, dict):
+    if not isinstance(_current_entity_ref, (dict, list)):
         match missing_key_handler:
             case 'exception':
                 raise ValueError(f"Expected nested dictionaries, {_current_entity_ref} is not a dict")
@@ -137,17 +137,31 @@ def _dict_update_by_key_split(
                 raise Exception("Unhandled case for missing inner dict key")
 
     final_key = keys[-1]
-    if final_key not in _current_entity_ref:
-        match missing_key_handler:
-            case 'exception':
-                raise KeyError(f"Key {final_key} not found")
-            case 'skip':
-                return entity
-            case 'add_missing':
-                _current_entity_ref[final_key] = new_value
+    _update_refs = []
+    if isinstance(_current_entity_ref, list):
+        _update_refs += _current_entity_ref
+    else:
+        _update_refs.append(_current_entity_ref)
 
-    if _current_entity_ref[final_key]:
-        _current_entity_ref[final_key] = new_value
+    for _ref in _update_refs:
+        if isinstance(new_value, Callable):
+            _new_value = new_value(_ref)
+        elif isinstance(new_value, tuple):
+            _new_value = new_value[0](_ref, **new_value[1])
+        else:
+            _new_value = new_value
+
+        if final_key not in _ref:
+            match missing_key_handler:
+                case 'exception':
+                    raise KeyError(f"Key {final_key} not found")
+                case 'skip':
+                    return entity
+                case 'add_missing':
+                    _ref[final_key] = _new_value
+
+        if _ref[final_key]:
+            _ref[final_key] = _new_value
 
     return entity
 
