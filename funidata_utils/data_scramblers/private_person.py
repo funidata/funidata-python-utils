@@ -118,7 +118,7 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
         schoolEducationLanguageUrns=[
             lambda entity: scramble_with_weighted_pseudorandom(
                 entity=entity,
-                key='preferredLanguageUrn',
+                key='schoolEducationLanguageUrns',
                 weights={
                     'urn:code:school-education-language:fi': 5000,
                     'urn:code:school-education-language:sv': 1000,
