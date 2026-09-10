@@ -2,6 +2,7 @@ import hashlib
 import math
 import random
 import typing
+from functools import lru_cache
 
 from dateutil import rrule, parser
 from pydantic import BaseModel
@@ -53,12 +54,19 @@ def replace_from_list(original_value, replacement_list):
     return val
 
 
-def get_weighted_random_value(value_weight_dict, in_seed):
+def get_weighted_random_value(
+    value_weight_dict: dict | list[tuple],
+    in_seed
+):
     random.seed(in_seed)
-    values, weights = zip(*value_weight_dict.items())
+    if isinstance(value_weight_dict, list):
+        values, weights = zip(*value_weight_dict)
+    else:
+        values, weights = zip(*value_weight_dict.items())
     return random.choices(values, weights=weights)[0]
 
 
+@lru_cache(maxsize=256)
 def default_hash(key, hash_function='sha512', return_int=True):
     return hashlib_hash(str(key), hash_function, return_int)
 
@@ -93,7 +101,7 @@ def hashlib_hash(
 def scramble_with_weighted_pseudorandom(
     entity: dict,
     key: str,
-    weights: dict,
+    weights: dict | list[tuple],
     scramble_seed_key: str | None = None,
     scramble_empty_values: bool = True,
     **kwargs
