@@ -11,7 +11,9 @@ class KoriPersonScrambler(SingletonMetaScrambler):
         id=None,
         documentState=None,
         universityOrgIds=None,
-        titles=None,
+        titles=[
+            lambda x: {'fi': 'titteli', 'en': 'title', 'sv': 'titel'}
+        ],
         firstName=[
             get_scrambled_first_name,
         ],
