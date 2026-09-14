@@ -82,19 +82,21 @@ def get_scrambled_nationalities(
         },
         in_seed=str(entity['id'])
     )
+    nationality_weights = {
+        # 'urn:code:country:246': 5000,  # Disabled due to nationality-PIC combo
+        'urn:code:country:248': 50,
+        'urn:code:country:752': 25,
+        'urn:code:country:056': 10,
+        'urn:code:country:276': 10,
+        'urn:code:country:250': 10,
+    }
     if random_nationality_count > 1:
         # TODO: figure out a more robust way later in case of triple/quadruple nationalitites are required
         return list({
             get_weighted_random_value(
                 value_weight_dict={
-                    k: v for k, v in {
-                        # 'urn:code:country:246': 5000,  # Disabled due to nationality-PIC combo
-                        'urn:code:country:248': 50,
-                        'urn:code:country:752': 25,
-                        'urn:code:country:056': 10,
-                        'urn:code:country:276': 10,
-                        'urn:code:country:250': 10,
-                    }.items() if k != x
+                    k: v for k, v in nationality_weights.items()
+                    if k != x
                 },
                 in_seed=str(entity['id']) + x
             )
@@ -103,14 +105,7 @@ def get_scrambled_nationalities(
 
     return [
         get_weighted_random_value(
-            value_weight_dict={
-                'urn:code:country:246': 5000,
-                'urn:code:country:248': 50,
-                'urn:code:country:752': 25,
-                'urn:code:country:056': 10,
-                'urn:code:country:276': 10,
-                'urn:code:country:250': 10,
-            },
+            value_weight_dict=nationality_weights,
             in_seed=str(entity['id'])
         )
     ]
