@@ -125,7 +125,8 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
                     'urn:code:school-education-language:ru': 50,
                     'urn:code:school-education-language:en': 50,
                 },
-                scramble_seed_key=entity['id']
+                scramble_seed_key=entity['id'],
+                scramble_empty_values=False,
             )
         ],
         municipalityUrn=[

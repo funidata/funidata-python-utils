@@ -113,6 +113,9 @@ def scramble_with_weighted_pseudorandom(
 
     # If the final part before the replaceable value is a list, perform replacement on all list entities
     if isinstance(_original_value, list):
+        if len(_original_value) == 0:
+            return _original_value
+
         _final_key_part = key.split('.')[-1]
         if isinstance(_original_value[0], dict):
             return [
