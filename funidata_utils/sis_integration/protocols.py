@@ -25,7 +25,7 @@ class SupportsExportAuthentication(HasHostAndProxies, Protocol):
 class ScramblingClass(typing.Protocol):
     scrambling_keys: dict
 
-    def scramble(self, entity, processed_keys: dict) -> dict:
+    def scramble(self, entity, processed_keys: set) -> dict:
         ...
 
 
