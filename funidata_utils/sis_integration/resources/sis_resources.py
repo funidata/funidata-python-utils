@@ -7,6 +7,7 @@ from re import sub
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
+from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
 
 
@@ -138,6 +139,9 @@ class StudyRights(BaseResource):
 
 
 class TermRegistrations(BaseResource):
+    scrambling_classes = [
+        StudyRightTermRegistrationScrambler
+    ]
     imports = SisImport(
         endpoint='/ori/api/term-registrations/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
