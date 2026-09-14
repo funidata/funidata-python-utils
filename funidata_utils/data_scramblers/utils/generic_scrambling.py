@@ -7,6 +7,8 @@ from functools import lru_cache
 from dateutil import rrule, parser
 from pydantic import BaseModel
 
+from funidata_utils.utils import recursive_dict_fetch, get_recursive_dict_value
+
 
 # Default salt for hashlib functions
 DEFAULT_SALT = b"\x12D'\xf3\x95\xf3\xfe\xf0\x1ap\x8f\x89t\x07\xbf\xb8"
@@ -102,19 +104,52 @@ def scramble_with_weighted_pseudorandom(
     entity: dict,
     key: str,
     weights: dict | list[tuple],
-    scramble_seed_key: str | None = None,
+    scramble_seed_key: str | typing.Callable | None = None,
     scramble_empty_values: bool = True,
+    missing_key_handler: typing.Literal['skip', 'exception'] = 'exception',
     **kwargs
 ):
-    if scramble_seed_key:
+    _original_value = get_recursive_dict_value(entity, key, missing_key_handler=missing_key_handler)
+
+    # If the final part before the replaceable value is a list, perform replacement on all list entities
+    if isinstance(_original_value, list):
+        if len(_original_value) == 0:
+            return _original_value
+
+        _final_key_part = key.split('.')[-1]
+        if isinstance(_original_value[0], dict):
+            return [
+                _x | (
+                    {
+                        _final_key_part: scramble_with_weighted_pseudorandom(
+                            _x,
+                            key=_final_key_part,
+                            weights=weights,
+                            scramble_seed_key=scramble_seed_key + str(_x),
+                            scramble_empty_values=scramble_empty_values,
+                            missing_key_handler=missing_key_handler,
+                        )
+                    } or {}
+                )
+                for _x in _original_value
+            ]
+        else:
+            return [
+                get_weighted_random_value(
+                    value_weight_dict=weights,
+                    in_seed=scramble_seed_key + str(_x),
+                )
+                for _x in _original_value
+            ]
+
+    if isinstance(scramble_seed_key, typing.Callable):
+        seed_key = scramble_seed_key(entity)
+    elif scramble_seed_key:
         seed_key = scramble_seed_key
     else:
-        if key not in entity:
-            raise KeyError(f"Key '{key}' not in entity")
+        seed_key = _original_value
 
-        seed_key = entity[key]
-
-    if not entity.get(key):  # yes, this could be an oneliner, but it hurts the eyes...
+    if not _original_value:  # yes, this could be an oneliner, but it hurts the eyes...
         if not scramble_empty_values:
             return None
 
