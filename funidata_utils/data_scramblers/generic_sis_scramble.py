@@ -45,6 +45,11 @@ class UnprocessedKeysDropperScrambler(SingletonMetaScrambler):
         _keys = set()
         for key in entity_keys:
             if key not in processed_keys:
+                # Used this during development to find which subtypes had missing keys, not sure if applicable to "any" entity
+                # if 'type' in entity:
+                #     _keys.add(f'{entity["type"]}.{key}')
+                # else:
+                #     _keys.add(key)
                 _keys.add(key)
                 entity.pop(key)
 
