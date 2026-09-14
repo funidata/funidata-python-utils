@@ -88,7 +88,7 @@ def get_scrambled_nationalities(
             get_weighted_random_value(
                 value_weight_dict={
                     k: v for k, v in {
-                        'urn:code:country:246': 5000,
+                        # 'urn:code:country:246': 5000,  # Disabled due to nationality-PIC combo
                         'urn:code:country:248': 50,
                         'urn:code:country:752': 25,
                         'urn:code:country:056': 10,
