@@ -8,6 +8,7 @@ from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
+from ...data_scramblers.workflow_scrambler import WorkflowScramblerSelector
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -40,6 +41,7 @@ __all__ = [
     'TermRegistrationRequirements',
     'CooperationNetworks',
     'EnrolmentCalculationConfigs',
+    'Workflows',
 ]
 
 
@@ -443,5 +445,19 @@ class EnrolmentCalculationConfigs(BaseResource):
     )
     exports = SisExport(
         endpoint='/ilmo/api/enrolment-calculation-configs/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class Workflows(BaseResource):
+    scrambling_classes = [
+        WorkflowScramblerSelector,
+    ]
+    imports = SisImport(
+        endpoint='/ori/api/workflows/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ori/api/workflows/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
