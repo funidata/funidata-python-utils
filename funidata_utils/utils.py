@@ -2,6 +2,7 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 import sys
+import typing
 from collections import defaultdict
 from functools import reduce
 from statistics import mean, stdev
@@ -73,7 +74,8 @@ def batch(iterable, steps=1):
 
 def recursive_dict_fetch(
     entity: Any,
-    keys: list
+    keys: list,
+    missing_key_handler: typing.Literal['skip', 'exception'] = 'exception',
 ):
     if not entity:
         return None
@@ -81,6 +83,13 @@ def recursive_dict_fetch(
     if len(keys) == 1:
         if isinstance(entity, list):
             return entity
+
+        if keys[0] not in entity:
+            match missing_key_handler:
+                case 'skip':
+                    return entity
+                case 'exception' | _:
+                    raise KeyError(f"Could not find {keys[0]} in entity")
 
         return entity[keys[0]]
 
@@ -90,12 +99,13 @@ def recursive_dict_fetch(
 def get_recursive_dict_value(
     entity: dict,
     dot_separated_key: str,
+    missing_key_handler: typing.Literal['skip', 'exception'],
 ):
     parts = dot_separated_key.split('.')
     if not parts:
         raise ValueError("dot_separated_key required")
 
-    return recursive_dict_fetch(entity, parts)
+    return recursive_dict_fetch(entity, parts, missing_key_handler=missing_key_handler)
 
 
 def _dict_update_by_key_split(
@@ -103,7 +113,7 @@ def _dict_update_by_key_split(
     keys: list,
     new_value,
     missing_key_handler: Literal['skip', 'exception', 'add_missing'],
-):
+) -> dict | None:
     _first_key = keys[0]
     if _first_key not in entity:
         return None
@@ -140,6 +150,8 @@ def _dict_update_by_key_split(
     _update_refs = []
     if isinstance(_current_entity_ref, list):
         _update_refs += _current_entity_ref
+    elif isinstance(_current_entity_ref[final_key], list):
+        _update_refs += _current_entity_ref[final_key]
     else:
         _update_refs.append(_current_entity_ref)
 
@@ -156,7 +168,7 @@ def _dict_update_by_key_split(
                 case 'exception':
                     raise KeyError(f"Key {final_key} not found")
                 case 'skip':
-                    return entity
+                    continue
                 case 'add_missing':
                     _ref[final_key] = _new_value
 
@@ -169,15 +181,16 @@ def _dict_update_by_key_split(
 def update_inner_dictionary_key(
     entity: dict,
     dot_separated_key: str,
-    new_value: str | bool | int | Tuple[Callable, dict] | None,
+    new_value: str | bool | int | dict | Tuple[Callable, dict] | Callable | None,
     missing_key_handler: Literal['skip', 'exception', 'add_missing'] = 'exception'
 ):
+    """ Updates the inner dictionary key, and returns the first part of key path (root.branch.leaf returns `root[branch]`)"""
     parts = dot_separated_key.split('.')
     if not parts:
         raise ValueError("dot_separated_key required")
 
-    diu = _dict_update_by_key_split(entity, parts, new_value, missing_key_handler=missing_key_handler)
-    if diu is None:
+    updated_entity = _dict_update_by_key_split(entity, parts, new_value, missing_key_handler=missing_key_handler)
+    if updated_entity is None:
         return None
 
-    return entity.get(parts[0])
+    return updated_entity.get(parts[0])

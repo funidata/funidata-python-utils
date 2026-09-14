@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from .utils.generic_scrambling import (
     scramble_with_weighted_pseudorandom, hashlib_hash, get_random_date,
 )
@@ -143,6 +141,9 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
                 scramble_seed_key=entity['id']
             )
         ],
+        oppijaID=[
+            lambda x: None
+        ],
         oppijanumero=[
             lambda x: None
         ],
@@ -199,4 +200,6 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
                 scramble_seed_key=entity['id']
             )
         ],
+        graduationSurveyExemptionGranted=None,
+        loginDisabledType=None,
     )

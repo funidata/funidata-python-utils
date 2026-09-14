@@ -106,9 +106,10 @@ def scramble_with_weighted_pseudorandom(
     weights: dict | list[tuple],
     scramble_seed_key: str | typing.Callable | None = None,
     scramble_empty_values: bool = True,
+    missing_key_handler: typing.Literal['skip', 'exception'] = 'exception',
     **kwargs
 ):
-    _original_value = get_recursive_dict_value(entity, key)
+    _original_value = get_recursive_dict_value(entity, key, missing_key_handler=missing_key_handler)
 
     # If the final part before the replaceable value is a list, perform replacement on all list entities
     if isinstance(_original_value, list):
@@ -122,6 +123,7 @@ def scramble_with_weighted_pseudorandom(
                         weights=weights,
                         scramble_seed_key=scramble_seed_key + str(_x),
                         scramble_empty_values=scramble_empty_values,
+                        missing_key_handler=missing_key_handler,
                     )
                 } or {}
             )

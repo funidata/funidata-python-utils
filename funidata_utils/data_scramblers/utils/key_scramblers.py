@@ -84,11 +84,9 @@ def get_scrambled_nationalities(
     )
     if random_nationality_count > 1:
         # TODO: figure out a more robust way later in case of triple/quadruple nationalitites are required
-        return [
-            scramble_with_weighted_pseudorandom(
-                entity=entity,
-                key='citizenshipUrns',
-                weights={
+        return list({
+            get_weighted_random_value(
+                value_weight_dict={
                     k: v for k, v in {
                         'urn:code:country:246': 5000,
                         'urn:code:country:248': 50,
@@ -98,16 +96,14 @@ def get_scrambled_nationalities(
                         'urn:code:country:250': 10,
                     }.items() if k != x
                 },
-                scramble_seed_key=str(entity['id']) + x
+                in_seed=str(entity['id']) + x
             )
             for x in entity.get('citizenshipUrns')
-        ]
+        })
 
     return [
-        scramble_with_weighted_pseudorandom(
-            entity=entity,
-            key='citizenshipUrns',
-            weights={
+        get_weighted_random_value(
+            value_weight_dict={
                 'urn:code:country:246': 5000,
                 'urn:code:country:248': 50,
                 'urn:code:country:752': 25,
@@ -115,6 +111,6 @@ def get_scrambled_nationalities(
                 'urn:code:country:276': 10,
                 'urn:code:country:250': 10,
             },
-            scramble_seed_key=str(entity['id'])
+            in_seed=str(entity['id'])
         )
     ]
