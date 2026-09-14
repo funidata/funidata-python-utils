@@ -5,7 +5,6 @@ from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from .schemas import SisImport, SisExport, SisDelete
-from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.kori_person import KoriPersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
