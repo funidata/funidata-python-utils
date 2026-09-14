@@ -86,3 +86,27 @@ def test_private_person_scrambler_scrambles_keys():
                 continue
 
             assert scrambled_data.get(key, -42) != data.get(key, -42)
+
+
+@pytest.mark.unit
+def test_private_person_scrambler_handles_lists_correctly():
+    data = {
+        "documentState": "DRAFT",
+        "id": "otm-123456",
+        "citizenshipUrns": [
+            "urn:code:country:247",
+            "urn:code:country:248"
+        ],
+        'preferredLanguageUrn': '',
+        "schoolEducationLanguageUrns": [
+            "urn:code:school-education-language:*"
+        ],
+        "oids": [
+            "string"
+        ],
+    }
+
+    scrambled_data = PrivatePersonScrambler.scramble(copy.deepcopy(data), set())
+    list_keys = {'citizenshipUrns', 'schoolEducationLanguageUrns'}
+    for key in list_keys:
+        assert isinstance(scrambled_data[key], list), scrambled_data[key]

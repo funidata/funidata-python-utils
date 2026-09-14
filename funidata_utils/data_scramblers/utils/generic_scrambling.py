@@ -114,21 +114,30 @@ def scramble_with_weighted_pseudorandom(
     # If the final part before the replaceable value is a list, perform replacement on all list entities
     if isinstance(_original_value, list):
         _final_key_part = key.split('.')[-1]
-        return [
-            _x | (
-                {
-                    _final_key_part: scramble_with_weighted_pseudorandom(
-                        _x,
-                        key=_final_key_part,
-                        weights=weights,
-                        scramble_seed_key=scramble_seed_key + str(_x),
-                        scramble_empty_values=scramble_empty_values,
-                        missing_key_handler=missing_key_handler,
-                    )
-                } or {}
-            )
-            for _x in _original_value
-        ]
+        if isinstance(_original_value[0], dict):
+            return [
+                _x | (
+                    {
+                        _final_key_part: scramble_with_weighted_pseudorandom(
+                            _x,
+                            key=_final_key_part,
+                            weights=weights,
+                            scramble_seed_key=scramble_seed_key + str(_x),
+                            scramble_empty_values=scramble_empty_values,
+                            missing_key_handler=missing_key_handler,
+                        )
+                    } or {}
+                )
+                for _x in _original_value
+            ]
+        else:
+            return [
+                get_weighted_random_value(
+                    value_weight_dict=weights,
+                    in_seed=scramble_seed_key + str(_x),
+                )
+                for _x in _original_value
+            ]
 
     if isinstance(scramble_seed_key, typing.Callable):
         seed_key = scramble_seed_key(entity)
