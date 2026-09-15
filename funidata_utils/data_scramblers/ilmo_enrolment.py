@@ -34,13 +34,19 @@ class IlmoEnrolmentScrambler(SingletonMetaScrambler):
             lambda original_val: update_inner_dictionary_key(
                 original_val,
                 dot_separated_key='cooperationNetworkStatus.rejectionReason',
-                new_value=None,
+                new_value='cooperationNetworkStatus.rejectionReason',
                 missing_key_handler='skip'
             ),
             lambda original_val: update_inner_dictionary_key(
                 original_val,
                 'cooperationNetworkStatus.outboundStatusMessage',
-                new_value=None,
+                new_value='cooperationNetworkStatus.outboundStatusMessage',
+                missing_key_handler='skip'
+            ),
+            lambda original_val: update_inner_dictionary_key(
+                original_val,
+                'cooperationNetworkStatus.selectionItemStatusInfo',
+                new_value='cooperationNetworkStatus.selectionItemStatusInfo',
                 missing_key_handler='skip'
             ),
         ],
