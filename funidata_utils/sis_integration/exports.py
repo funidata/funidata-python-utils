@@ -3,7 +3,6 @@
 # ------------------------------------------------------------------------------
 import json
 import logging
-from collections import defaultdict
 from typing import TextIO, overload, IO, Generator, Literal
 
 from .protocols import SisExportable, SupportsExportAuthentication, ScramblingClass, SisExportableSupportScrambling
@@ -109,9 +108,9 @@ def export_from_endpoint_generator(
             if scrambling_classes:
                 scrambling_classes.append(SisMetadataScrambler)
                 scrambling_classes.append(UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys))
-                processed_keys = set()
 
                 for entity in entities:
+                    processed_keys = set()
                     for scrambling_class in scrambling_classes:
                         entity = scrambling_class.scramble(entity, processed_keys)
 
