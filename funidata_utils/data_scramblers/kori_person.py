@@ -15,7 +15,12 @@ class KoriPersonScrambler(SingletonMetaScrambler):
             lambda x: {'fi': 'titteli', 'en': 'title', 'sv': 'titel'}
         ],
         firstName=[
-            get_scrambled_first_name,
+            (
+                get_scrambled_first_name,
+                dict(
+                    old_value_key_getter_func=lambda x: x.get('firstName')
+                )
+            ),
         ],
         lastName=[
             get_scrambled_last_name,
