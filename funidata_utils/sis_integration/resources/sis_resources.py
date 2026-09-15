@@ -1,10 +1,11 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-from .schemas import SisImport, SisExport, SisDelete
 from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
+from .schemas import SisImport, SisExport, SisDelete
+from ...data_scramblers.kori_person import KoriPersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
@@ -302,6 +303,9 @@ class Modules(BaseResource):
 
 
 class KoriPersons(BaseResource):
+    scrambling_classes = [
+        KoriPersonScrambler
+    ]
     imports = SisImport(
         endpoint='/kori/api/persons/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
