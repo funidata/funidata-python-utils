@@ -607,6 +607,8 @@ class CustomAttainmentWorkflowScrambler(SingletonMetaScrambler):
             ),
         ],
         planId=None,
+        moduleId=None,
+        moduleGroupId=None,
     )
 
     @classmethod
@@ -1086,14 +1088,6 @@ class RequiredModuleContentWorkflowScrambler(SingletonMetaScrambler):
     # lambda x: None means -> set the value None
     discriminator = 'RequiredModuleContentWorkflow'
     scrambling_keys = _workflow_base_scrambling_keys | dict(
-        planContent=[
-            lambda original_val: update_inner_dictionary_key(
-                original_val,
-                'planContent.customStudyDrafts',
-                new_value=_handle_custom_study_drafts,
-                missing_key_handler='skip'
-            )
-        ],
         formalRecommendation=None,
         contentRecommendation=None,
         moduleId=None,
@@ -1106,6 +1100,19 @@ class RequiredModuleContentWorkflowScrambler(SingletonMetaScrambler):
         parentModuleId=None,
         moduleContentWorkflow=None,
         planId=None,
+        customStudyDrafts=[
+            lambda original_val: update_inner_dictionary_key(
+                original_val,
+                dot_separated_key='customStudyDrafts',
+                new_value=_handle_custom_study_drafts,
+                missing_key_handler='skip'
+            ),
+        ],
+        moduleSelections=None,
+        customModuleAttainmentSelections=None,
+        applicationRationale=[
+            lambda original_val: "applicationRationale" if original_val else original_val
+        ],
     )
 
     @classmethod
