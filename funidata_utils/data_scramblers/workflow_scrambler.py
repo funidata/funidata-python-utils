@@ -742,6 +742,58 @@ class StudyRightExtensionWorkflowScrambler(SingletonMetaScrambler):
     discriminator = 'StudyRightExtensionWorkflow'
     scrambling_keys = _workflow_base_scrambling_keys | dict(
         id=None,
+        planId=None,
+        planSnapshot=[
+            lambda original_application: update_inner_dictionary_key(
+                original_application,
+                'planSnapshot.customStudyDrafts',
+                new_value=_handle_custom_study_drafts,
+                missing_key_handler='skip'
+            ),
+            lambda original_application: update_inner_dictionary_key(
+                original_application,
+                'planSnapshot.name',
+                new_value='planSnapshot.name',
+                missing_key_handler='skip'
+            ),
+            lambda original_application: update_inner_dictionary_key(
+                original_application,
+                'planSnapshot.timelineNotes',
+                new_value='planSnapshot.timelineNotes',
+                missing_key_handler='skip'
+            ),
+        ],
+        educationId=None,
+        studyRightValidity=None,
+        previousExtensions=[
+            lambda original_application: update_inner_dictionary_key(
+                original_application,
+                'previousExtensions.grantReason',
+                new_value='previousExtensions.grantReason',
+                missing_key_handler='skip',
+            ),
+            lambda original_application: update_inner_dictionary_key(
+                original_application,
+                'previousExtensions.deleteReason',
+                new_value='previousExtensions.deleteReason',
+                missing_key_handler='skip',
+            )
+        ],
+        termRegistrations=None,  # Should be non-scrambleable
+        usedAttendanceTerms=None,
+        usedAbsenceTerms=None,
+        usedStatutoryAbsenceTerms=None,
+        termsWithoutRegistration=None,
+        attainmentIds=None,
+        phase1Progress=None,  # Seems benign
+        phase2Progress=None,  # Seems benign
+        requestedTerms=None,
+        delayRationale=[
+            lambda rationale: 'delayRationale' if rationale else rationale,
+        ],
+        applicationRationale=[
+            lambda rationale: 'applicationRationale' if rationale else rationale,
+        ],
     )
 
     @classmethod
@@ -1017,6 +1069,41 @@ class ModuleAttainmentWorkflowScrambler(SingletonMetaScrambler):
         contentRecommendation=None,
         moduleId=None,
         moduleGroupId=None,
+        moduleContentWorkflow=None,
+        planId=None,
+    )
+
+    @classmethod
+    def scramble(cls, entity: dict, processed_keys: set) -> dict:
+        if entity['type'] != cls.discriminator:
+            return entity
+
+        return super().scramble(entity, processed_keys)
+
+
+class RequiredModuleContentWorkflowScrambler(SingletonMetaScrambler):
+    # key=None means "Keep the original value"
+    # lambda x: None means -> set the value None
+    discriminator = 'RequiredModuleContentWorkflow'
+    scrambling_keys = _workflow_base_scrambling_keys | dict(
+        planContent=[
+            lambda original_val: update_inner_dictionary_key(
+                original_val,
+                'planContent.customStudyDrafts',
+                new_value=_handle_custom_study_drafts,
+                missing_key_handler='skip'
+            )
+        ],
+        formalRecommendation=None,
+        contentRecommendation=None,
+        moduleId=None,
+        moduleGroupId=None,
+        approvedModuleId=None,
+        courseUnitSelections=None,
+        customCourseUnitAttainmentSelections=None,
+        educationId=None,
+        originalReferredPlanId=None,
+        parentModuleId=None,
         moduleContentWorkflow=None,
         planId=None,
     )
