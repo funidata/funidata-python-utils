@@ -609,6 +609,7 @@ class CustomAttainmentWorkflowScrambler(SingletonMetaScrambler):
         planId=None,
         moduleId=None,
         moduleGroupId=None,
+        moduleContentWorkflow=None,
     )
 
     @classmethod
@@ -796,6 +797,7 @@ class StudyRightExtensionWorkflowScrambler(SingletonMetaScrambler):
         applicationRationale=[
             lambda rationale: 'applicationRationale' if rationale else rationale,
         ],
+        moduleContentWorkflow=None,
     )
 
     @classmethod
