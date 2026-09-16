@@ -1,4 +1,7 @@
+from .replacement_data import thesis_titles_fi, thesis_titles_en, thesis_titles_sv
+from .utils.generic_scrambling import replace_from_list
 from ..data_scramblers.base import SingletonMetaScrambler
+from ..utils import update_inner_dictionary_key
 
 
 class ThesisScrambler(SingletonMetaScrambler):
@@ -8,8 +11,38 @@ class ThesisScrambler(SingletonMetaScrambler):
         id=None,
         personId=None,
         attainmentId=None,
-        title=None,
-        subject=None,
+        title=[
+            lambda x: update_inner_dictionary_key(
+                x,
+                'title.fi',
+                lambda y: replace_from_list(
+                    original_value=x['id'],
+                    replacement_list=thesis_titles_fi
+                ),
+                missing_key_handler='skip'
+            ),
+            lambda x: update_inner_dictionary_key(
+                x,
+                'title.en',
+                lambda y: replace_from_list(
+                    original_value=x['id'],
+                    replacement_list=thesis_titles_en
+                ),
+                missing_key_handler='skip'
+            ),
+            lambda x: update_inner_dictionary_key(
+                x,
+                'title.sv',
+                lambda y: replace_from_list(
+                    original_value=x['id'],
+                    replacement_list=thesis_titles_sv
+                ),
+                missing_key_handler='skip'
+            )
+        ],
+        subject=[
+            lambda x: {'fi': 'aihe', 'sv': 'ämne', 'en': 'subject'}
+        ],
         thesisTypeUrn=None,
         responsibilityInfos=None,
         organisations=None,

@@ -150,7 +150,7 @@ def _dict_update_by_key_split(
     _update_refs = []
     if isinstance(_current_entity_ref, list):
         _update_refs += _current_entity_ref
-    elif isinstance(_current_entity_ref[final_key], list):
+    elif isinstance(_current_entity_ref.get(final_key), list):
         _update_refs += _current_entity_ref[final_key]
     else:
         _update_refs.append(_current_entity_ref)
@@ -159,7 +159,7 @@ def _dict_update_by_key_split(
         if isinstance(new_value, Callable):
             _new_value = new_value(_ref)
         elif isinstance(new_value, tuple):
-            _new_value = new_value[0](_ref, **new_value[1])
+            _new_value = new_value[0](str(_ref), **new_value[1])
         else:
             _new_value = new_value
 

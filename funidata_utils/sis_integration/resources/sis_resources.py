@@ -11,6 +11,7 @@ from ...data_scramblers.ilmo_enrolment import IlmoEnrolmentScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
+from ...data_scramblers.thesis import ThesisScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -163,6 +164,7 @@ class TermRegistrations(BaseResource):
 
 
 class Thesis(BaseResource):
+    scrambling_classes = [ThesisScrambler]
     imports = SisImport(
         endpoint='/ori/api/thesis/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
