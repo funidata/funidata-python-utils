@@ -45,7 +45,7 @@ class ThesisScrambler(SingletonMetaScrambler):
             lambda x: {'fi': 'aihe', 'sv': 'ämne', 'en': 'subject'}
         ],
         thesisTypeUrn=None,
-        responsibilityInfos=None,
+        responsibilityInfos=lambda x: [], # TODO: Update with real scrambling
         organisations=None,
         courseUnitId=None,
         courseUnitGroupId=None,
