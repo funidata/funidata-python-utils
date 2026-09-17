@@ -512,7 +512,7 @@ _workflow_base_scrambling_keys = dict(
         ),
     ],
     cancelReason=[
-        lambda original_val: "cancelReason"
+        lambda original_val: "cancelReason" if original_val['cancelReason'] else None
     ],
     cancelTime=None,
     cancellerId=None,
