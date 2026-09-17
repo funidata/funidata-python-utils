@@ -129,34 +129,37 @@ def _handle_application_scrambling(original_application):
                     name='name',
                     organisation='organisation',
                     description='description',
-                    gradeScale='Grade scale 1-5',
-                    credits=scramble_with_weighted_pseudorandom(
-                        x,
-                        key='credits',
-                        weights=[
-                            ("30 op", 50),
-                            ("15 op", 100),
-                            ("5 op", 150),
-                            ("5 ov", 25),
-                            ("2 pallerojumppaa", 5),
-                        ],
-                        scramble_seed_key=lambda x: x['localId'],
-                        scramble_empty_values=False,
-                        missing_key_handler='skip'
-                    ),
-                    grade=scramble_with_weighted_pseudorandom(
-                        x,
-                        key='grade',
-                        weights=[
-                            ("5", 100),
-                            ("4", 250),
-                            ("3", 500),
-                            ("1", 350),
-                        ],
-                        scramble_seed_key=lambda x: x['localId'],
-                        scramble_empty_values=False,
-                        missing_key_handler='skip'
-                    )
+                ) | (
+                    dict(
+                        gradeScale='Grade scale 1-5',
+                        credits=scramble_with_weighted_pseudorandom(
+                            x,
+                            key='credits',
+                            weights=[
+                                ("30 op", 50),
+                                ("15 op", 100),
+                                ("5 op", 150),
+                                ("5 ov", 25),
+                                ("2 pallerojumppaa", 5),
+                            ],
+                            scramble_seed_key=lambda x: x['localId'],
+                            scramble_empty_values=False,
+                            missing_key_handler='skip'
+                        ),
+                        grade=scramble_with_weighted_pseudorandom(
+                            x,
+                            key='grade',
+                            weights=[
+                                ("5", 100),
+                                ("4", 250),
+                                ("3", 500),
+                                ("1", 350),
+                            ],
+                            scramble_seed_key=lambda x: x['localId'],
+                            scramble_empty_values=False,
+                            missing_key_handler='skip'
+                        )
+                    ) if x['type'] == 'STUDIES' else {}
                 )
                 for x in
                 original_application['priorLearnings']
