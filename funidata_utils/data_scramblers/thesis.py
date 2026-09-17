@@ -9,6 +9,7 @@ class ThesisScrambler(SingletonMetaScrambler):
     # lambda x: None means -> set the value None
     scrambling_keys = dict(
         id=None,
+        documentState=None,
         personId=None,
         attainmentId=None,
         title=[
