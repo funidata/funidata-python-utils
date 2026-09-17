@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 def _handle_custom_study_drafts(_customStudyDraft):
+    if not _customStudyDraft:
+        return _customStudyDraft
+
     update_inner_dictionary_key(
         _customStudyDraft,
         dot_separated_key='name',
@@ -327,6 +330,36 @@ def _handle_application_scrambling(original_application):
     return original_application
 
 
+def _handle_recommendations(original_entity, recommendation_key: str):
+    if not original_entity:
+        return original_entity
+
+    update_inner_dictionary_key(
+        original_entity,
+        dot_separated_key=f'{recommendation_key}.responsiblePerson',
+        new_value=f'{recommendation_key}.responsiblePerson',
+        missing_key_handler='skip'
+    )
+    update_inner_dictionary_key(
+        original_entity,
+        dot_separated_key=f'{recommendation_key}.responsiblePersonTitle',
+        new_value={'fi': f'{recommendation_key}.responsiblePersonTitle'},
+        missing_key_handler='skip'
+    )
+    update_inner_dictionary_key(
+        original_entity,
+        dot_separated_key=f'{recommendation_key}.additionalInformation',
+        new_value=f'{recommendation_key}.additionalInformation',
+        missing_key_handler='skip'
+    )
+    update_inner_dictionary_key(
+        original_entity,
+        dot_separated_key=f'{recommendation_key}.comment',
+        new_value=f'{recommendation_key}.comment',
+        missing_key_handler='skip'
+    )
+
+
 def _handle_decision_scrambling(original_decision):
     if not original_decision:
         return original_decision
@@ -343,31 +376,9 @@ def _handle_decision_scrambling(original_decision):
 
     match decision_type:
         case 'AttainmentWorkflowDecision' | 'ModuleContentWorkflowDecision':
-            for recommendation in {'formalRecommendation', 'contentRecommendation'}:
-                update_inner_dictionary_key(
-                    original_decision,
-                    dot_separated_key=f'{recommendation}.responsiblePerson',
-                    new_value=f'{recommendation}.responsiblePerson',
-                    missing_key_handler='skip'
-                )
-                update_inner_dictionary_key(
-                    original_decision,
-                    dot_separated_key=f'{recommendation}.responsiblePersonTitle',
-                    new_value={'fi': f'{recommendation}.responsiblePersonTitle'},
-                    missing_key_handler='skip'
-                )
-                update_inner_dictionary_key(
-                    original_decision,
-                    dot_separated_key=f'{recommendation}.additionalInformation',
-                    new_value=f'{recommendation}.additionalInformation',
-                    missing_key_handler='skip'
-                )
-                update_inner_dictionary_key(
-                    original_decision,
-                    dot_separated_key=f'{recommendation}.comment',
-                    new_value=f'{recommendation}.comment',
-                    missing_key_handler='skip'
-                )
+            _handle_recommendations(original_decision, 'formalRecommendation')
+            _handle_recommendations(original_decision, 'contentRecommendation')
+
             if decision_type == 'AttainmentWorkflowDecision':
                 original_decision['appealInstructions'] = update_inner_dictionary_key(
                     original_decision,
@@ -530,81 +541,14 @@ class CustomAttainmentWorkflowScrambler(SingletonMetaScrambler):
             lambda original_val: "attainmentDescription"
         ],
         customStudyDraft=[
-            lambda original_val: update_inner_dictionary_key(
-                original_val,
-                dot_separated_key='customStudyDraft',
-                new_value=_handle_custom_study_drafts,
-                missing_key_handler='skip'
-            ),
+            lambda original_val: _handle_custom_study_drafts(original_val.get('customStudyDraft'))
         ],
         attainmentLanguage=None,
         formalRecommendation=[
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.responsiblePerson',
-                    new_value='formalRecommendation.responsiblePerson',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.responsiblePersonTitle',
-                    new_value='formalRecommendation.responsiblePersonTitle',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.additionalInformation',
-                    new_value='formalRecommendation.additionalInformation',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.comment',
-                    new_value='formalRecommendation.comment',
-                    missing_key_handler='skip'
-                )
-            ),
+            lambda original_val: _handle_recommendations(original_val, 'formalRecommendation')
         ],
         contentRecommendation=[
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.responsiblePerson',
-                    new_value='contentRecommendation.responsiblePerson',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.responsiblePersonTitle',
-                    new_value='contentRecommendation.responsiblePersonTitle',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.additionalInformation',
-                    new_value='contentRecommendation.additionalInformation',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.comment',
-                    new_value='contentRecommendation.comment',
-                    missing_key_handler='skip'
-                )
-            ),
+            lambda original_val: _handle_recommendations(original_val, 'contentRecommendation')
         ],
         planId=None,
         moduleId=None,
@@ -645,80 +589,12 @@ class CustomModuleContentWorkflowScrambler(SingletonMetaScrambler):
         customStudyDrafts=[
             lambda original_val: update_inner_dictionary_key(
                 original_val,
-                dot_separated_key='customStudyDraft',
+                dot_separated_key='customStudyDrafts',
                 new_value=_handle_custom_study_drafts,
                 missing_key_handler='skip'
             ),
         ],
         attainmentLanguage=None,
-        formalRecommendation=[
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.responsiblePerson',
-                    new_value='formalRecommendation.responsiblePerson',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.responsiblePersonTitle',
-                    new_value='formalRecommendation.responsiblePersonTitle',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.additionalInformation',
-                    new_value='formalRecommendation.additionalInformation',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='formalRecommendation.comment',
-                    new_value='formalRecommendation.comment',
-                    missing_key_handler='skip'
-                )
-            ),
-        ],
-        contentRecommendation=[
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.responsiblePerson',
-                    new_value='contentRecommendation.responsiblePerson',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.responsiblePersonTitle',
-                    new_value='contentRecommendation.responsiblePersonTitle',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.additionalInformation',
-                    new_value='contentRecommendation.additionalInformation',
-                    missing_key_handler='skip'
-                )
-            ),
-            (
-                update_inner_dictionary_key,
-                dict(
-                    dot_separated_key='contentRecommendation.comment',
-                    new_value='contentRecommendation.comment',
-                    missing_key_handler='skip'
-                )
-            ),
-        ],
         approvedModuleId=None,
         courseUnitSelections=None,
         moduleContentWorkflow=None,  #
@@ -912,18 +788,16 @@ class PriorLearningInclusionWorkflowScrambler(SingletonMetaScrambler):
         ],
         name=[lambda x: "Name"],
         customStudyDraft=[
-            lambda original_val: update_inner_dictionary_key(
-                original_val,
-                dot_separated_key='customStudyDraft',
-                new_value=_handle_custom_study_drafts,
-                missing_key_handler='skip'
-            ),
+            lambda original_val: _handle_custom_study_drafts(original_val.get('customStudyDraft'))
         ],
         planId=None,
-        formalRecommendation=None,
-        moduleId=None,
+        formalRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'formalRecommendation')
+        ],
+        contentRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'contentRecommendation')
+        ], moduleId=None,
         moduleGroupId=None,
-        contentRecommendation=None,
         moduleContentWorkflow=None,  #
         degreeProgrammeId=None,
         degreeProgrammeGroupId=None,
@@ -1040,9 +914,12 @@ class PriorLearningSubstitutionWorkflowScrambler(SingletonMetaScrambler):
             ),
         ],
         planId=None,
-        contentRecommendation=None,
-        formalRecommendation=None,
-        courseUnitId=None,
+        formalRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'formalRecommendation')
+        ],
+        contentRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'contentRecommendation')
+        ], courseUnitId=None,
         courseUnitGroupId=None,
         moduleContentWorkflow=None,
     )
@@ -1069,8 +946,12 @@ class ModuleAttainmentWorkflowScrambler(SingletonMetaScrambler):
                 missing_key_handler='skip'
             )
         ],
-        formalRecommendation=None,
-        contentRecommendation=None,
+        formalRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'formalRecommendation')
+        ],
+        contentRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'contentRecommendation')
+        ],
         moduleId=None,
         moduleGroupId=None,
         moduleContentWorkflow=None,
@@ -1090,8 +971,12 @@ class RequiredModuleContentWorkflowScrambler(SingletonMetaScrambler):
     # lambda x: None means -> set the value None
     discriminator = 'RequiredModuleContentWorkflow'
     scrambling_keys = _workflow_base_scrambling_keys | dict(
-        formalRecommendation=None,
-        contentRecommendation=None,
+        formalRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'formalRecommendation')
+        ],
+        contentRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'contentRecommendation')
+        ],
         moduleId=None,
         moduleGroupId=None,
         approvedModuleId=None,
@@ -1210,9 +1095,13 @@ class DegreeProgrammeAttainmentWorkflowScrambler(SingletonMetaScrambler):
         planId=None,
         moduleId=None,
         moduleGroupId=None,
-        contentRecommendation=None,
         moduleContentWorkflow=None,  #
-        formalRecommendation=None,
+        formalRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'formalRecommendation')
+        ],
+        contentRecommendation=[
+            lambda original_val: _handle_recommendations(original_val, 'contentRecommendation')
+        ],
         newWorkflowId=None,
         joinsAlumniAssociation=None,
     )
