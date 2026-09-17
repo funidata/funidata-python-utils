@@ -52,7 +52,7 @@ def get_random_date(n: int | str, *args, **kwargs):
 def replace_from_list(original_value, replacement_list):
     # Trusting in the collision resistance of SHA512 combined with using smaller replacement_list collections
     # we should be able to trust that replacement values are non-reversible
-    val = replacement_list[default_hash(original_value) % len(replacement_list)]
+    val = replacement_list[default_hash(str(original_value)) % len(replacement_list)]
     return val
 
 
