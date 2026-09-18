@@ -5,14 +5,17 @@ from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from .schemas import SisImport, SisExport, SisDelete
+from ...data_scramblers.attained_qualification import AttainedQualificationScrambler
 from ...data_scramblers.kori_person import KoriPersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.ilmo_enrolment import IlmoEnrolmentScrambler
+from ...data_scramblers.mobility_period import MobilityPeriodScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
 from ...data_scramblers.workflow_scrambler import WorkflowScramblerSelector
 from ...data_scramblers.thesis import ThesisScrambler
+from ...data_scramblers.tuition_fee_obligation_period import TuitionFeeObligationPeriodScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -47,6 +50,8 @@ __all__ = [
     'EnrolmentCalculationConfigs',
     'IlmoEnrolments',
     'Workflows',
+    'AttainedQualifications',
+    'TuitionFeeObligationPeriods',
 ]
 
 
@@ -178,6 +183,9 @@ class Thesis(BaseResource):
 
 
 class MobilityPeriods(BaseResource):
+    scrambling_classes = [
+        MobilityPeriodScrambler
+    ]
     imports = SisImport(
         endpoint='/ori/api/mobility-periods/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
@@ -489,5 +497,33 @@ class Workflows(BaseResource):
     )
     exports = SisExport(
         endpoint='/ori/api/workflows/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class AttainedQualifications(BaseResource):
+    scrambling_classes = [
+        AttainedQualificationScrambler
+    ]
+    imports = SisImport(
+        endpoint='/ori/api/attained-qualifications/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ori/api/attained-qualifications/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class TuitionFeeObligationPeriods(BaseResource):
+    scrambling_classes = [
+        TuitionFeeObligationPeriodScrambler
+    ]
+    imports = SisImport(
+        endpoint='/ori/api/tuition-fee-obligation-periods/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ori/api/tuition-fee-obligation-periods/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
