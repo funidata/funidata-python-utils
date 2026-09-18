@@ -13,6 +13,7 @@ from ...data_scramblers.mobility_period import MobilityPeriodScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
+from ...data_scramblers.workflow_scrambler import WorkflowScramblerSelector
 from ...data_scramblers.thesis import ThesisScrambler
 from ...data_scramblers.tuition_fee_obligation_period import TuitionFeeObligationPeriodScrambler
 
@@ -48,6 +49,7 @@ __all__ = [
     'CooperationNetworks',
     'EnrolmentCalculationConfigs',
     'IlmoEnrolments',
+    'Workflows',
     'AttainedQualifications',
     'TuitionFeeObligationPeriods',
 ]
@@ -482,6 +484,20 @@ class IlmoEnrolments(BaseResource):
     patches = SisImport(
         endpoint='/ilmo/api/enrolments/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+
+    
+class Workflows(BaseResource):
+    scrambling_classes = [
+        WorkflowScramblerSelector,
+    ]
+    imports = SisImport(
+        endpoint='/ori/api/workflows/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ori/api/workflows/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
 
 
