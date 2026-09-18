@@ -14,6 +14,7 @@ from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
 from ...data_scramblers.thesis import ThesisScrambler
+from ...data_scramblers.tuition_fee_obligation_period import TuitionFeeObligationPeriodScrambler
 
 
 _DEFAULT_EXPORT_LIMIT = 2500
@@ -48,6 +49,7 @@ __all__ = [
     'EnrolmentCalculationConfigs',
     'IlmoEnrolments',
     'AttainedQualifications',
+    'TuitionFeeObligationPeriods',
 ]
 
 
@@ -493,5 +495,19 @@ class AttainedQualifications(BaseResource):
     )
     exports = SisExport(
         endpoint='/ori/api/attained-qualifications/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
+    )
+
+
+class TuitionFeeObligationPeriods(BaseResource):
+    scrambling_classes = [
+        TuitionFeeObligationPeriodScrambler
+    ]
+    imports = SisImport(
+        endpoint='/ori/api/tuition-fee-obligation-periods/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ori/api/tuition-fee-obligation-periods/v1/export',
         default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
