@@ -5,6 +5,7 @@ from re import sub
 
 from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
 from .schemas import SisImport, SisExport, SisDelete
+from ...data_scramblers.attained_qualification import AttainedQualificationScrambler
 from ...data_scramblers.kori_person import KoriPersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.ilmo_enrolment import IlmoEnrolmentScrambler
@@ -45,6 +46,7 @@ __all__ = [
     'CooperationNetworks',
     'EnrolmentCalculationConfigs',
     'IlmoEnrolments',
+    'AttainedQualifications',
 ]
 
 
@@ -474,4 +476,18 @@ class IlmoEnrolments(BaseResource):
     patches = SisImport(
         endpoint='/ilmo/api/enrolments/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+
+
+class AttainedQualifications(BaseResource):
+    scrambling_classes = [
+        AttainedQualificationScrambler
+    ]
+    imports = SisImport(
+        endpoint='/ori/api/attained-qualifications/v1/import',
+        default_import_limit=_DEFAULT_IMPORT_LIMIT,
+    )
+    exports = SisExport(
+        endpoint='/ori/api/attained-qualifications/v1/export',
+        default_export_limit=_DEFAULT_EXPORT_LIMIT,
     )
