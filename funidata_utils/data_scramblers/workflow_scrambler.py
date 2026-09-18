@@ -375,7 +375,7 @@ def _handle_decision_scrambling(original_decision):
     # approvedBy
     original_decision['approverTitle'] = {'fi': 'approverTitle'} if original_decision['approverTitle'] else None
     # approvalDate
-    original_decision['resolutionRationale'] = 'resolutionRationale'
+    original_decision['resolutionRationale'] = 'resolutionRationale' if original_decision['resolutionRationale'] else None
 
     match decision_type:
         case 'AttainmentWorkflowDecision' | 'ModuleContentWorkflowDecision':
@@ -567,21 +567,8 @@ class CustomModuleContentWorkflowScrambler(SingletonMetaScrambler):
     # lambda x: None means -> set the value None
     discriminator = 'CustomModuleContentWorkflow'
     scrambling_keys = _workflow_base_scrambling_keys | dict(
-        plannedParentModuleId=None,
-        degreeProgrammeId=None,
-        degreeProgrammeGroupId=None,
-        plannedCredits=None,
-        name=[
-            lambda original_val: "name"
-        ],
-        responsibleTeacher=[
-            lambda original_val: "responsibleTeacher"
-        ],
         applicationRationale=[
-            lambda original_val: "applicationRationale"
-        ],
-        attainmentDescription=[
-            lambda original_val: "attainmentDescription"
+            lambda original_val: "applicationRationale" if original_val else original_val
         ],
         customStudyDrafts=[
             lambda original_val: update_inner_dictionary_key(
@@ -591,12 +578,11 @@ class CustomModuleContentWorkflowScrambler(SingletonMetaScrambler):
                 missing_key_handler='skip'
             ),
         ],
-        attainmentLanguage=None,
         approvedModuleId=None,
         courseUnitSelections=None,
-        moduleContentWorkflow=None,  #
-        customCourseUnitAttainmentSelections=None,  #
-        customModuleAttainmentSelections=None,  #
+        moduleContentWorkflow=None,
+        customCourseUnitAttainmentSelections=None,
+        customModuleAttainmentSelections=None,
         parentModuleId=None,
         educationId=None,
         moduleSelections=None,
