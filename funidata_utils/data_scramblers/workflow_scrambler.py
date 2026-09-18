@@ -405,12 +405,6 @@ def _handle_decision_scrambling(original_decision):
             # AdministrativeReview
             update_inner_dictionary_key(
                 original_decision,
-                dot_separated_key='administrativeReview.result',
-                new_value='administrativeReview.result',
-                missing_key_handler='skip'
-            )
-            update_inner_dictionary_key(
-                original_decision,
                 dot_separated_key='administrativeReview.notes',
                 new_value='administrativeReview.notes',
                 missing_key_handler='skip'
