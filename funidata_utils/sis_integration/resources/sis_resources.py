@@ -8,6 +8,7 @@ from .schemas import SisImport, SisExport, SisDelete
 from ...data_scramblers.kori_person import KoriPersonScrambler
 from ...data_scramblers.attainment import AttainmentScrambler
 from ...data_scramblers.ilmo_enrolment import IlmoEnrolmentScrambler
+from ...data_scramblers.mobility_period import MobilityPeriodScrambler
 from ...data_scramblers.study_right import StudyRightScrambler
 from ...data_scramblers.studyright_termregistration import StudyRightTermRegistrationScrambler
 from ...data_scramblers.osuva_plan_scrambler import OsuvaPlanScrambler
@@ -176,6 +177,9 @@ class Thesis(BaseResource):
 
 
 class MobilityPeriods(BaseResource):
+    scrambling_classes = [
+        MobilityPeriodScrambler
+    ]
     imports = SisImport(
         endpoint='/ori/api/mobility-periods/v1/import',
         default_import_limit=_DEFAULT_IMPORT_LIMIT,
