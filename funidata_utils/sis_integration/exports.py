@@ -95,6 +95,14 @@ def export_from_endpoint_generator(
         params = {}
 
     scrambling_warning_triggered_keys = set()
+    _scrambling_classes = None
+    if scrambling_classes:
+        _scrambling_classes = [
+            *scrambling_classes,
+            SisMetadataScrambler,
+            UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys)
+        ]
+
     while True:
         sis_response = send_get_httpx(
             path=f"{sis_settings.host}{endpoint}",
@@ -105,13 +113,10 @@ def export_from_endpoint_generator(
         if sis_response.status_code == 200:
             response_json = sis_response.json()
             entities: list[dict] = response_json.get("entities", [])
-            if scrambling_classes:
-                scrambling_classes.append(SisMetadataScrambler)
-                scrambling_classes.append(UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys))
-
+            if _scrambling_classes:
                 for entity in entities:
                     processed_keys = set()
-                    for scrambling_class in scrambling_classes:
+                    for scrambling_class in _scrambling_classes:
                         entity = scrambling_class.scramble(entity, processed_keys)
 
                 yield entities
