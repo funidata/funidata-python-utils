@@ -9,6 +9,7 @@ import typing
 from typing import Tuple, Any, Callable, Literal
 
 import httpx
+from httpx import AsyncClient, AsyncHTTPTransport
 
 from ..utils import flatten, group_by, batch
 
@@ -20,11 +21,14 @@ logger = logging.getLogger(__name__)
 def _collect_suitable_batches_grouped_by_key(
     items_by_key: dict[Any, list[dict]],
     sorting_function: Callable = None,
-    batch_size_trigger: int = 500,
+    batch_size_trigger: int | None = 500,
 ) -> list[list[list[dict]]]:
     batches: list[list[list[dict]]] = []
     current_batch = []
     current_batch_size = 0
+
+    if not batch_size_trigger:
+        batch_size_trigger = 500
 
     sendable_lists_of_items = list(items_by_key.values())
 
@@ -233,6 +237,9 @@ async def send_post_with_binary_err_search_httpx(
     binary_err_search_sublists: bool = True,
     method: Literal['POST', 'PATCH'] = 'POST',
     max_parallel_requests: int = 1,
+    _state: dict[
+                Literal['max_seen_depth', 'sent_requests'], int
+            ] | None = None,
 ) -> list[httpx.Response]:
     if len(payload) <= 0:
         raise Exception(f"Payload missing when attempting to POST to : {path}")
@@ -244,7 +251,7 @@ async def send_post_with_binary_err_search_httpx(
             "https://": httpx.AsyncHTTPTransport(proxy=proxies.get('https')),
         }
 
-    client = httpx.AsyncClient(mounts=proxy_mounts, auth=auth)
+    client = _get_async_httpx_client(auth, proxy_mounts)
     semaphore = asyncio.Semaphore(max_parallel_requests)
 
     async def _with_sem(coro: typing.Coroutine):
@@ -281,6 +288,7 @@ async def send_post_with_binary_err_search_httpx(
                     binary_search_max_depth=binary_search_max_depth,
                     binary_err_search_sublists=binary_err_search_sublists,
                     method=method,
+                    _state=_state,
                 ))
                 for _batch in batches
             ]
@@ -299,6 +307,7 @@ async def send_post_with_binary_err_search_httpx(
                 binary_search_max_depth=binary_search_max_depth,
                 binary_err_search_sublists=binary_err_search_sublists,
                 method=method,
+                _state=_state,
             )
 
         # When batch size is configured, batch the payloads
@@ -313,8 +322,14 @@ async def send_post_with_binary_err_search_httpx(
                 binary_search_max_depth=binary_search_max_depth,
                 binary_err_search_sublists=binary_err_search_sublists,
                 method=method,
+                _state=_state,
             ))
             for batched_payload in batch(payload, batch_size)
         ]
         results = await asyncio.gather(*_tasks)
         return flatten(results)
+
+
+def _get_async_httpx_client(auth: tuple[str, str] | None, proxy_mounts: dict[str, AsyncHTTPTransport] | None) -> AsyncClient:
+    client = httpx.AsyncClient(mounts=proxy_mounts, auth=auth)
+    return client
