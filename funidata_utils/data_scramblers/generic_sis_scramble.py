@@ -1,4 +1,5 @@
 import sys
+from functools import lru_cache
 
 
 if sys.version_info >= (3, 12):
@@ -31,14 +32,27 @@ class SisMetadataScrambler(SingletonMetaScrambler):
     )
 
 
-class UnprocessedKeysDropperScrambler(SingletonMetaScrambler):
+class UnprocessedKeysDropperScrambler:
     scrambling_keys = {}
 
     def __init__(self, loggable_keys: set[str]):
         self._loggable_keys = loggable_keys
 
+    @classmethod
+    @lru_cache
+    def keys_without_scrambling(cls):
+        return {k for k, v in getattr(cls, 'scrambling_keys', {}).items() if not v}
+
+    @classmethod
+    @lru_cache
+    def dict_items_with_scrambling(cls):
+        return {
+            k: v
+            for k, v in getattr(cls, 'scrambling_keys', {}).items()
+            if v
+        }.items()
+
     # Instance method override to provide access to self._loggable_keys, and also provide different scrambling logic from other classes
-    @override
     def scramble(self, entity: dict, processed_keys: set) -> dict:  # noqa: instance method signature does not match cls method
         """ Pops any keys that are not present in processed_keys """
         entity_keys = set(entity.keys())
