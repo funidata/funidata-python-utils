@@ -36,14 +36,16 @@ class StudyRightScrambler(SingletonMetaScrambler):
             lambda x: None
         ],
         studyRightExtensions=[
-            lambda x: [
-                # Override grant + delete reasons with lorem ipsum, otherwise retain original extensions
-                original_extension | dict(
-                    grantReason="Extension grant Raisin: Lorem Ipsum" if original_extension['grantReason'] else None,
-                    deleteReason="Extension Delete Raisin: Lorem Ipsum" if original_extension['deleteReason'] else None
-                )
-                for original_extension in x.get('studyRightExtensions', []) or []
-            ]
+            lambda original_extension: update_inner_dictionary_key(
+                original_extension,
+                'studyRightExtensions.grantReason',
+                'studyRightExtensions.grantReason: Lorem Ipsum'
+            ),
+            lambda original_extension: update_inner_dictionary_key(
+                original_extension,
+                'studyRightExtensions.deleteReason',
+                'studyRightExtensions.deleteReason: Lorem Ipsum'
+            )
         ],
         studyRightCancellation=[
             (
@@ -55,15 +57,11 @@ class StudyRightScrambler(SingletonMetaScrambler):
             ),
         ],
         studyRightPassivations=[
-            lambda x: [
-                # Override grant + delete reasons with lorem ipsum, otherwise retain original extensions
-                lambda original_val: update_inner_dictionary_key(
-                    original_passivation,
-                    'additionalInfo',
-                    'studyRightPassivations.additionalInfo: Lorem Ipsum'
-                )
-                for original_passivation in x.get('studyRightPassivations', []) or []
-            ]
+            lambda original_passivation: update_inner_dictionary_key(
+                original_passivation,
+                'studyRightPassivations.additionalInfo',
+                'studyRightPassivations.additionalInfo: Lorem Ipsum'
+            )
         ],
         studyRightGraduation=None,
         acceptedSelectionPath=None,
