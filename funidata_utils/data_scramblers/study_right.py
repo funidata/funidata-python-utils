@@ -65,13 +65,6 @@ class StudyRightScrambler(SingletonMetaScrambler):
                 for original_passivation in x.get('studyRightPassivations', []) or []
             ]
         ],
-        studyRightTermination=[
-            lambda original_val: update_inner_dictionary_key(
-                original_val,
-                'studyRightTermination.terminationReason',
-                'studyRightTermination.terminationReason: Lorem Ipsum'
-            ),
-        ],
         studyRightGraduation=None,
         acceptedSelectionPath=None,
         requestedSelectionPath=None,
