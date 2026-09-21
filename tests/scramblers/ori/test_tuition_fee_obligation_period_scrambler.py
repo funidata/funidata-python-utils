@@ -8,6 +8,7 @@ from funidata_utils.data_scramblers.tuition_fee_obligation_period import Tuition
 @pytest.mark.unit
 def test_tuition_fee_scrambler_scrambles():
     data = {
+        "documentState": "ACTIVE",
         "id": "otm-123456",
         "studyRightId": "otm-123456",
         "valid": {
