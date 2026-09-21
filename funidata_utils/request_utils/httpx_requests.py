@@ -51,13 +51,14 @@ def send_get_httpx(
     params: dict | None = None,
 ) -> httpx.Response:
     client = _get_httpx_client(auth, proxies)
-    response = client.get(
-        path,
-        auth=auth,
-        params=params,
-        timeout=600,
-    )
-    return response
+    with client:
+        response = client.get(
+            path,
+            auth=auth,
+            params=params,
+            timeout=600,
+        )
+        return response
 
 
 def _get_httpx_client(auth: tuple[str, str] | None, proxies: dict[Any, Any] | None) -> Client:
