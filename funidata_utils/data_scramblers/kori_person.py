@@ -12,7 +12,7 @@ class KoriPersonScrambler(SingletonMetaScrambler):
         documentState=None,
         universityOrgIds=None,
         titles=[
-            lambda x: {'fi': 'titteli', 'en': 'title', 'sv': 'titel'}
+            lambda x: [{'fi': 'titteli', 'en': 'title', 'sv': 'titel'}]
         ],
         firstName=[
             (

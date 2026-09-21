@@ -9,6 +9,7 @@ import typing
 from typing import Tuple, Any, Callable, Literal
 
 import httpx
+from httpx import AsyncClient, AsyncHTTPTransport
 
 from ..utils import flatten, group_by, batch
 
@@ -20,11 +21,14 @@ logger = logging.getLogger(__name__)
 def _collect_suitable_batches_grouped_by_key(
     items_by_key: dict[Any, list[dict]],
     sorting_function: Callable = None,
-    batch_size_trigger: int = 500,
+    batch_size_trigger: int | None = 500,
 ) -> list[list[list[dict]]]:
     batches: list[list[list[dict]]] = []
     current_batch = []
     current_batch_size = 0
+
+    if not batch_size_trigger:
+        batch_size_trigger = 500
 
     sendable_lists_of_items = list(items_by_key.values())
 
@@ -54,14 +58,15 @@ async def send_get_httpx(
         "https://": httpx.AsyncHTTPTransport(proxy=proxies.get('https')),
     } if proxies else None
     client = httpx.AsyncClient(mounts=proxy_mounts, auth=auth)
-    response = await client.get(
-        path,
-        auth=auth,
-        params=params,
-        timeout=600,
-        follow_redirects=allow_redirects,
-    )
-    return response
+    async with client:
+        response = await client.get(
+            path,
+            auth=auth,
+            params=params,
+            timeout=600,
+            follow_redirects=allow_redirects,
+        )
+        return response
 
 
 async def _binary_search_enabled_post_httpx(
@@ -232,6 +237,9 @@ async def send_post_with_binary_err_search_httpx(
     binary_err_search_sublists: bool = True,
     method: Literal['POST', 'PATCH'] = 'POST',
     max_parallel_requests: int = 1,
+    _state: dict[
+                Literal['max_seen_depth', 'sent_requests'], int
+            ] | None = None,
 ) -> list[httpx.Response]:
     if len(payload) <= 0:
         raise Exception(f"Payload missing when attempting to POST to : {path}")
@@ -243,35 +251,55 @@ async def send_post_with_binary_err_search_httpx(
             "https://": httpx.AsyncHTTPTransport(proxy=proxies.get('https')),
         }
 
-    client = httpx.AsyncClient(mounts=proxy_mounts, auth=auth)
+    client = _get_async_httpx_client(auth, proxy_mounts)
     semaphore = asyncio.Semaphore(max_parallel_requests)
 
     async def _with_sem(coro: typing.Coroutine):
         async with semaphore:
             return await coro
 
-    if group_by_key:
-        items_by_key = group_by(payload, lambda x: x[group_by_key])
-        batches = _collect_suitable_batches_grouped_by_key(
-            items_by_key=items_by_key,
-            sorting_function=None,
-            batch_size_trigger=batch_size,
-        )
-        """
-        Creates a structure that contains the grouped data as lists of the original groups 
-        that then reside in lists approximately of the size batch_size
-        Could be useful for example for grouping attainments of persons, so that the original context
-        of which attainments belong to which person can be separately sent in one batch.
-        [
-            [ [1], [2,3] ],
-            [ [4,5,6] ],
-            [ [7,8], [10,11,12,13,14] ],
-        ]
-        """
-        _tasks = [
-            _with_sem(_binary_search_enabled_post_httpx(
+    async with client:
+        if group_by_key:
+            items_by_key = group_by(payload, lambda x: x[group_by_key])
+            batches = _collect_suitable_batches_grouped_by_key(
+                items_by_key=items_by_key,
+                sorting_function=None,
+                batch_size_trigger=batch_size,
+            )
+            """
+            Creates a structure that contains the grouped data as lists of the original groups 
+            that then reside in lists approximately of the size batch_size
+            Could be useful for example for grouping attainments of persons, so that the original context
+            of which attainments belong to which person can be separately sent in one batch.
+            [
+                [ [1], [2,3] ],
+                [ [4,5,6] ],
+                [ [7,8], [10,11,12,13,14] ],
+            ]
+            """
+            _tasks = [
+                _with_sem(_binary_search_enabled_post_httpx(
+                    path=path,
+                    payload=_batch,
+                    params=params,
+                    auth=auth,
+                    client=client,
+                    binary_search_depth=0,
+                    binary_search_max_depth=binary_search_max_depth,
+                    binary_err_search_sublists=binary_err_search_sublists,
+                    method=method,
+                    _state=_state,
+                ))
+                for _batch in batches
+            ]
+            results = await asyncio.gather(*_tasks)
+            return flatten(results)
+
+        # Is not group_by'ed -> If batch size is not configured, try sending everything
+        if not batch_size:
+            return await _binary_search_enabled_post_httpx(
                 path=path,
-                payload=_batch,
+                payload=payload,
                 params=params,
                 auth=auth,
                 client=client,
@@ -279,40 +307,29 @@ async def send_post_with_binary_err_search_httpx(
                 binary_search_max_depth=binary_search_max_depth,
                 binary_err_search_sublists=binary_err_search_sublists,
                 method=method,
+                _state=_state,
+            )
+
+        # When batch size is configured, batch the payloads
+        _tasks = [
+            _with_sem(_binary_search_enabled_post_httpx(
+                path=path,
+                payload=batched_payload,
+                params=params,
+                auth=auth,
+                client=client,
+                binary_search_depth=0,
+                binary_search_max_depth=binary_search_max_depth,
+                binary_err_search_sublists=binary_err_search_sublists,
+                method=method,
+                _state=_state,
             ))
-            for _batch in batches
+            for batched_payload in batch(payload, batch_size)
         ]
         results = await asyncio.gather(*_tasks)
         return flatten(results)
 
-    # Is not group_by'ed -> If batch size is not configured, try sending everything
-    if not batch_size:
-        return await _binary_search_enabled_post_httpx(
-            path=path,
-            payload=payload,
-            params=params,
-            auth=auth,
-            client=client,
-            binary_search_depth=0,
-            binary_search_max_depth=binary_search_max_depth,
-            binary_err_search_sublists=binary_err_search_sublists,
-            method=method,
-        )
 
-    # When batch size is configured, batch the payloads
-    _tasks = [
-        _with_sem(_binary_search_enabled_post_httpx(
-            path=path,
-            payload=batched_payload,
-            params=params,
-            auth=auth,
-            client=client,
-            binary_search_depth=0,
-            binary_search_max_depth=binary_search_max_depth,
-            binary_err_search_sublists=binary_err_search_sublists,
-            method=method,
-        ))
-        for batched_payload in batch(payload, batch_size)
-    ]
-    results = await asyncio.gather(*_tasks)
-    return flatten(results)
+def _get_async_httpx_client(auth: tuple[str, str] | None, proxy_mounts: dict[str, AsyncHTTPTransport] | None) -> AsyncClient:
+    client = httpx.AsyncClient(mounts=proxy_mounts, auth=auth)
+    return client

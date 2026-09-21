@@ -87,7 +87,7 @@ def recursive_dict_fetch(
         if keys[0] not in entity:
             match missing_key_handler:
                 case 'skip':
-                    return entity
+                    return None
                 case 'exception' | _:
                     raise KeyError(f"Could not find {keys[0]} in entity")
 
@@ -142,7 +142,7 @@ def _dict_update_by_key_split(
             case 'exception':
                 raise ValueError(f"Expected nested dictionaries, {_current_entity_ref} is not a dict")
             case 'skip':
-                return entity
+                return None
             case _:
                 raise Exception("Unhandled case for missing inner dict key")
 

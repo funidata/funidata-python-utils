@@ -14,6 +14,7 @@ from pydantic import (
     PastDate,
 )
 
+from .study_right_cooperation_network_status import CooperationNetworkStatus
 from .common import (
     SIS_MAX_LONG_STRING_LENGTH,
     OTM_ID_REGEX_PATTERN,
@@ -95,6 +96,7 @@ class StudyRightCancellation(BaseModel):
     cancellationType: Literal[
         'RESCINDED',
         'CANCELLED_BY_ADMINISTRATION',
+        'TERMINATED',
     ]
 
     @field_serializer('cancellationDate')
@@ -193,8 +195,8 @@ class StudyRight(BaseModel):
     codeUrns: list[CodeUrnsStr]
     additionalInformation: Optional[dict] = None
     # basedOnEnrolmentRights: bool < Apparently removed from sisu model at some point in time
-    cooperationNetworkRights: Optional[str] = None
-    cooperationNetworkStatus: Optional[dict] = None
+    cooperationNetworkRights: Optional[list[dict]] = None
+    cooperationNetworkStatus: Optional[CooperationNetworkStatus] = None
     schoolEducationLanguageUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('school-education-language'))] = None
 
     @field_serializer('snapshotDateTime')
