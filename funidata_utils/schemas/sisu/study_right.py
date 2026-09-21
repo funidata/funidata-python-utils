@@ -95,6 +95,7 @@ class StudyRightCancellation(BaseModel):
     cancellationType: Literal[
         'RESCINDED',
         'CANCELLED_BY_ADMINISTRATION',
+        'TERMINATED',
     ]
 
     @field_serializer('cancellationDate')
@@ -193,7 +194,7 @@ class StudyRight(BaseModel):
     codeUrns: list[CodeUrnsStr]
     additionalInformation: Optional[dict] = None
     # basedOnEnrolmentRights: bool < Apparently removed from sisu model at some point in time
-    cooperationNetworkRights: Optional[str] = None
+    cooperationNetworkRights: Optional[list[dict]] = None
     cooperationNetworkStatus: Optional[dict] = None
     schoolEducationLanguageUrn: Annotated[STRIPPED_STR | None, Field(pattern=sis_code_urn_pattern('school-education-language'))] = None
 
