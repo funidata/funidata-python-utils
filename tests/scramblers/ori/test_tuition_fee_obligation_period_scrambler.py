@@ -24,4 +24,11 @@ def test_tuition_fee_scrambler_scrambles_additional_info():
     }
 
     scrambled_data = TuitionFeeObligationPeriodScrambler.scramble(copy.deepcopy(data), set())
-    assert scrambled_data['additionalInfo'] != data['additionalInfo']
+
+    assert len(TuitionFeeObligationPeriodScrambler.dict_items_with_scrambling()) >= 1
+    for key, _ in TuitionFeeObligationPeriodScrambler.dict_items_with_scrambling():
+        if isinstance(scrambled_data.get(key), bool):
+            # Cannot reliably test for bool 50/50 changes
+            continue
+
+        assert scrambled_data.get(key, -42) != data.get(key, -42)
