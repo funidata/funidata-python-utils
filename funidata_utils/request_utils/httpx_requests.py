@@ -183,30 +183,62 @@ def send_post_with_binary_err_search_httpx(
 
     client = httpx.Client(mounts=proxy_mounts, auth=auth)
 
-    if group_by_key:
-        items_by_key = group_by(payload, lambda x: x[group_by_key])
-        batches = _collect_suitable_batches_grouped_by_key(
-            items_by_key=items_by_key,
-            sorting_function=None,
-            batch_size_trigger=batch_size,
-        )
-        """
-        Creates a structure that contains the grouped data as lists of the original groups 
-        that then reside in lists approximately of the size batch_size
-        Could be useful for example for grouping attainments of persons, so that the original context
-        of which attainments belong to which person can be separately sent in one batch.
-        [
-            [ [1], [2,3] ],
-            [ [4,5,6] ],
-            [ [7,8], [10,11,12,13,14] ],
-        ]
-        """
-        responses = []
+    with client:
+        if group_by_key:
+            items_by_key = group_by(payload, lambda x: x[group_by_key])
+            batches = _collect_suitable_batches_grouped_by_key(
+                items_by_key=items_by_key,
+                sorting_function=None,
+                batch_size_trigger=batch_size,
+            )
+            """
+            Creates a structure that contains the grouped data as lists of the original groups 
+            that then reside in lists approximately of the size batch_size
+            Could be useful for example for grouping attainments of persons, so that the original context
+            of which attainments belong to which person can be separately sent in one batch.
+            [
+                [ [1], [2,3] ],
+                [ [4,5,6] ],
+                [ [7,8], [10,11,12,13,14] ],
+            ]
+            """
+            responses = []
 
-        for _batch in batches:
+            for _batch in batches:
+                batch_responses = _binary_search_enabled_post_httpx(
+                    path=path,
+                    payload=_batch,
+                    params=params,
+                    auth=auth,
+                    client=client,
+                    binary_search_depth=0,
+                    binary_search_max_depth=binary_search_max_depth,
+                    binary_err_search_sublists=binary_err_search_sublists,
+                    method=method,
+                )
+                responses += batch_responses
+            return responses
+
+        # Is not group_by'ed -> If batch size is not configured, try sending everything
+        if not batch_size:
+            return _binary_search_enabled_post_httpx(
+                path=path,
+                payload=payload,
+                params=params,
+                auth=auth,
+                client=client,
+                binary_search_depth=0,
+                binary_search_max_depth=binary_search_max_depth,
+                binary_err_search_sublists=binary_err_search_sublists,
+                method=method,
+            )
+
+        # When batch size is configured, batch the payload
+        responses = []
+        for batched_payload in batch(payload, batch_size):
             batch_responses = _binary_search_enabled_post_httpx(
                 path=path,
-                payload=_batch,
+                payload=batched_payload,
                 params=params,
                 auth=auth,
                 client=client,
@@ -216,36 +248,5 @@ def send_post_with_binary_err_search_httpx(
                 method=method,
             )
             responses += batch_responses
+
         return responses
-
-    # Is not group_by'ed -> If batch size is not configured, try sending everything
-    if not batch_size:
-        return _binary_search_enabled_post_httpx(
-            path=path,
-            payload=payload,
-            params=params,
-            auth=auth,
-            client=client,
-            binary_search_depth=0,
-            binary_search_max_depth=binary_search_max_depth,
-            binary_err_search_sublists=binary_err_search_sublists,
-            method=method,
-        )
-
-    # When batch size is configured, batch the payload
-    responses = []
-    for batched_payload in batch(payload, batch_size):
-        batch_responses = _binary_search_enabled_post_httpx(
-            path=path,
-            payload=batched_payload,
-            params=params,
-            auth=auth,
-            client=client,
-            binary_search_depth=0,
-            binary_search_max_depth=binary_search_max_depth,
-            binary_err_search_sublists=binary_err_search_sublists,
-            method=method,
-        )
-        responses += batch_responses
-
-    return responses
