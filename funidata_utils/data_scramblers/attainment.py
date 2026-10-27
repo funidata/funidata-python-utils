@@ -18,6 +18,8 @@ class AttainmentScrambler(SingletonMetaScrambler):
         personId=None,
         verifierPersonId=None,
         studyRightId=None,
+        primaryStatus=None,
+        studentApplicationId=None,
         registrationDate=None,
         expiryDate=None,
         attainmentLanguageUrn=None,
