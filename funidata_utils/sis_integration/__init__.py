@@ -2,7 +2,7 @@
 #  All rights reserved.
 # ------------------------------------------------------------------------------
 
-from .exports import export_from_sisu
+from .exports import export_from_sisu, export_pages_from_sisu, ExportPage
 from .async_imports import (
     import_to_sisu, patch_to_sisu,
 )
