@@ -3,7 +3,9 @@
 # ------------------------------------------------------------------------------
 
 import json
-from sqlalchemy import create_engine, text
+
+# SQLAlchemy is the optional `sql` extra. Import it lazily so that importing the `auth` and
+# `sis_integration` packages (which reach this module through `DatabaseConfig`) works without it.
 
 
 def json_encoder_ascii_false(d):
@@ -19,6 +21,8 @@ def get_engine(
     max_overflow: int = 0,
     connect_args: dict | None = None,
 ):
+    from sqlalchemy import create_engine
+
     engine = create_engine(
         db_uri,
         json_serializer=json_encoder_ascii_false,
@@ -31,6 +35,8 @@ def get_engine(
 
 
 def get_by_statement(session, stmt: str, sql_params_dict: dict | None = None) -> list[dict]:
+    from sqlalchemy import text
+
     return [
         {**x._mapping} for x in
         session.execute(
