@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from funidata_utils.data_scramblers.replacement_data import first_names, last_names
 from funidata_utils.data_scramblers.utils.generic_scrambling import (
     replace_from_list, scramble_with_weighted_pseudorandom,
-    get_string_shuffled_with_mask, get_weighted_random_value,
+    get_string_shuffled_with_mask, get_weighted_random_value, hashlib_hash,
 )
 
 
@@ -65,6 +65,34 @@ def get_scrambled_last_name(
     old_value = old_value_key_getter_func(entity)
 
     return replace_from_list(hash_key_getter_func(entity), last_name_list) if old_value else old_value
+
+
+def get_scrambled_student_number(
+    entity: dict | BaseModel | None = None,
+    hash_key_getter_func: typing.Callable = lambda x: x['id'],
+    old_value_key_getter_func: typing.Callable = lambda x: x.get('studentNumber'),
+    *args,
+    **kwargs
+) -> str | None:
+    """
+    Deterministic pseudonymous student number derived from the person id, not from the real student number.
+    Student numbers are a small search space, so hashing them directly would be brute-forceable; the person
+    id is opaque and already present in clear in the scrambled data. Using it as the seed also keeps the
+    value consistent between the private person export (id) and other exports referencing personId.
+    """
+    if not entity:
+        return None
+
+    old_value = old_value_key_getter_func(entity)
+    if not old_value:
+        return old_value
+
+    return str(hashlib_hash(
+        key=str(hash_key_getter_func(entity)),
+        hash_function='sha256',
+        output_length=9,
+        limit_int_len=True,
+    ))
 
 
 def get_scrambled_nationalities(
