@@ -1,4 +1,5 @@
 import copy
+import re
 
 import pytest
 
@@ -104,3 +105,51 @@ def test_attainment_scrambler_handles_missing_cooperation_network_status():
         "cooperationNetworkStatus": None
     }
     AttainmentScrambler.scramble(copy.deepcopy(data), set())
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_scrambles_person_fields_consistently_with_private_person():
+    from funidata_utils.data_scramblers.private_person import PrivatePersonScrambler
+
+    data = {
+        'id': '1',
+        'personId': 'otm-person-1',
+        'personFirstNames': 'Matti Kalevi',
+        'personLastName': 'Meikäläinen',
+        'personStudentNumber': '012345678',
+    }
+
+    scrambled_data = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+    assert scrambled_data['personFirstNames'] != data['personFirstNames']
+    assert scrambled_data['personLastName'] != data['personLastName']
+    assert scrambled_data['personStudentNumber'] != data['personStudentNumber']
+    assert re.fullmatch(r'[1-9][0-9]{8}', scrambled_data['personStudentNumber'])
+
+    person = PrivatePersonScrambler.scramble(
+        {
+            'id': data['personId'],
+            'firstNames': data['personFirstNames'],
+            'lastName': data['personLastName'],
+            'studentNumber': data['personStudentNumber'],
+        },
+        set()
+    )
+    assert scrambled_data['personFirstNames'] == person['firstNames']
+    assert scrambled_data['personLastName'] == person['lastName']
+    assert scrambled_data['personStudentNumber'] == person['studentNumber']
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_handles_null_person_fields():
+    data = {
+        'id': '1',
+        'personId': 'otm-person-1',
+        'personFirstNames': None,
+        'personLastName': None,
+        'personStudentNumber': None,
+    }
+
+    scrambled_data = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+    assert scrambled_data['personFirstNames'] is None
+    assert scrambled_data['personLastName'] is None
+    assert scrambled_data['personStudentNumber'] is None

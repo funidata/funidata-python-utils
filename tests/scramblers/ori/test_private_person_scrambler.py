@@ -110,3 +110,18 @@ def test_private_person_scrambler_handles_lists_correctly():
     list_keys = {'citizenshipUrns', 'schoolEducationLanguageUrns'}
     for key in list_keys:
         assert isinstance(scrambled_data[key], list), scrambled_data[key]
+
+
+@pytest.mark.unit
+def test_private_person_scrambler_student_number_is_deterministic_per_person():
+    def scramble(person_id, student_number='012345678'):
+        return PrivatePersonScrambler.scramble(
+            {'id': person_id, 'studentNumber': student_number}, set()
+        )['studentNumber']
+
+    assert scramble('otm-1') == scramble('otm-1')
+    # Derived from the person id, so the real student number does not affect the output
+    assert scramble('otm-1') == scramble('otm-1', student_number='999999999')
+    assert scramble('otm-1') != scramble('otm-2')
+    assert scramble('otm-1') != '012345678'
+    assert scramble('otm-1', student_number=None) is None

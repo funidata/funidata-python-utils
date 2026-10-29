@@ -4,6 +4,9 @@ from typing import Tuple
 from .utils.generic_scrambling import (
     scramble_with_weighted_pseudorandom,
 )
+from .utils.key_scramblers import (
+    get_scrambled_first_name, get_scrambled_last_name, get_scrambled_student_number,
+)
 from ..data_scramblers.base import SingletonMetaScrambler
 from ..utils import update_inner_dictionary_key
 
@@ -125,6 +128,35 @@ class AttainmentScrambler(SingletonMetaScrambler):
         type=None,
         attainmentDate=None,
         s2r2Classification=None,
+
+        # Seeded with personId so the fake name matches the scrambled PrivatePerson of the same person.
+        personFirstNames=[
+            (
+                get_scrambled_first_name,
+                dict(
+                    hash_key_getter_func=lambda x: x['personId'],
+                    old_value_key_getter_func=lambda x: x.get('personFirstNames'),
+                ),
+            ),
+        ],
+        personLastName=[
+            (
+                get_scrambled_last_name,
+                dict(
+                    hash_key_getter_func=lambda x: x['personId'],
+                    old_value_key_getter_func=lambda x: x.get('personLastName'),
+                ),
+            ),
+        ],
+        personStudentNumber=[
+            (
+                get_scrambled_student_number,
+                dict(
+                    hash_key_getter_func=lambda x: x['personId'],
+                    old_value_key_getter_func=lambda x: x.get('personStudentNumber'),
+                ),
+            ),
+        ],
 
         # CUA
         courseUnitId=None,
