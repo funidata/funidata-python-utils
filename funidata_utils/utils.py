@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 import asyncio
 import sys
+import threading
 import typing
 from collections import defaultdict
 from functools import reduce
@@ -76,23 +77,39 @@ def batch(iterable, steps=1):
 _T = TypeVar('_T')
 
 
+def _close_async_generator(runner: asyncio.Runner, agen: AsyncGenerator) -> None:
+    try:
+        runner.run(agen.aclose())
+    finally:
+        runner.close()
+
+
 def iterate_async_generator(agen: AsyncGenerator[_T, None]) -> Generator[_T, None, None]:
     """
     Drive an async generator from synchronous code, yielding its items one by one.
 
     Runs the generator on a private event loop for the lifetime of the returned sync generator.
-    Like `asyncio.run`, this cannot be used from inside a running event loop (raises `RuntimeError`);
-    use the async generator directly in that case.
+    Like `asyncio.run`, iterating cannot be done from inside a running event loop (raises
+    `RuntimeError`); use the async generator directly in that case. Closing the sync generator
+    (explicitly or via garbage collection) is safe anywhere: if an event loop happens to be running
+    on the current thread, the cleanup is done on a helper thread instead of raising.
     """
-    with asyncio.Runner() as runner:
+    runner = asyncio.Runner()
+    try:
+        while True:
+            try:
+                yield runner.run(agen.__anext__())
+            except StopAsyncIteration:
+                return
+    finally:
         try:
-            while True:
-                try:
-                    yield runner.run(agen.__anext__())
-                except StopAsyncIteration:
-                    return
-        finally:
-            runner.run(agen.aclose())
+            asyncio.get_running_loop()
+        except RuntimeError:
+            _close_async_generator(runner, agen)
+        else:
+            closer = threading.Thread(target=_close_async_generator, args=(runner, agen))
+            closer.start()
+            closer.join()
 
 
 def recursive_dict_fetch(

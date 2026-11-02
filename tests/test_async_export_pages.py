@@ -2,6 +2,7 @@
 Tests for the async exports in `funidata_utils.sis_integration.async_exports`, plus the
 `iterate_async_generator` helper that the sync wrappers are built on.
 """
+import asyncio
 import io
 import json
 
@@ -199,6 +200,28 @@ def test_iterate_async_generator_closes_on_early_break():
     sync_gen = iterate_async_generator(agen())
     assert next(sync_gen) == 0
     sync_gen.close()
+    assert closed
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_iterate_async_generator_can_be_closed_inside_a_running_loop():
+    closed = False
+
+    async def agen():
+        nonlocal closed
+        try:
+            for i in range(100):
+                yield i
+        finally:
+            closed = True
+
+    # Started outside the loop (as a sync caller would), then dropped while a loop is running.
+    sync_gen = iterate_async_generator(agen())
+    assert await asyncio.to_thread(next, sync_gen) == 0
+
+    sync_gen.close()
+
     assert closed
 
 
