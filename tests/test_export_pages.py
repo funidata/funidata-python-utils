@@ -2,6 +2,9 @@
 Tests for `export_pages_from_sisu`: paging driven by `greatestOrdinal`/`hasMore`, caller-set page
 size, and scrambling that rebuilds the yielded page from the scrambler return values.
 """
+import io
+import json
+
 import httpx
 import pytest
 from pydantic import BaseModel
@@ -89,6 +92,27 @@ class StuckSisu:
             "_get_async_httpx_client",
             lambda *args, **kwargs: httpx.AsyncClient(transport=httpx.MockTransport(self.handler)),
         )
+
+
+class ShortPagedSisu(PagedSisu):
+    """
+    Like PagedSisu but every page holds at most `page_size` entities regardless of the requested
+    limit, as happens when SISU filters entities server side. hasMore is still reported truthfully.
+    """
+
+    def __init__(self, total: int, page_size: int):
+        super().__init__(total)
+        self.page_size = page_size
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        since = int(request.url.params["since"])
+        self.requests.append({"since": since, "limit": int(request.url.params["limit"])})
+        ordinals = [o for o in range(since + 1, self.total + 1)][:self.page_size]
+        return httpx.Response(200, json={
+            "entities": [_attainment(o) for o in ordinals],
+            "greatestOrdinal": ordinals[-1] if ordinals else since,
+            "hasMore": bool(ordinals) and ordinals[-1] < self.total,
+        })
 
 
 @pytest.mark.unit
@@ -213,3 +237,25 @@ def test_export_from_sisu_still_collects_all_pages(monkeypatch):
     entities = export_from_sisu(ExportSettings(), Attainments)
 
     assert [e["id"] for e in entities] == [f"otm-{o}" for o in range(1, 8)]
+
+
+@pytest.mark.unit
+def test_export_from_sisu_follows_has_more_on_short_pages(monkeypatch):
+    sisu = ShortPagedSisu(total=7, page_size=2)
+    sisu.install(monkeypatch)
+
+    entities = export_from_sisu(ExportSettings(), Attainments)
+
+    assert [e["id"] for e in entities] == [f"otm-{o}" for o in range(1, 8)]
+    assert len(sisu.requests) == 4
+
+
+@pytest.mark.unit
+def test_export_from_sisu_fp_follows_has_more_on_short_pages(monkeypatch):
+    sisu = ShortPagedSisu(total=7, page_size=2)
+    sisu.install(monkeypatch)
+    fp = io.StringIO()
+
+    export_from_sisu(ExportSettings(), Attainments, fp=fp)
+
+    assert [json.loads(line)["id"] for line in fp.getvalue().splitlines()] == [f"otm-{o}" for o in range(1, 8)]

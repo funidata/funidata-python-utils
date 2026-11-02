@@ -13,7 +13,7 @@ from funidata_utils.sis_integration import async_export_pages_from_sisu, async_e
 from funidata_utils.sis_integration.async_exports import export_pages_from_sisu, export_from_sisu
 from funidata_utils.sis_integration.resources import Attainments, CodeBooks
 from funidata_utils.utils import iterate_async_generator
-from tests.test_export_pages import ExportSettings, PagedSisu, StuckSisu, _attainment
+from tests.test_export_pages import ExportSettings, PagedSisu, ShortPagedSisu, StuckSisu, _attainment
 
 
 def test_package_exposes_async_functions_under_prefixed_names():
@@ -123,6 +123,21 @@ async def test_export_from_sisu_collects_all_pages(monkeypatch):
     entities = await export_from_sisu(ExportSettings(), Attainments)
 
     assert [e["id"] for e in entities] == [f"otm-{o}" for o in range(1, 8)]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_export_from_sisu_follows_has_more_on_short_pages(monkeypatch):
+    sisu = ShortPagedSisu(total=7, page_size=2)
+    sisu.install(monkeypatch)
+    fp = io.StringIO()
+
+    entities = await export_from_sisu(ExportSettings(), Attainments)
+    await export_from_sisu(ExportSettings(), Attainments, fp=fp)
+
+    expected = [f"otm-{o}" for o in range(1, 8)]
+    assert [e["id"] for e in entities] == expected
+    assert [json.loads(line)["id"] for line in fp.getvalue().splitlines()] == expected
 
 
 @pytest.mark.unit

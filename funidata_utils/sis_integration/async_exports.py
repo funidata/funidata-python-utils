@@ -156,9 +156,6 @@ async def _export_from_endpoint(
     params: dict | None = None,
     scrambling_classes: list[ScramblingClass] | None = None
 ) -> IO | list[dict]:
-    if not params:
-        params = {}
-
     exported_entities = []
     async for entities in export_from_endpoint_generator(
         sis_settings=sis_settings,
@@ -175,9 +172,6 @@ async def _export_from_endpoint(
             for json_entity in entities:
                 fp.write(json.dumps(json_entity))
                 fp.write('\n')
-
-        if len(entities) == 0 or len(entities) < export_limit:
-            break
 
     if fp is None:
         return exported_entities
