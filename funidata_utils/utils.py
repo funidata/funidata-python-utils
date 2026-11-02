@@ -1,12 +1,13 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
+import asyncio
 import sys
 import typing
 from collections import defaultdict
 from functools import reduce
 from statistics import mean, stdev
-from typing import Any, Generator, Callable, Literal, Tuple
+from typing import Any, Generator, Callable, Literal, Tuple, AsyncGenerator, TypeVar
 
 import httpx
 
@@ -70,6 +71,28 @@ def batch(iterable, steps=1):
     length = len(iterable)
     for index in range(0, length, steps):
         yield iterable[index:min(index + steps, length)]
+
+
+_T = TypeVar('_T')
+
+
+def iterate_async_generator(agen: AsyncGenerator[_T, None]) -> Generator[_T, None, None]:
+    """
+    Drive an async generator from synchronous code, yielding its items one by one.
+
+    Runs the generator on a private event loop for the lifetime of the returned sync generator.
+    Like `asyncio.run`, this cannot be used from inside a running event loop (raises `RuntimeError`);
+    use the async generator directly in that case.
+    """
+    with asyncio.Runner() as runner:
+        try:
+            while True:
+                try:
+                    yield runner.run(agen.__anext__())
+                except StopAsyncIteration:
+                    return
+        finally:
+            runner.run(agen.aclose())
 
 
 def recursive_dict_fetch(

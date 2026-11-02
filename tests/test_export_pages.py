@@ -6,7 +6,7 @@ import httpx
 import pytest
 from pydantic import BaseModel
 
-from funidata_utils.request_utils import httpx_requests
+from funidata_utils.request_utils import async_httpx_requests
 from funidata_utils.sis_integration import export_pages_from_sisu, ExportPage, export_from_sisu
 from funidata_utils.sis_integration.resources import Attainments, CodeBooks
 
@@ -62,9 +62,9 @@ class PagedSisu:
 
     def install(self, monkeypatch):
         monkeypatch.setattr(
-            httpx_requests,
-            "_get_httpx_client",
-            lambda *args, **kwargs: httpx.Client(transport=httpx.MockTransport(self.handler)),
+            async_httpx_requests,
+            "_get_async_httpx_client",
+            lambda *args, **kwargs: httpx.AsyncClient(transport=httpx.MockTransport(self.handler)),
         )
 
 
@@ -159,9 +159,9 @@ def test_scramble_requires_scrambling_classes(monkeypatch):
 @pytest.mark.unit
 def test_non_200_raises(monkeypatch):
     monkeypatch.setattr(
-        httpx_requests,
-        "_get_httpx_client",
-        lambda *args, **kwargs: httpx.Client(
+        async_httpx_requests,
+        "_get_async_httpx_client",
+        lambda *args, **kwargs: httpx.AsyncClient(
             transport=httpx.MockTransport(lambda request: httpx.Response(503, text="down"))
         ),
     )
