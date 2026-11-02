@@ -15,6 +15,7 @@ class IlmoEnrolmentScrambler(SingletonMetaScrambler):
         studyRightId=None,
         openUniversityCartId=None,
         openUniversityCartItemId=None,
+        status=None,
         state=None,
         processingState=None,
         studySubGroups=None,
