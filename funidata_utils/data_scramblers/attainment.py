@@ -14,6 +14,14 @@ from ..utils import update_inner_dictionary_key
 logger = logging.getLogger(__name__)
 
 
+def _person_hash_key(entity: dict):
+    """
+    Seed for the person name / student number pseudonyms. personId keeps them consistent with the
+    scrambled PrivatePerson of the same person; fall back to the attainment id if it is missing.
+    """
+    return entity.get('personId') or entity['id']
+
+
 class AttainmentScrambler(SingletonMetaScrambler):
     scrambling_keys = dict(
         id=None,
@@ -129,12 +137,12 @@ class AttainmentScrambler(SingletonMetaScrambler):
         attainmentDate=None,
         s2r2Classification=None,
 
-        # Seeded with personId so the fake name matches the scrambled PrivatePerson of the same person.
+        # Seeded with personId (see _person_hash_key) so the values match the scrambled PrivatePerson.
         personFirstNames=[
             (
                 get_scrambled_first_name,
                 dict(
-                    hash_key_getter_func=lambda x: x['personId'],
+                    hash_key_getter_func=_person_hash_key,
                     old_value_key_getter_func=lambda x: x.get('personFirstNames'),
                 ),
             ),
@@ -143,7 +151,7 @@ class AttainmentScrambler(SingletonMetaScrambler):
             (
                 get_scrambled_last_name,
                 dict(
-                    hash_key_getter_func=lambda x: x['personId'],
+                    hash_key_getter_func=_person_hash_key,
                     old_value_key_getter_func=lambda x: x.get('personLastName'),
                 ),
             ),
@@ -152,7 +160,7 @@ class AttainmentScrambler(SingletonMetaScrambler):
             (
                 get_scrambled_student_number,
                 dict(
-                    hash_key_getter_func=lambda x: x['personId'],
+                    hash_key_getter_func=_person_hash_key,
                     old_value_key_getter_func=lambda x: x.get('personStudentNumber'),
                 ),
             ),

@@ -153,3 +153,43 @@ def test_attainment_scrambler_handles_null_person_fields():
     assert scrambled_data['personFirstNames'] is None
     assert scrambled_data['personLastName'] is None
     assert scrambled_data['personStudentNumber'] is None
+
+
+_PERSON_KEYS = ('personFirstNames', 'personLastName', 'personStudentNumber')
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_person_fields_seed_on_personId():
+    data = {
+        'id': 'otm-1',
+        'personId': 'person-1',
+        'personFirstNames': 'Real First',
+        'personLastName': 'Real Last',
+        'personStudentNumber': '012345678',
+    }
+    other_attainment = {**data, 'id': 'otm-2'}
+
+    scrambled = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+    scrambled_other = AttainmentScrambler.scramble(copy.deepcopy(other_attainment), set())
+
+    for key in _PERSON_KEYS:
+        assert scrambled[key] != data[key]
+        # Same person on a different attainment gets the same pseudonym.
+        assert scrambled[key] == scrambled_other[key]
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_person_fields_without_personId_fall_back_to_id():
+    data = {
+        'id': 'otm-1',
+        'personFirstNames': 'Real First',
+        'personLastName': 'Real Last',
+        'personStudentNumber': '012345678',
+    }
+
+    scrambled = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+    scrambled_again = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+
+    for key in _PERSON_KEYS:
+        assert scrambled[key] != data[key]
+        assert scrambled[key] == scrambled_again[key]
