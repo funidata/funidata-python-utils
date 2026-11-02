@@ -96,7 +96,15 @@ async def _export_pages_from_endpoint(
         # An empty page can never continue, regardless of what SISU says; otherwise trust `hasMore`
         # and fall back to the page size when the endpoint does not report it.
         has_more = bool(entities) and bool(response_json.get("hasMore", len(entities) >= export_limit))
-        greatest_ordinal = response_json.get("greatestOrdinal", greatest_ordinal)
+        next_ordinal = response_json.get("greatestOrdinal")
+        if has_more and (next_ordinal is None or next_ordinal <= greatest_ordinal):
+            # Continuing would re-request the same page forever, so fail instead of looping.
+            raise Exception(
+                f"Error in export of {endpoint}: SISU reported more data after since={greatest_ordinal} "
+                f"but greatestOrdinal did not advance (got {next_ordinal!r})"
+            )
+        if next_ordinal is not None:
+            greatest_ordinal = next_ordinal
 
         yield ExportPage(entities=entities, greatest_ordinal=greatest_ordinal, has_more=has_more)
 

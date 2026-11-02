@@ -68,6 +68,29 @@ class PagedSisu:
         )
 
 
+class StuckSisu:
+    """Always reports hasMore=true but never advances greatestOrdinal (or omits it entirely)."""
+
+    def __init__(self, report_ordinal: bool = True):
+        self.report_ordinal = report_ordinal
+        self.requests: list[dict] = []
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        since = int(request.url.params["since"])
+        self.requests.append({"since": since})
+        body = {"entities": [_attainment(since + 1)], "hasMore": True}
+        if self.report_ordinal:
+            body["greatestOrdinal"] = since
+        return httpx.Response(200, json=body)
+
+    def install(self, monkeypatch):
+        monkeypatch.setattr(
+            async_httpx_requests,
+            "_get_async_httpx_client",
+            lambda *args, **kwargs: httpx.AsyncClient(transport=httpx.MockTransport(self.handler)),
+        )
+
+
 @pytest.mark.unit
 def test_pages_expose_ordinal_and_has_more(monkeypatch):
     sisu = PagedSisu(total=7)
@@ -93,6 +116,18 @@ def test_has_more_false_on_a_full_page_stops_the_export(monkeypatch):
     assert [len(p.entities) for p in pages] == [3, 3]
     assert pages[-1].has_more is False
     assert len(sisu.requests) == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("report_ordinal", [True, False])
+def test_non_advancing_ordinal_raises_instead_of_looping(monkeypatch, report_ordinal):
+    sisu = StuckSisu(report_ordinal=report_ordinal)
+    sisu.install(monkeypatch)
+
+    with pytest.raises(Exception, match="greatestOrdinal did not advance"):
+        list(export_pages_from_sisu(ExportSettings(), Attainments, since_ordinal=4))
+
+    assert [r["since"] for r in sisu.requests] == [4]
 
 
 @pytest.mark.unit

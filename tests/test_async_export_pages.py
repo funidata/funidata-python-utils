@@ -13,7 +13,7 @@ from funidata_utils.sis_integration import async_export_pages_from_sisu, async_e
 from funidata_utils.sis_integration.async_exports import export_pages_from_sisu, export_from_sisu
 from funidata_utils.sis_integration.resources import Attainments, CodeBooks
 from funidata_utils.utils import iterate_async_generator
-from tests.test_export_pages import ExportSettings, PagedSisu, _attainment
+from tests.test_export_pages import ExportSettings, PagedSisu, StuckSisu, _attainment
 
 
 def test_package_exposes_async_functions_under_prefixed_names():
@@ -35,6 +35,19 @@ async def test_pages_expose_ordinal_and_has_more(monkeypatch):
     assert [p.has_more for p in pages] == [True, True, False]
     assert [r["since"] for r in sisu.requests] == [0, 3, 6]
     assert all(r["limit"] == 3 for r in sisu.requests)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+@pytest.mark.parametrize("report_ordinal", [True, False])
+async def test_non_advancing_ordinal_raises_instead_of_looping(monkeypatch, report_ordinal):
+    sisu = StuckSisu(report_ordinal=report_ordinal)
+    sisu.install(monkeypatch)
+
+    with pytest.raises(Exception, match="greatestOrdinal did not advance"):
+        [p async for p in export_pages_from_sisu(ExportSettings(), Attainments, since_ordinal=4)]
+
+    assert [r["since"] for r in sisu.requests] == [4]
 
 
 @pytest.mark.unit
