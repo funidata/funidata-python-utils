@@ -7,19 +7,15 @@ Synchronous SISU exports. These are thin wrappers that run the async implementat
 event loop (use `async_exports` directly there).
 """
 import asyncio
-import logging
-from typing import TextIO, overload, IO, Generator, Literal
+from typing import overload, IO, Generator, Literal
 
 from . import async_exports
-from .async_exports import ExportPage, _resolve_scrambling_classes  # noqa: F401 (re-exported)
+from .async_exports import ExportPage  # noqa: F401 (re-exported)
 from .protocols import SisExportable, SupportsExportAuthentication, ScramblingClass, SisExportableSupportScrambling
 from ..utils import iterate_async_generator
 
 
-logger = logging.getLogger(__name__)
-
-
-def _export_pages_from_endpoint(
+def export_pages_from_endpoint(
     sis_settings: SupportsExportAuthentication,
     endpoint: str,
     since_ordinal: int = 0,
@@ -28,59 +24,9 @@ def _export_pages_from_endpoint(
     params: dict | None = None,
     scrambling_classes: list[ScramblingClass] | None = None
 ) -> Generator[ExportPage, None, None]:
-    return iterate_async_generator(async_exports._export_pages_from_endpoint(
+    return iterate_async_generator(async_exports.export_pages_from_endpoint(
         sis_settings=sis_settings,
         endpoint=endpoint,
-        since_ordinal=since_ordinal,
-        export_limit=export_limit,
-        since=since,
-        params=params,
-        scrambling_classes=scrambling_classes,
-    ))
-
-
-@overload
-def _export_from_endpoint(
-    sis_settings: SupportsExportAuthentication,
-    endpoint: str,
-    fp: None,
-    since_ordinal: int = 0,
-    export_limit: int = 1000,
-    since: str = 'since',
-    params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
-) -> list[dict]:
-    ...
-
-
-@overload
-def _export_from_endpoint(
-    sis_settings: SupportsExportAuthentication,
-    endpoint: str,
-    fp: IO,
-    since_ordinal: int = 0,
-    export_limit: int = 1000,
-    since: str = 'since',
-    params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
-) -> TextIO:
-    ...
-
-
-def _export_from_endpoint(
-    sis_settings: SupportsExportAuthentication,
-    endpoint: str,
-    fp: IO | None,
-    since_ordinal: int = 0,
-    export_limit: int = 1000,
-    since: str = 'since',
-    params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
-) -> IO | list[dict]:
-    return asyncio.run(async_exports._export_from_endpoint(
-        sis_settings=sis_settings,
-        endpoint=endpoint,
-        fp=fp,
         since_ordinal=since_ordinal,
         export_limit=export_limit,
         since=since,
@@ -227,18 +173,14 @@ def export_from_sisu(
     as_generator: bool = False,
     scramble: bool = False,
 ) -> list[dict] | IO | Generator[list[dict], None, None]:
-    scrambling_classes = _resolve_scrambling_classes(resource, scramble)
-
     if as_generator:
-        return export_from_endpoint_generator(
-            endpoint=resource.exports.endpoint,
-            export_limit=resource.exports.default_export_limit,
-            sis_settings=sisu_config,
+        return (page.entities for page in export_pages_from_sisu(
+            sisu_config,
+            resource,
             since_ordinal=since_ordinal,
-            since=resource.exports.since,
             params=params,
-            scrambling_classes=scrambling_classes,
-        )
+            scramble=scramble,
+        ))
 
     return asyncio.run(async_exports.export_from_sisu(
         sisu_config,

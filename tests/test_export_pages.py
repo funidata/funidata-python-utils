@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from funidata_utils.request_utils import async_httpx_requests
 from funidata_utils.sis_integration import export_pages_from_sisu, ExportPage, export_from_sisu
+from funidata_utils.sis_integration.exports import export_from_endpoint_generator
 from funidata_utils.sis_integration.resources import Attainments, CodeBooks
 
 
@@ -275,7 +276,7 @@ def test_scramble_requires_scrambling_classes(monkeypatch):
     sisu.install(monkeypatch)
 
     with pytest.raises(AttributeError):
-        export_pages_from_sisu(ExportSettings(), CodeBooks, scramble=True)
+        next(export_pages_from_sisu(ExportSettings(), CodeBooks, scramble=True))
 
 
 @pytest.mark.unit
@@ -336,3 +337,19 @@ def test_export_from_sisu_fp_follows_has_more_on_short_pages(monkeypatch):
     export_from_sisu(ExportSettings(), Attainments, fp=fp)
 
     assert [json.loads(line)["id"] for line in fp.getvalue().splitlines()] == [f"otm-{o}" for o in range(1, 8)]
+
+
+@pytest.mark.unit
+def test_export_from_endpoint_generator_yields_entity_pages(monkeypatch):
+    sisu = PagedSisu(total=7)
+    sisu.install(monkeypatch)
+
+    pages = list(export_from_endpoint_generator(
+        ExportSettings(),
+        Attainments.exports.endpoint,
+        since=Attainments.exports.since,
+        export_limit=3,
+    ))
+
+    assert [len(p) for p in pages] == [3, 3, 1]
+    assert [e["id"] for p in pages for e in p] == [f"otm-{o}" for o in range(1, 8)]

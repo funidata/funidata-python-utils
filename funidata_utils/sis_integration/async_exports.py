@@ -7,7 +7,7 @@ Async SISU exports. The sync functions in `exports.py` are thin wrappers around 
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import TextIO, overload, IO, Literal, AsyncGenerator
+from typing import overload, IO, Literal, AsyncGenerator
 
 from .protocols import SisExportable, SupportsExportAuthentication, ScramblingClass, SisExportableSupportScrambling
 from ..data_scramblers.generic_sis_scramble import SisMetadataScrambler, UnprocessedKeysDropperScrambler
@@ -27,21 +27,7 @@ class ExportPage:
     """Whether SISU reported more entities after this page."""
 
 
-def _resolve_scrambling_classes(
-    resource: SisExportable | SisExportableSupportScrambling,
-    scramble: bool,
-) -> list[ScramblingClass] | None:
-    if not scramble:
-        return None
-
-    scrambling_classes = resource.scrambling_classes
-    if not scrambling_classes:
-        raise Exception("Requested scrambling for a resource that has no scrambling_classes")
-
-    return scrambling_classes
-
-
-async def _export_pages_from_endpoint(
+async def export_pages_from_endpoint(
     sis_settings: SupportsExportAuthentication,
     endpoint: str,
     since_ordinal: int = 0,
@@ -50,15 +36,18 @@ async def _export_pages_from_endpoint(
     params: dict | None = None,
     scrambling_classes: list[ScramblingClass] | None = None
 ) -> AsyncGenerator[ExportPage, None]:
+    """
+    Low-level variant of `export_pages_from_sisu` for callers that do not have a `SisExportable`
+    resource: export an endpoint page by page, yielding `ExportPage` objects.
+    """
     greatest_ordinal = since_ordinal
     if not params:
         params = {}
 
     scrambling_warning_triggered_keys: set[str] = set()
     reported_keys: set[str] = set()
-    _scrambling_classes = None
     if scrambling_classes:
-        _scrambling_classes = [
+        scrambling_classes = [
             *scrambling_classes,
             SisMetadataScrambler,
             UnprocessedKeysDropperScrambler(scrambling_warning_triggered_keys)
@@ -76,11 +65,11 @@ async def _export_pages_from_endpoint(
 
         response_json = sis_response.json()
         entities: list[dict] = response_json.get("entities", [])
-        if _scrambling_classes:
+        if scrambling_classes:
             scrambled_entities = []
             for entity in entities:
                 processed_keys = set()
-                for scrambling_class in _scrambling_classes:
+                for scrambling_class in scrambling_classes:
                     entity = scrambling_class.scramble(entity, processed_keys)
                 scrambled_entities.append(entity)
             entities = scrambled_entities
@@ -122,67 +111,6 @@ async def _export_pages_from_endpoint(
         )
 
 
-@overload
-async def _export_from_endpoint(
-    sis_settings: SupportsExportAuthentication,
-    endpoint: str,
-    fp: None,
-    since_ordinal: int = 0,
-    export_limit: int = 1000,
-    since: str = 'since',
-    params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
-) -> list[dict]:
-    ...
-
-
-@overload
-async def _export_from_endpoint(
-    sis_settings: SupportsExportAuthentication,
-    endpoint: str,
-    fp: IO,
-    since_ordinal: int = 0,
-    export_limit: int = 1000,
-    since: str = 'since',
-    params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
-) -> TextIO:
-    ...
-
-
-async def _export_from_endpoint(
-    sis_settings: SupportsExportAuthentication,
-    endpoint: str,
-    fp: IO | None,
-    since_ordinal: int = 0,
-    export_limit: int = 1000,
-    since: str = 'since',
-    params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
-) -> IO | list[dict]:
-    exported_entities = []
-    async for entities in export_from_endpoint_generator(
-        sis_settings=sis_settings,
-        endpoint=endpoint,
-        since_ordinal=since_ordinal,
-        export_limit=export_limit,
-        since=since,
-        params=params,
-        scrambling_classes=scrambling_classes
-    ):
-        if fp is None:
-            exported_entities += entities
-        else:
-            for json_entity in entities:
-                fp.write(json.dumps(json_entity))
-                fp.write('\n')
-
-    if fp is None:
-        return exported_entities
-
-    return fp
-
-
 async def export_from_endpoint_generator(
     sis_settings: SupportsExportAuthentication,
     endpoint: str,
@@ -192,7 +120,8 @@ async def export_from_endpoint_generator(
     params: dict | None = None,
     scrambling_classes: list[ScramblingClass] | None = None
 ) -> AsyncGenerator[list[dict], None]:
-    async for page in _export_pages_from_endpoint(
+    """Like `export_pages_from_endpoint`, but yields only the entities of each page."""
+    async for page in export_pages_from_endpoint(
         sis_settings=sis_settings,
         endpoint=endpoint,
         since_ordinal=since_ordinal,
@@ -220,14 +149,20 @@ def export_pages_from_sisu(
     Use this when the caller needs to track where the export is (e.g. to resume later or to store
     data by ordinal). `export_limit` overrides the resource's default page size.
     """
-    return _export_pages_from_endpoint(
-        endpoint=resource.exports.endpoint,
-        export_limit=export_limit or resource.exports.default_export_limit,
+    scrambling_classes = None
+    if scramble:
+        scrambling_classes = resource.scrambling_classes
+        if not scrambling_classes:
+            raise Exception("Requested scrambling for a resource that has no scrambling_classes")
+
+    return export_pages_from_endpoint(
         sis_settings=sisu_config,
+        endpoint=resource.exports.endpoint,
         since_ordinal=since_ordinal,
+        export_limit=export_limit or resource.exports.default_export_limit,
         since=resource.exports.since,
         params=params,
-        scrambling_classes=_resolve_scrambling_classes(resource, scramble),
+        scrambling_classes=scrambling_classes,
     )
 
 
@@ -330,26 +265,27 @@ async def export_from_sisu(
     With `as_generator=True` the awaited result is an async generator of entity pages:
     `gen = await export_from_sisu(..., as_generator=True)` then `async for entities in gen`.
     """
-    scrambling_classes = _resolve_scrambling_classes(resource, scramble)
+    pages = export_pages_from_sisu(
+        sisu_config,
+        resource,
+        since_ordinal=since_ordinal,
+        params=params,
+        scramble=scramble,
+    )
 
     if as_generator:
-        return export_from_endpoint_generator(
-            endpoint=resource.exports.endpoint,
-            export_limit=resource.exports.default_export_limit,
-            sis_settings=sisu_config,
-            since_ordinal=since_ordinal,
-            since=resource.exports.since,
-            params=params,
-            scrambling_classes=scrambling_classes,
-        )
+        return (page.entities async for page in pages)
 
-    return await _export_from_endpoint(
-        endpoint=resource.exports.endpoint,
-        export_limit=resource.exports.default_export_limit,
-        sis_settings=sisu_config,
-        since_ordinal=since_ordinal,
-        since=resource.exports.since,
-        fp=fp or None,
-        params=params,
-        scrambling_classes=scrambling_classes,
-    )
+    exported_entities: list[dict] = []
+    async for page in pages:
+        if fp is None:
+            exported_entities += page.entities
+        else:
+            for json_entity in page.entities:
+                fp.write(json.dumps(json_entity))
+                fp.write('\n')
+
+    if fp is None:
+        return exported_entities
+
+    return fp

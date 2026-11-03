@@ -11,7 +11,9 @@ import pytest
 
 from funidata_utils.request_utils import async_httpx_requests
 from funidata_utils.sis_integration import async_export_pages_from_sisu, async_export_from_sisu, ExportPage
-from funidata_utils.sis_integration.async_exports import export_pages_from_sisu, export_from_sisu
+from funidata_utils.sis_integration.async_exports import (
+    export_pages_from_sisu, export_from_sisu, export_from_endpoint_generator,
+)
 from funidata_utils.sis_integration.resources import Attainments, CodeBooks
 from funidata_utils.utils import iterate_async_generator
 from tests.test_export_pages import (
@@ -139,9 +141,10 @@ async def test_scrambled_pages_use_scrambler_output(monkeypatch, caplog):
 
 
 @pytest.mark.unit
-def test_scramble_requires_scrambling_classes():
+@pytest.mark.asyncio
+async def test_scramble_requires_scrambling_classes():
     with pytest.raises(AttributeError):
-        export_pages_from_sisu(ExportSettings(), CodeBooks, scramble=True)
+        await anext(export_pages_from_sisu(ExportSettings(), CodeBooks, scramble=True))
 
 
 @pytest.mark.unit
@@ -280,3 +283,22 @@ async def test_sync_wrapper_refuses_to_run_inside_event_loop(monkeypatch):
 
     with pytest.raises(RuntimeError):
         sync_export_from_sisu(ExportSettings(), Attainments)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_export_from_endpoint_generator_yields_entity_pages(monkeypatch):
+    sisu = PagedSisu(total=7)
+    sisu.install(monkeypatch)
+
+    pages = [
+        entities async for entities in export_from_endpoint_generator(
+            ExportSettings(),
+            Attainments.exports.endpoint,
+            since=Attainments.exports.since,
+            export_limit=3,
+        )
+    ]
+
+    assert [len(p) for p in pages] == [3, 3, 1]
+    assert [e["id"] for p in pages for e in p] == [f"otm-{o}" for o in range(1, 8)]
