@@ -7,6 +7,7 @@ Synchronous SISU exports. These are thin wrappers that run the async implementat
 event loop (use `async_exports` directly there).
 """
 import asyncio
+from collections.abc import Sequence
 from typing import overload, IO, Generator, Literal
 
 from . import async_exports
@@ -22,7 +23,7 @@ def export_pages_from_endpoint(
     export_limit: int = 1000,
     since: str = 'since',
     params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
+    scrambling_classes: Sequence[type[ScramblingClass] | ScramblingClass] | None = None
 ) -> Generator[ExportPage, None, None]:
     return iterate_async_generator(async_exports.export_pages_from_endpoint(
         sis_settings=sis_settings,
@@ -42,7 +43,7 @@ def export_from_endpoint_generator(
     export_limit: int = 1000,
     since: str = 'since',
     params: dict | None = None,
-    scrambling_classes: list[ScramblingClass] | None = None
+    scrambling_classes: Sequence[type[ScramblingClass] | ScramblingClass] | None = None
 ) -> Generator[list[dict], None, None]:
     return iterate_async_generator(async_exports.export_from_endpoint_generator(
         sis_settings=sis_settings,
@@ -57,7 +58,7 @@ def export_from_endpoint_generator(
 
 def export_pages_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportable | SisExportableSupportScrambling,
+    resource: type[SisExportable] | type[SisExportableSupportScrambling],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
@@ -83,7 +84,7 @@ def export_pages_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
+    resource: type[SisExportable],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
@@ -97,7 +98,7 @@ def export_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportableSupportScrambling,
+    resource: type[SisExportableSupportScrambling],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
@@ -111,12 +112,12 @@ def export_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
+    resource: type[SisExportable],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
     fp: None = None,
-    as_generator: Literal[True] = True,
+    as_generator: Literal[True],
     scramble: Literal[False] = False,
 ) -> Generator[list[dict], None, None]:
     ...
@@ -125,12 +126,12 @@ def export_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportableSupportScrambling,
+    resource: type[SisExportableSupportScrambling],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
     fp: None = None,
-    as_generator: Literal[True] = True,
+    as_generator: Literal[True],
     scramble: bool = True,
 ) -> Generator[list[dict], None, None]:
     ...
@@ -139,7 +140,7 @@ def export_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportable,
+    resource: type[SisExportable],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
@@ -153,7 +154,7 @@ def export_from_sisu(
 @overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportableSupportScrambling,
+    resource: type[SisExportableSupportScrambling],
     *,
     since_ordinal: int = 0,
     params: dict | None = None,
@@ -164,9 +165,37 @@ def export_from_sisu(
     ...
 
 
+@overload
 def export_from_sisu(
     sisu_config: SupportsExportAuthentication,
-    resource: SisExportable | SisExportableSupportScrambling,
+    resource: type[SisExportable] | type[SisExportableSupportScrambling],
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: IO | None = None,
+    as_generator: Literal[False] = False,
+    scramble: bool = False,
+) -> list[dict] | IO:
+    ...
+
+
+@overload
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: type[SisExportable] | type[SisExportableSupportScrambling],
+    *,
+    since_ordinal: int = 0,
+    params: dict | None = None,
+    fp: None = None,
+    as_generator: Literal[True],
+    scramble: bool = False,
+) -> Generator[list[dict], None, None]:
+    ...
+
+
+def export_from_sisu(
+    sisu_config: SupportsExportAuthentication,
+    resource: type[SisExportable] | type[SisExportableSupportScrambling],
     since_ordinal: int = 0,
     params: dict | None = None,
     fp: IO | None = None,
