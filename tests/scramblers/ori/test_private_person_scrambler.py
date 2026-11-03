@@ -120,8 +120,29 @@ def test_private_person_scrambler_student_number_is_deterministic_per_person():
         )['studentNumber']
 
     assert scramble('otm-1') == scramble('otm-1')
-    # Derived from the person id, so the real student number does not affect the output
+    # Digits come from the person id, so the real student number only affects the output length
     assert scramble('otm-1') == scramble('otm-1', student_number='999999999')
     assert scramble('otm-1') != scramble('otm-2')
     assert scramble('otm-1') != '012345678'
     assert scramble('otm-1', student_number=None) is None
+
+
+@pytest.mark.unit
+def test_private_person_scrambler_student_number_preserves_length():
+    def scramble(student_number):
+        return PrivatePersonScrambler.scramble(
+            {'id': 'otm-1', 'studentNumber': student_number}, set()
+        )['studentNumber']
+
+    # Sisu student numbers can be 1-100 characters; short values are padded up to 9 digits
+    assert len(scramble('1')) == 9
+    assert len(scramble('012345678')) == 9
+    assert len(scramble('a' * 12)) == 12
+    assert len(scramble('a' * 50)) == 50
+    assert len(scramble('a' * 77)) == 77
+    # sha256 yields at most 77-78 decimal digits, so longer values are capped at the digest length
+    assert len(scramble('a' * 100)) in (77, 78)
+
+    # Same person: only the length differs, the digits come from the person id
+    assert scramble('a' * 50).startswith(scramble('a' * 12))
+    assert scramble('a' * 50).isdigit()

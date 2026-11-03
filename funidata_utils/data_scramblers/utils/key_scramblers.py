@@ -75,10 +75,13 @@ def get_scrambled_student_number(
     **kwargs
 ) -> str | None:
     """
-    Deterministic pseudonymous student number derived from the person id, not from the real student number.
-    Student numbers are a small search space, so hashing them directly would be brute-forceable; the person
-    id is opaque and already present in clear in the scrambled data. Using it as the seed also keeps the
-    value consistent between the private person export (id) and other exports referencing personId.
+    Deterministic pseudonymous student number whose digits are derived from the person id, not from the real
+    student number. Student numbers are a small search space, so hashing them directly would be brute-forceable;
+    the person id is opaque and already present in clear in the scrambled data. Using it as the seed also keeps
+    the value consistent between the private person export (id) and other exports referencing personId.
+
+    Only the length follows the real value (minimum 9). Sisu allows 1-100 characters, but the sha256 digest has
+    at most 77-78 decimal digits, so values longer than that are capped at the digest length.
     """
     if not entity:
         return None
@@ -90,7 +93,7 @@ def get_scrambled_student_number(
     return str(hashlib_hash(
         key=str(hash_key_getter_func(entity)),
         hash_function='sha256',
-        output_length=9,
+        output_length=max(9, len(old_value)),
         limit_int_len=True,
     ))
 
