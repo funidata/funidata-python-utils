@@ -115,6 +115,44 @@ class ShortPagedSisu(PagedSisu):
         })
 
 
+class EmptyWindowSisu(PagedSisu):
+    """
+    Like PagedSisu but every window below `empty_until` comes back empty with hasMore=true and
+    greatestOrdinal advanced to `empty_until`, as happens when SISU filters a whole page server side.
+    """
+
+    def __init__(self, total: int, empty_until: int):
+        super().__init__(total)
+        self.empty_until = empty_until
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        since = int(request.url.params["since"])
+        limit = int(request.url.params["limit"])
+        self.requests.append({"since": since, "limit": limit})
+        if since < self.empty_until:
+            return httpx.Response(200, json={
+                "entities": [], "greatestOrdinal": self.empty_until, "hasMore": True,
+            })
+        ordinals = [o for o in range(since + 1, self.total + 1)][:limit]
+        return httpx.Response(200, json={
+            "entities": [_attainment(o) for o in ordinals],
+            "greatestOrdinal": ordinals[-1] if ordinals else since,
+            "hasMore": bool(ordinals) and ordinals[-1] < self.total,
+        })
+
+
+class EmptyStuckSisu(StuckSisu):
+    """Empty page with hasMore=true and a non-advancing greatestOrdinal."""
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        since = int(request.url.params["since"])
+        self.requests.append({"since": since})
+        body = {"entities": [], "hasMore": True}
+        if self.report_ordinal:
+            body["greatestOrdinal"] = since
+        return httpx.Response(200, json=body)
+
+
 @pytest.mark.unit
 def test_pages_expose_ordinal_and_has_more(monkeypatch):
     sisu = PagedSisu(total=7)
@@ -146,6 +184,31 @@ def test_has_more_false_on_a_full_page_stops_the_export(monkeypatch):
 @pytest.mark.parametrize("report_ordinal", [True, False])
 def test_non_advancing_ordinal_raises_instead_of_looping(monkeypatch, report_ordinal):
     sisu = StuckSisu(report_ordinal=report_ordinal)
+    sisu.install(monkeypatch)
+
+    with pytest.raises(Exception, match="greatestOrdinal did not advance"):
+        list(export_pages_from_sisu(ExportSettings(), Attainments, since_ordinal=4))
+
+    assert [r["since"] for r in sisu.requests] == [4]
+
+
+@pytest.mark.unit
+def test_empty_page_with_has_more_continues(monkeypatch):
+    sisu = EmptyWindowSisu(total=5, empty_until=3)
+    sisu.install(monkeypatch)
+
+    pages = list(export_pages_from_sisu(ExportSettings(), Attainments, export_limit=3))
+
+    assert [len(p.entities) for p in pages] == [0, 2]
+    assert [p.has_more for p in pages] == [True, False]
+    assert [p.greatest_ordinal for p in pages] == [3, 5]
+    assert [r["since"] for r in sisu.requests] == [0, 3]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("report_ordinal", [True, False])
+def test_empty_page_with_has_more_and_stuck_ordinal_raises(monkeypatch, report_ordinal):
+    sisu = EmptyStuckSisu(report_ordinal=report_ordinal)
     sisu.install(monkeypatch)
 
     with pytest.raises(Exception, match="greatestOrdinal did not advance"):
@@ -248,6 +311,20 @@ def test_export_from_sisu_follows_has_more_on_short_pages(monkeypatch):
 
     assert [e["id"] for e in entities] == [f"otm-{o}" for o in range(1, 8)]
     assert len(sisu.requests) == 4
+
+
+@pytest.mark.unit
+def test_export_from_sisu_continues_past_empty_page_with_has_more(monkeypatch):
+    sisu = EmptyWindowSisu(total=5, empty_until=3)
+    sisu.install(monkeypatch)
+    fp = io.StringIO()
+
+    entities = export_from_sisu(ExportSettings(), Attainments)
+    export_from_sisu(ExportSettings(), Attainments, fp=fp)
+
+    expected = ["otm-4", "otm-5"]
+    assert [e["id"] for e in entities] == expected
+    assert [json.loads(line)["id"] for line in fp.getvalue().splitlines()] == expected
 
 
 @pytest.mark.unit

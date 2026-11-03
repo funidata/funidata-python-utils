@@ -93,9 +93,13 @@ async def _export_pages_from_endpoint(
                 )
                 reported_keys |= new_keys
 
-        # An empty page can never continue, regardless of what SISU says; otherwise trust `hasMore`
-        # and fall back to the page size when the endpoint does not report it.
-        has_more = bool(entities) and bool(response_json.get("hasMore", len(entities) >= export_limit))
+        # Trust SISU's `hasMore` when it is reported, even on an empty page (server-side filtering
+        # can empty a window that still has data after it). Without `hasMore`, fall back to the
+        # page size, which means an empty page ends the export.
+        if "hasMore" in response_json:
+            has_more = bool(response_json["hasMore"])
+        else:
+            has_more = len(entities) >= export_limit
         next_ordinal = response_json.get("greatestOrdinal")
         if has_more and (next_ordinal is None or next_ordinal <= greatest_ordinal):
             # Continuing would re-request the same page forever, so fail instead of looping.

@@ -14,7 +14,9 @@ from funidata_utils.sis_integration import async_export_pages_from_sisu, async_e
 from funidata_utils.sis_integration.async_exports import export_pages_from_sisu, export_from_sisu
 from funidata_utils.sis_integration.resources import Attainments, CodeBooks
 from funidata_utils.utils import iterate_async_generator
-from tests.test_export_pages import ExportSettings, PagedSisu, ShortPagedSisu, StuckSisu, _attainment
+from tests.test_export_pages import (
+    ExportSettings, EmptyStuckSisu, EmptyWindowSisu, PagedSisu, ShortPagedSisu, StuckSisu, _attainment,
+)
 
 
 def test_package_exposes_async_functions_under_prefixed_names():
@@ -49,6 +51,48 @@ async def test_non_advancing_ordinal_raises_instead_of_looping(monkeypatch, repo
         [p async for p in export_pages_from_sisu(ExportSettings(), Attainments, since_ordinal=4)]
 
     assert [r["since"] for r in sisu.requests] == [4]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_empty_page_with_has_more_continues(monkeypatch):
+    sisu = EmptyWindowSisu(total=5, empty_until=3)
+    sisu.install(monkeypatch)
+
+    pages = [p async for p in export_pages_from_sisu(ExportSettings(), Attainments, export_limit=3)]
+
+    assert [len(p.entities) for p in pages] == [0, 2]
+    assert [p.has_more for p in pages] == [True, False]
+    assert [p.greatest_ordinal for p in pages] == [3, 5]
+    assert [r["since"] for r in sisu.requests] == [0, 3]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+@pytest.mark.parametrize("report_ordinal", [True, False])
+async def test_empty_page_with_has_more_and_stuck_ordinal_raises(monkeypatch, report_ordinal):
+    sisu = EmptyStuckSisu(report_ordinal=report_ordinal)
+    sisu.install(monkeypatch)
+
+    with pytest.raises(Exception, match="greatestOrdinal did not advance"):
+        [p async for p in export_pages_from_sisu(ExportSettings(), Attainments, since_ordinal=4)]
+
+    assert [r["since"] for r in sisu.requests] == [4]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_export_from_sisu_continues_past_empty_page_with_has_more(monkeypatch):
+    sisu = EmptyWindowSisu(total=5, empty_until=3)
+    sisu.install(monkeypatch)
+    fp = io.StringIO()
+
+    entities = await export_from_sisu(ExportSettings(), Attainments)
+    await export_from_sisu(ExportSettings(), Attainments, fp=fp)
+
+    expected = ["otm-4", "otm-5"]
+    assert [e["id"] for e in entities] == expected
+    assert [json.loads(line)["id"] for line in fp.getvalue().splitlines()] == expected
 
 
 @pytest.mark.unit
