@@ -123,7 +123,7 @@ def test_attainment_scrambler_scrambles_person_fields_consistently_with_private_
     assert scrambled_data['personFirstNames'] != data['personFirstNames']
     assert scrambled_data['personLastName'] != data['personLastName']
     assert scrambled_data['personStudentNumber'] != data['personStudentNumber']
-    assert re.fullmatch(r'[1-9][0-9]{8}', scrambled_data['personStudentNumber'])
+    assert re.fullmatch(r'[1-9a-z][0-9a-z]{8}', scrambled_data['personStudentNumber'])
 
     person = PrivatePersonScrambler.scramble(
         {

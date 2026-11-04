@@ -92,9 +92,10 @@ def get_scrambled_student_number(
 
     return str(hashlib_hash(
         key=str(hash_key_getter_func(entity)),
-        hash_function='sha256',
+        hash_function='md5',
         output_length=max(9, len(old_value)),
         limit_int_len=True,
+        return_int=False
     ))
 
 

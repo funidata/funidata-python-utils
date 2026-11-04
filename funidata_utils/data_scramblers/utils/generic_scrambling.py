@@ -97,7 +97,7 @@ def hashlib_hash(
             return val
         return int(str(val)[0:output_length])
 
-    return alg.hexdigest()[0:output_length]
+    return alg.hexdigest()[-1 * output_length:]
 
 
 def scramble_with_weighted_pseudorandom(
