@@ -95,7 +95,7 @@ def hashlib_hash(
         val = int.from_bytes(alg.digest(), 'big')
         if not limit_int_len:
             return val
-        return int(str(val)[0:output_length])
+        return int(str(val)[-1 * output_length:])
 
     return alg.hexdigest()[-1 * output_length:]
 
