@@ -3,7 +3,7 @@ from .utils.generic_scrambling import (
 )
 from .utils.key_scramblers import (
     get_scrambled_first_name, get_scrambled_last_name, get_scrambled_nationalities, get_phone_number_shuffled_with_mask,
-    get_scrambled_email,
+    get_scrambled_email, get_scrambled_student_number,
 )
 from ..data_scramblers.base import SingletonMetaScrambler
 
@@ -15,7 +15,7 @@ class PrivatePersonScrambler(SingletonMetaScrambler):
         id=None,
         documentState=None,
         studentNumber=[
-            lambda x: None
+            get_scrambled_student_number
         ],
         personalIdentityCode=[
             lambda x: None

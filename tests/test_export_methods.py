@@ -1,11 +1,11 @@
 import pytest
 from pydantic import BaseModel
 
-from funidata_utils.request_utils import httpx_requests
+from funidata_utils.request_utils import async_httpx_requests
 from funidata_utils.sis_integration.exports import export_from_sisu
 from funidata_utils.sis_integration.resources import OriPersons, CodeBooks
 from funidata_utils.data_scramblers.replacement_data import last_names, first_names
-from tests.helpers import mock_sync_client, _get_mock_httpx_client
+from tests.helpers import mock_client, _get_mock_async_httpx_client
 
 
 # You can test the real sis-integration by settings this to False
@@ -21,9 +21,9 @@ class Diu(BaseModel):
 
 
 @pytest.mark.e2e
-def test_generator_export_without_scramble(mock_sync_client, monkeypatch):
+def test_generator_export_without_scramble(mock_client, monkeypatch):
     if use_mock_httpx_data:
-        monkeypatch.setattr(httpx_requests, "_get_httpx_client", _get_mock_httpx_client)
+        monkeypatch.setattr(async_httpx_requests, "_get_async_httpx_client", _get_mock_async_httpx_client)
 
     _entities = export_from_sisu(
         sisu_config=Diu(),
@@ -39,9 +39,9 @@ def test_generator_export_without_scramble(mock_sync_client, monkeypatch):
 
 
 @pytest.mark.e2e
-def test_generator_export_with_scramble(mock_sync_client, monkeypatch):
+def test_generator_export_with_scramble(mock_client, monkeypatch):
     if use_mock_httpx_data:
-        monkeypatch.setattr(httpx_requests, "_get_httpx_client", _get_mock_httpx_client)
+        monkeypatch.setattr(async_httpx_requests, "_get_async_httpx_client", _get_mock_async_httpx_client)
 
     _entities = export_from_sisu(
         sisu_config=Diu(),
@@ -60,9 +60,9 @@ def test_generator_export_with_scramble(mock_sync_client, monkeypatch):
 
 
 @pytest.mark.e2e
-def test_generator_export_fails_with_scramble_for_unsupported_resource(mock_sync_client, monkeypatch):
+def test_generator_export_fails_with_scramble_for_unsupported_resource(mock_client, monkeypatch):
     if use_mock_httpx_data:
-        monkeypatch.setattr(httpx_requests, "_get_httpx_client", _get_mock_httpx_client)
+        monkeypatch.setattr(async_httpx_requests, "_get_async_httpx_client", _get_mock_async_httpx_client)
 
     with pytest.raises(AttributeError):
         _entities = export_from_sisu(
@@ -75,9 +75,9 @@ def test_generator_export_fails_with_scramble_for_unsupported_resource(mock_sync
 
 
 @pytest.mark.e2e
-def test_regular_export_fails_with_scramble_for_unsupported_resource(mock_sync_client, monkeypatch):
+def test_regular_export_fails_with_scramble_for_unsupported_resource(mock_client, monkeypatch):
     if use_mock_httpx_data:
-        monkeypatch.setattr(httpx_requests, "_get_httpx_client", _get_mock_httpx_client)
+        monkeypatch.setattr(async_httpx_requests, "_get_async_httpx_client", _get_mock_async_httpx_client)
 
     with pytest.raises(AttributeError):
         _entities = export_from_sisu(
@@ -90,9 +90,9 @@ def test_regular_export_fails_with_scramble_for_unsupported_resource(mock_sync_c
 
 
 @pytest.mark.e2e
-def test_regular_export_fails_without_scramble_for_unsupported_resource(mock_sync_client, monkeypatch):
+def test_regular_export_fails_without_scramble_for_unsupported_resource(mock_client, monkeypatch):
     if use_mock_httpx_data:
-        monkeypatch.setattr(httpx_requests, "_get_httpx_client", _get_mock_httpx_client)
+        monkeypatch.setattr(async_httpx_requests, "_get_async_httpx_client", _get_mock_async_httpx_client)
 
     _entities = export_from_sisu(
         sisu_config=Diu(),

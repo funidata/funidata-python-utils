@@ -1,12 +1,14 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
+import asyncio
 import sys
+import threading
 import typing
 from collections import defaultdict
 from functools import reduce
 from statistics import mean, stdev
-from typing import Any, Generator, Callable, Literal, Tuple
+from typing import Any, Generator, Callable, Literal, Tuple, AsyncGenerator, TypeVar
 
 import httpx
 
@@ -70,6 +72,44 @@ def batch(iterable, steps=1):
     length = len(iterable)
     for index in range(0, length, steps):
         yield iterable[index:min(index + steps, length)]
+
+
+_T = TypeVar('_T')
+
+
+def _close_async_generator(runner: asyncio.Runner, agen: AsyncGenerator) -> None:
+    try:
+        runner.run(agen.aclose())
+    finally:
+        runner.close()
+
+
+def iterate_async_generator(agen: AsyncGenerator[_T, None]) -> Generator[_T, None, None]:
+    """
+    Drive an async generator from synchronous code, yielding its items one by one.
+
+    Runs the generator on a private event loop for the lifetime of the returned sync generator.
+    Like `asyncio.run`, iterating cannot be done from inside a running event loop (raises
+    `RuntimeError`); use the async generator directly in that case. Closing the sync generator
+    (explicitly or via garbage collection) is safe anywhere: if an event loop happens to be running
+    on the current thread, the cleanup is done on a helper thread instead of raising.
+    """
+    runner = asyncio.Runner()
+    try:
+        while True:
+            try:
+                yield runner.run(agen.__anext__())
+            except StopAsyncIteration:
+                return
+    finally:
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            _close_async_generator(runner, agen)
+        else:
+            closer = threading.Thread(target=_close_async_generator, args=(runner, agen))
+            closer.start()
+            closer.join()
 
 
 def recursive_dict_fetch(
@@ -147,22 +187,26 @@ def _dict_update_by_key_split(
                 raise Exception("Unhandled case for missing inner dict key")
 
     final_key = keys[-1]
-    _update_refs = []
+
+    def _compute_new_value(_ref):
+        if isinstance(new_value, Callable):
+            return new_value(_ref)
+        if isinstance(new_value, tuple):
+            return new_value[0](_ref, **new_value[1])
+        return new_value
+
     if isinstance(_current_entity_ref, list):
-        _update_refs += _current_entity_ref
-    elif isinstance(_current_entity_ref.get(final_key), list):
-        _update_refs += _current_entity_ref[final_key]
+        _update_refs = _current_entity_ref
+    elif isinstance(_current_entity_ref.get(final_key), list) and isinstance(new_value, (Callable, tuple)):
+        _items = _current_entity_ref[final_key]
+        for _index, _item in enumerate(_items):
+            if _item:
+                _items[_index] = _compute_new_value(_item)
+        return entity
     else:
-        _update_refs.append(_current_entity_ref)
+        _update_refs = [_current_entity_ref]
 
     for _ref in _update_refs:
-        if isinstance(new_value, Callable):
-            _new_value = new_value(_ref)
-        elif isinstance(new_value, tuple):
-            _new_value = new_value[0](_ref, **new_value[1])
-        else:
-            _new_value = new_value
-
         if final_key not in _ref:
             match missing_key_handler:
                 case 'exception':
@@ -170,9 +214,10 @@ def _dict_update_by_key_split(
                 case 'skip':
                     continue
                 case 'add_missing':
-                    _ref[final_key] = _new_value
+                    pass
 
-        if _ref[final_key]:
+        _new_value = _compute_new_value(_ref)
+        if final_key not in _ref or _ref[final_key]:
             _ref[final_key] = _new_value
 
     return entity

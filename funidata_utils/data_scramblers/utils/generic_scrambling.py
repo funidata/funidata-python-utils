@@ -95,9 +95,53 @@ def hashlib_hash(
         val = int.from_bytes(alg.digest(), 'big')
         if not limit_int_len:
             return val
-        return int(str(val)[0:output_length])
+        return int(str(val)[-1 * output_length:])
 
-    return alg.hexdigest()[0:output_length]
+    return alg.hexdigest()[-1 * output_length:]
+
+
+def scramble_localized_string(
+    entity: dict,
+    key: str,
+    weights: list[tuple[dict, int]],
+    scramble_seed_key: str | typing.Callable | None = None,
+    scramble_empty_values: bool = False,
+    missing_key_handler: typing.Literal['skip', 'exception'] = 'exception',
+    **kwargs
+) -> dict | None:
+    """
+    Scramble a SISU LocalizedString ({'fi': ..., 'sv': ..., 'en': ...}) while keeping its shape.
+
+    The result has exactly the same language keys as the original. Falsy language values
+    (None, '') are kept as is. The replacement texts are picked from `weights`
+    (a list of ({lang: text}, weight) tuples) with a pseudorandom choice seeded by
+    `scramble_seed_key` (callable, value, or the original value when not given). A language
+    present in the original but missing from the chosen entry gets the entry's first text
+    suffixed with the language code, so every language still gets a distinct value.
+
+    Empty originals (None, {}) are never replaced with invented content; None is returned
+    regardless of `scramble_empty_values` (kept in the signature for drop-in compatibility
+    with scramble_with_weighted_pseudorandom).
+    """
+    _original_value = get_recursive_dict_value(entity, key, missing_key_handler=missing_key_handler)
+
+    if not _original_value or not isinstance(_original_value, dict):
+        return None
+
+    if isinstance(scramble_seed_key, typing.Callable):
+        seed_key = scramble_seed_key(entity)
+    elif scramble_seed_key:
+        seed_key = scramble_seed_key
+    else:
+        seed_key = _original_value
+
+    chosen = get_weighted_random_value(value_weight_dict=weights, in_seed=str(seed_key))
+    first_text = next(iter(chosen.values()))
+
+    return {
+        lang: (chosen.get(lang) or f'{first_text} ({lang})') if original_text else original_text
+        for lang, original_text in _original_value.items()
+    }
 
 
 def scramble_with_weighted_pseudorandom(

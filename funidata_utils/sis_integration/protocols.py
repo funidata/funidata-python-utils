@@ -1,7 +1,7 @@
 #  Copyright (c) 2025 Funidata Oy.
 #  All rights reserved.
 # ------------------------------------------------------------------------------
-import typing
+from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 from .resources.schemas import SisExport, SisImport, SisDelete
@@ -22,10 +22,16 @@ class SupportsExportAuthentication(HasHostAndProxies, Protocol):
         ...
 
 
-class ScramblingClass(typing.Protocol):
+class ScramblingClass(Protocol):
+    """
+    A scrambler as used by the export functions. Scramblers are usually passed as classes
+    (`scramble` is a classmethod on `SingletonMetaScrambler`), but an instance with a plain
+    `scramble` method satisfies this too.
+    """
     scrambling_keys: dict
 
-    def scramble(self, entity, processed_keys: set) -> dict:
+    @classmethod
+    def scramble(cls, entity: dict, processed_keys: set) -> dict:
         ...
 
 
@@ -34,7 +40,9 @@ class SisExportable(Protocol):
 
 
 class SisExportableSupportScrambling(SisExportable, Protocol):
-    scrambling_classes: list[ScramblingClass] | None = None
+    @property
+    def scrambling_classes(self) -> Sequence[type[ScramblingClass]] | None:
+        ...
 
 
 @runtime_checkable

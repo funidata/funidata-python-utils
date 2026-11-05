@@ -2,13 +2,25 @@ import logging
 from typing import Tuple
 
 from .utils.generic_scrambling import (
+    scramble_localized_string,
     scramble_with_weighted_pseudorandom,
+)
+from .utils.key_scramblers import (
+    get_scrambled_first_name, get_scrambled_last_name, get_scrambled_student_number,
 )
 from ..data_scramblers.base import SingletonMetaScrambler
 from ..utils import update_inner_dictionary_key
 
 
 logger = logging.getLogger(__name__)
+
+
+def _person_hash_key(entity: dict):
+    """
+    Seed for the person name / student number pseudonyms. personId keeps them consistent with the
+    scrambled PrivatePerson of the same person; fall back to the attainment id if it is missing.
+    """
+    return entity.get('personId') or entity['id']
 
 
 class AttainmentScrambler(SingletonMetaScrambler):
@@ -18,6 +30,8 @@ class AttainmentScrambler(SingletonMetaScrambler):
         personId=None,
         verifierPersonId=None,
         studyRightId=None,
+        primaryStatus=None,
+        studentApplicationId=None,
         registrationDate=None,
         expiryDate=None,
         attainmentLanguageUrn=None,
@@ -103,7 +117,7 @@ class AttainmentScrambler(SingletonMetaScrambler):
                 entity,
                 dot_separated_key='cooperationNetworkStatus.rejectionReason',
                 new_value=(
-                    scramble_with_weighted_pseudorandom,
+                    scramble_localized_string,
                     dict(
                         key='rejectionReason',
                         weights=[
@@ -123,6 +137,35 @@ class AttainmentScrambler(SingletonMetaScrambler):
         type=None,
         attainmentDate=None,
         s2r2Classification=None,
+
+        # Seeded with personId (see _person_hash_key) so the values match the scrambled PrivatePerson.
+        personFirstNames=[
+            (
+                get_scrambled_first_name,
+                dict(
+                    hash_key_getter_func=_person_hash_key,
+                    old_value_key_getter_func=lambda x: x.get('personFirstNames'),
+                ),
+            ),
+        ],
+        personLastName=[
+            (
+                get_scrambled_last_name,
+                dict(
+                    hash_key_getter_func=_person_hash_key,
+                    old_value_key_getter_func=lambda x: x.get('personLastName'),
+                ),
+            ),
+        ],
+        personStudentNumber=[
+            (
+                get_scrambled_student_number,
+                dict(
+                    hash_key_getter_func=_person_hash_key,
+                    old_value_key_getter_func=lambda x: x.get('personStudentNumber'),
+                ),
+            ),
+        ],
 
         # CUA
         courseUnitId=None,

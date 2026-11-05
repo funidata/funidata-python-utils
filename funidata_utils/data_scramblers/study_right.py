@@ -76,6 +76,8 @@ class StudyRightScrambler(SingletonMetaScrambler):
         ],
         phase1MinorSelections=None,
         phase2MinorSelections=None,
+        state=None,
+        statePeriods=None,
         personalizedSelectionPath=[
             lambda original_val: update_inner_dictionary_key(
                 original_val,
