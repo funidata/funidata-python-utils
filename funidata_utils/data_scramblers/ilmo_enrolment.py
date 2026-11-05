@@ -35,7 +35,10 @@ class IlmoEnrolmentScrambler(SingletonMetaScrambler):
             lambda original_val: update_inner_dictionary_key(
                 original_val,
                 dot_separated_key='cooperationNetworkStatus.rejectionReason',
-                new_value='cooperationNetworkStatus.rejectionReason',
+                new_value=lambda status: {
+                    lang: f'cooperationNetworkStatus.rejectionReason.{lang}'
+                    for lang in (status.get('rejectionReason') or {})
+                },
                 missing_key_handler='skip'
             ),
             lambda original_val: update_inner_dictionary_key(

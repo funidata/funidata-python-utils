@@ -160,3 +160,63 @@ def test_enrolment_scrambler_handles_lists_correctly():
     }
     for key in list_keys:
         assert isinstance(scrambled_data[key], list), scrambled_data[key]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("rejection_reason", [
+    {"fi": "Finnish version", "sv": "Swedish version", "en": "English version"},
+    {"fi": "Finnish version", "sv": "Swedish version"},
+    {"en": "English version"},
+])
+def test_enrolment_scrambler_keeps_rejection_reason_localized(rejection_reason):
+    data = {
+        "id": "otm-123456",
+        "cooperationNetworkStatus": {
+            "direction": "INBOUND",
+            "outboundStatus": "NOT_VALID",
+            "rejectionReason": rejection_reason,
+            "outboundStatusMessage": "string",
+        },
+    }
+
+    scrambled_data = IlmoEnrolmentScrambler.scramble(copy.deepcopy(data), set())
+    scrambled_reason = scrambled_data["cooperationNetworkStatus"]["rejectionReason"]
+
+    # rejectionReason is a LocalizedString in SISU; the scrambler must keep the type
+    # and the original language keys, but replace every value
+    assert isinstance(scrambled_reason, dict), scrambled_reason
+    assert set(scrambled_reason) == set(rejection_reason)
+    for lang, original in rejection_reason.items():
+        assert isinstance(scrambled_reason[lang], str)
+        assert scrambled_reason[lang]
+        assert scrambled_reason[lang] != original
+
+
+@pytest.mark.unit
+def test_enrolment_scrambler_leaves_null_rejection_reason_untouched():
+    data = {
+        "id": "otm-123456",
+        "cooperationNetworkStatus": {
+            "direction": "INBOUND",
+            "rejectionReason": None,
+            "outboundStatusMessage": "string",
+        },
+    }
+
+    scrambled_data = IlmoEnrolmentScrambler.scramble(copy.deepcopy(data), set())
+
+    assert scrambled_data["cooperationNetworkStatus"]["rejectionReason"] is None
+    assert scrambled_data["cooperationNetworkStatus"]["outboundStatusMessage"] != "string"
+
+
+@pytest.mark.unit
+def test_enrolment_scrambler_does_not_add_missing_cooperation_network_status():
+    data = {
+        "id": "otm-123456",
+        "personId": "otm-123456",
+        "state": "NOT_ENROLLED",
+    }
+
+    scrambled_data = IlmoEnrolmentScrambler.scramble(copy.deepcopy(data), set())
+
+    assert "cooperationNetworkStatus" not in scrambled_data
