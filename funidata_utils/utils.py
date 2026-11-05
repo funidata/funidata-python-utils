@@ -187,22 +187,26 @@ def _dict_update_by_key_split(
                 raise Exception("Unhandled case for missing inner dict key")
 
     final_key = keys[-1]
-    _update_refs = []
+
+    def _compute_new_value(_ref):
+        if isinstance(new_value, Callable):
+            return new_value(_ref)
+        if isinstance(new_value, tuple):
+            return new_value[0](_ref, **new_value[1])
+        return new_value
+
     if isinstance(_current_entity_ref, list):
-        _update_refs += _current_entity_ref
-    elif isinstance(_current_entity_ref.get(final_key), list):
-        _update_refs += _current_entity_ref[final_key]
+        _update_refs = _current_entity_ref
+    elif isinstance(_current_entity_ref.get(final_key), list) and isinstance(new_value, (Callable, tuple)):
+        _items = _current_entity_ref[final_key]
+        for _index, _item in enumerate(_items):
+            if _item:
+                _items[_index] = _compute_new_value(_item)
+        return entity
     else:
-        _update_refs.append(_current_entity_ref)
+        _update_refs = [_current_entity_ref]
 
     for _ref in _update_refs:
-        if isinstance(new_value, Callable):
-            _new_value = new_value(_ref)
-        elif isinstance(new_value, tuple):
-            _new_value = new_value[0](_ref, **new_value[1])
-        else:
-            _new_value = new_value
-
         if final_key not in _ref:
             match missing_key_handler:
                 case 'exception':
@@ -210,9 +214,10 @@ def _dict_update_by_key_split(
                 case 'skip':
                     continue
                 case 'add_missing':
-                    _ref[final_key] = _new_value
+                    pass
 
-        if _ref[final_key]:
+        _new_value = _compute_new_value(_ref)
+        if final_key not in _ref or _ref[final_key]:
             _ref[final_key] = _new_value
 
     return entity

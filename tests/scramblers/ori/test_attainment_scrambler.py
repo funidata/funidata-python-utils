@@ -193,3 +193,22 @@ def test_attainment_scrambler_person_fields_without_personId_fall_back_to_id():
     for key in _PERSON_KEYS:
         assert scrambled[key] != data[key]
         assert scrambled[key] == scrambled_again[key]
+
+
+@pytest.mark.unit
+def test_attainment_scrambler_handles_missing_rejectionReason():
+    # rejectionReason is optional in SISU CooperationNetworkStatus
+    data = {
+        'id': 'otm-1',
+        "cooperationNetworkStatus": {
+            "direction": "OUTBOUND",
+            "outboundStatus": "VALID",
+            "cooperationNetworkId": "otm-123456",
+        },
+    }
+
+    scrambled_data = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+
+    assert "rejectionReason" not in scrambled_data["cooperationNetworkStatus"]
+    assert scrambled_data["cooperationNetworkStatus"] == data["cooperationNetworkStatus"]
+
