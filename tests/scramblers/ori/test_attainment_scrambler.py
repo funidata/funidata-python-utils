@@ -212,3 +212,27 @@ def test_attainment_scrambler_handles_missing_rejectionReason():
     assert "rejectionReason" not in scrambled_data["cooperationNetworkStatus"]
     assert scrambled_data["cooperationNetworkStatus"] == data["cooperationNetworkStatus"]
 
+
+@pytest.mark.unit
+@pytest.mark.parametrize("rejection_reason", [
+    {"fi": "Finnish version", "sv": "Swedish version", "en": "English version"},
+    {"fi": "Finnish version", "sv": "Swedish version"},
+    {"en": "English version"},
+])
+def test_attainment_scrambler_keeps_rejectionReason_language_keys(rejection_reason):
+    data = {
+        'id': 'otm-1',
+        "cooperationNetworkStatus": {
+            "direction": "INBOUND",
+            "rejectionReason": rejection_reason,
+        },
+    }
+
+    scrambled_data = AttainmentScrambler.scramble(copy.deepcopy(data), set())
+    scrambled_reason = scrambled_data['cooperationNetworkStatus']['rejectionReason']
+
+    assert isinstance(scrambled_reason, dict)
+    assert set(scrambled_reason) == set(rejection_reason)
+    for lang, original in rejection_reason.items():
+        assert isinstance(scrambled_reason[lang], str) and scrambled_reason[lang]
+        assert scrambled_reason[lang] != original

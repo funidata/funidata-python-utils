@@ -1,5 +1,6 @@
 from ..data_scramblers.base import SingletonMetaScrambler
 from ..utils import update_inner_dictionary_key
+from .utils.generic_scrambling import scramble_localized_string
 
 
 
@@ -35,10 +36,18 @@ class IlmoEnrolmentScrambler(SingletonMetaScrambler):
             lambda original_val: update_inner_dictionary_key(
                 original_val,
                 dot_separated_key='cooperationNetworkStatus.rejectionReason',
-                new_value=lambda status: {
-                    lang: f'cooperationNetworkStatus.rejectionReason.{lang}'
-                    for lang in (status.get('rejectionReason') or {})
-                },
+                new_value=(
+                    scramble_localized_string,
+                    dict(
+                        key='rejectionReason',
+                        weights=[
+                            ({'fi': 'cooperationNetworkStatus.rejectionReason'}, 1000),
+                            ({'fi': 'Pallerojumppa'}, 42),
+                        ],
+                        scramble_seed_key=original_val['id'],
+                        scramble_empty_values=False
+                    )
+                ),
                 missing_key_handler='skip'
             ),
             lambda original_val: update_inner_dictionary_key(

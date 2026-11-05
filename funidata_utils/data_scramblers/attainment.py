@@ -2,6 +2,7 @@ import logging
 from typing import Tuple
 
 from .utils.generic_scrambling import (
+    scramble_localized_string,
     scramble_with_weighted_pseudorandom,
 )
 from .utils.key_scramblers import (
@@ -116,7 +117,7 @@ class AttainmentScrambler(SingletonMetaScrambler):
                 entity,
                 dot_separated_key='cooperationNetworkStatus.rejectionReason',
                 new_value=(
-                    scramble_with_weighted_pseudorandom,
+                    scramble_localized_string,
                     dict(
                         key='rejectionReason',
                         weights=[
